@@ -1,0 +1,362 @@
+#####
+####
+#
+#
+#                              PIntron
+#
+# A novel pipeline for computational gene-structure prediction based on
+# spliced alignment of expressed sequences (ESTs and mRNAs).
+#
+# Copyright (C) 2010  Yuri Pirola, Raffaella Rizzi
+#
+# Distributed under the terms of the GNU Affero General Public License (AGPL)
+#
+#
+# This file is part of PIntron.
+#
+# PIntron is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PIntron is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
+#
+####
+#
+# File di configurazione per gengetopt
+# Genera un parser degli argomenti a linea di comando
+# e di file di configurazione.
+#
+#####
+
+args "--conf-parser"
+
+package "est-fact"
+version "0.1"
+purpose "EST factorization Program"
+
+
+####################
+section "Configuration file"
+
+option "config-file" C
+"The configuration file."
+string typestr="filename"
+default="config.ini"
+optional
+
+####################
+#section "Input information"
+#sectiondesc="Organism, gene name, gene strand and EST cluster ID"
+
+#option "org" -
+#"Organism name"
+#string
+#default="unknown"
+#optional
+
+#option "gene" -
+#"Gene name"
+#string
+#default="unknown"
+#optional
+
+#option "strand" -
+#"Gene strand"
+#int typestr="1/-1"
+#values="1","-1"
+#default="1"
+#optional
+
+#option "chromosome" -
+#"Chromosome number"
+#string
+#default="unknown"
+#optional
+
+#option "est-cluster" -
+#"UniGene cluster ID"
+#string
+#default="unknown"
+#optional
+
+####################
+section "Parameters"
+sectiondesc="Alignment parameters"
+
+
+option "min-factor-length" l
+"The minimum length of a common factor"
+details=
+"Represents the minimum length of a pairing (i.e. parameter l of the article).
+Valid values: > 0.
+Suggested value: >= 12."
+int typestr="nt"
+default="15"
+optional
+
+option "min-intron-length" B
+"The minimum length of a gap to be considered as an intron (0 to ignore)."
+details=
+"Represents the minimum length of an intron (i.e. parameter b' of the article).
+Valid values: >= 0.
+Suggested value: at least 50."
+int typestr="nt"
+default="60"
+optional
+
+option "max-intron-length" -
+"The maximum length of a gap to be considered as an intron (0 to ignore)."
+details=
+"Represents the maximum length of an intron.
+Valid values: >= 0.
+Suggested value: at least 100000."
+int typestr="nt"
+default="0"
+optional
+
+option "min-string-depth-rate" d
+"Minimum string depth of a prefix of a pairing."
+details=
+"When a deepest common node N was found, the algorithm \
+processes common nodes whose string depth is greater \
+than (min-string-depth-rate * string_depth[N]).
+Rationale: if a long common factor was found, then \
+considering a much \
+shorter prefix does not seem useful.
+Suggested value: at least 0.2 (=20%).
+Valid values: [0.0, 1.0].
+The value 0.0 disables this feature."
+double typestr="[0.0, 1.0]"
+default="0.2"
+optional
+
+option "max-prefix-discarded-rate" p
+"The maximum length of a discarded prefix during the MEG construction expressed as a rate of the pattern length."
+details=
+"During the MEG construction the source vertex is \
+connected to a pairing (p,t,l) if and only if \
+p < (max-prefix-discarded-rate * |P|).
+Suggested value: at most 0.5 (=50%).
+Valid values: [0.0, 1.0]."
+double typestr="[0.0, 1.0]"
+default="0.60"
+optional
+
+option "max-suffix-discarded-rate" s
+"The maximum length of a discarded suffix during the MEG construction expressed as a rate of the pattern length."
+details=
+"During the MEG construction a pairing (p,t,l) is \
+connected to the sink vertex if and only if \
+|P| - p - l < (max-suffix-discarded-rate * |P|).
+Suggested value: at most 0.5 (=50%).
+Valid values: [0.0, 1.0]."
+double typestr="[0.0, 1.0]"
+default="0.60"
+optional
+
+option "max-prefix-discarded" P
+"The maximum length (in nt) of a discarded prefix during the construction of alignments."
+details=
+"An alignment is accepted if and only if it discards \
+a prefix of the pattern whose length is less than \
+max-prefix-discarded nt.
+Suggested value: 50 (nt).
+Valid values: >= 0."
+int typestr="nt"
+default="50"
+optional
+
+option "max-suffix-discarded" S
+"The maximum length (in nt) of a discarded suffix during the construction of alignments."
+details=
+"An alignment is accepted if and only if it discards \
+a suffix of the pattern whose length is less than \
+max-suffix-discarded nt.
+Suggested value: 50 (nt).
+Valid values: >= 0."
+int typestr="nt"
+default="50"
+optional
+
+option "min-distance-of-splice-sites" D
+"The minimum distance (in nt) between two different splice sites."
+details=
+"Two splice sites that are separated for less than \
+min-distance-of-splice-sites nt are considered as \
+the same splice site.
+Suggested value: 50 (nt).
+Valid values: >= 0."
+int typestr="nt"
+default="50"
+optional
+
+option "max-no-of-factorizations" -
+"The maximum number of factorizations (0 to disable)."
+details=
+"The program reports at most max-no-of-factorizations \
+factorizations, then it terminates.
+If it is set to 0, the check is not performed.
+Valid values: 0 to disable or >0 to enable."
+int typestr="number"
+default="0"
+optional
+
+option "max-difference-of-coverage" -
+"The maximum difference of coverage between valid factorizations."
+details=
+"The program reports the set of factorizations that \
+cover at most max-difference-of-coverage * |P| \
+bases less than the maximum coverage factorization.
+If it is set to 1.0, the check is implicitly disabled.
+Valid values: [0.0, 1.0]. \
+Suggested values: >= 0.05."
+double typestr="[0.0, 1.0]"
+default="0.05"
+optional
+
+option "max-difference-of-no-of-exons" -
+"The maximum number of additional exons that are reported."
+details=
+"Once the factorization with the minimum number, say n, of \
+exons has been found, the program reports all the \
+factorizations with at most \
+n + max-difference-of-no-of-exons exons.
+If it is set to -1, the check is not performed.
+Valid values: -1 to disable or >=0 to enable.
+Suggested values: >= 5."
+int typestr="number"
+default="5"
+optional
+
+option "max-difference-of-gap-length" -
+"The maximum additional length of a valid factorization."
+details=
+"Once the factorization with the minimum length, say n, of \
+gaps has been found, the program reports all the \
+factorizations with gaps whose length is at most \
+n + max-difference-of-gap-length.
+If it is set to -1, the check is not performed.
+Valid values: -1 to disable or >=0 to enable.
+Suggested values: >= 20."
+int typestr="number"
+default="20"
+optional
+
+option "retain-externals" E
+"If false, remove the first (and the last, if a polyA chain has not been found) factors."
+details=
+"If false, remove the first factor of the factorization \
+and also the last factor unless a polyA/T chain has been \
+found."
+enum typestr="true/false"
+values="true","false"
+default="true"
+optional
+
+option "max-pairings-in-CMEG" -
+"The maximum number of pairings in a CMEG in order to be considered not 'too much complicated'. The CMEG is rebuilt if it is considered 'too much complicated'. (See also the next option.)"
+details=
+"A CMEG that has less than max-pairings-in-CMEG vertices \
+is not considered 'too much complicated'. \
+A 'too much complicated' CMEG is rebuilt with an \
+increased min-factor-length until a not 'too much \
+complicated' CMEG is found.
+If it is set to 0, the check is not performed.
+(See also max-shortest-pairing-frequence option, \
+which regulates an additional aspect.)
+Valid values: 0 to disable or >0 to enable.
+Suggested values: >= 50."
+int typestr="number"
+default="80"
+optional
+
+
+option "max-shortest-pairing-frequence" -
+"The maximum frequence of a shortest pairing in a CMEG (w.r.t. the number of vertices) in order to be considered not 'too much complicated'. The CMEG is rebuilt if it is considered 'too much complicated'. (See also the previous option.)"
+details=
+"A CMEG with n vertices that has less than \
+max-shortest-pairing-frequence * n pairings with \
+minimum length is not considered 'too much complicated'. \
+A 'too much complicated' CMEG is rebuilt with an \
+increased min-factor-length until a not 'too much \
+complicated' CMEG is found.
+The value 1.0 implicitly disables the check.
+(See also max-pairings-in-CMEG option, \
+which regulates an additional aspect.)
+Valid values: (0.0, 1.0].
+Suggested values: >= 0.4."
+double typestr="(0.0, 1.0]"
+default="0.4"
+optional
+
+option "suff-pref-length-intron" -
+"The length of the intron suffix/prefix to be considered for intron gap alignment"
+details=
+"The length of the suffix/prefix of the intron \
+to be concatenated for computing the gap \
+alignment wrt to a genomic intron (in the intron refining procedure).
+Valid values: > 0.
+Suggested value: 70."
+int typestr="nt"
+default="70"
+optional
+
+option "suff-pref-length-est" -
+"The length of the est factor suffix/prefix to be considered for intron gap alignment"
+details=
+"The length of the suffix of the donor est factor and of the \
+prefix of the acceptor est factor to be concatenated for computing the gap \
+alignment wrt to a genomic intron (in the intron refining procedure).
+Valid values: > 0.
+Suggested value: 30."
+int typestr="nt"
+default="30"
+optional
+
+option "suff-pref-length-genomic" -
+"The length of the exon suffix/prefix to be considered for intron gap alignment"
+details=
+"The length of the suffix of the donor exon and of the \
+prefix of the acceptor exon to be concatenated for computing the gap \
+alignment wrt to a genomic intron (in the intron refining procedure).
+Valid values: > 0.
+Suggested value: 30."
+int typestr="nt"
+default="30"
+optional
+
+option "no-transitive-reduction" -
+"Do not perform the transitive reduction on the MEG before compositions are obtained"
+flag off
+
+option "no-short-edge-compaction" -
+"Do not perform the short edge compaction on the MEG before compositions are obtained"
+flag off
+
+
+####################
+#section "Memory management"
+#sectiondesc="Options that regulates the memory usage."
+
+#option "max-seq-in-gst" -
+#"The maximum number of sequences that are simultaneously stored in the generalized suffix tree."
+#details=
+#"The Generalized Suffix Tree will index the genomic \
+#sequence plus max-seq-in-gst expressed sequences plus \
+#the expressed sequences' reversals.
+#The higher this values, the faster (generally) the program.
+#Valid values: >= 1.
+#Suggested values: high as possible (w.r.t. the available memory."
+#int typestr="number"
+#default="50"
+#optional
+
+
+
