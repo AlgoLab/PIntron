@@ -161,12 +161,12 @@ while (my $l=<FB>) {
             die "Wrong number of exons: $index\n $v != ".$isoform->{'number exons'}."\n"
                 unless ($v+0 == $isoform->{'number exons'});
         } elsif ($k eq "L") {
-            $isoform->{length}=$v+0;
+            $isoform->{"CDS length"}=$v+0;
         } elsif ($k eq "CDS") {
             next if ($v eq '..');
             $v=~/^(<?)(\d+)\.\.(\d+)(>?)$/;
             my ($a,$b);
-            ($a,$isoform->{start},$isoform->{end},$b)=($1,$2+0,$3+0,$4);
+            ($a,$isoform->{"CDS start"},$isoform->{"CDS end"},$b)=($1,$2+0,$3+0,$4);
             $isoform->{'canonical start codon?'} = ($a eq '<') ? JSON::false : JSON::true;
             $isoform->{'canonical end codon?'}   = ($b eq '>') ? JSON::false : JSON::true;
         } elsif ($k eq "RefSeq") {
