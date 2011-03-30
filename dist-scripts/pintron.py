@@ -460,7 +460,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
              intron['acceptor score'], intron['BPS score'], intron['BPS position'], intron['type'], intron['pattern'],
              intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],
              intron['acceptor prefix']) = re.split("\t", line.rstrip())
-            intron['EST list'] = re.split(',', EST_list)
+            intron['EST list'] = [i for i in re.split(',', EST_list) if i != '']
 
             for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
                           'BPS position'):
