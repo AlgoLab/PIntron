@@ -309,96 +309,99 @@ void set_EST_GB_identification(pEST_info EST_info){
   }
 }
 
-void set_Chromosome(pEST_info EST_info){
-  my_assert(EST_info != NULL);
-  my_assert(EST_info->EST_id != NULL);
+static bool
+parse_genomic_header_standard(pEST_info gen) {
+// Parse the genomic header in the following format
+// >chrNN:NNNNN:NNNN:+-1
+// return true if successful
+  char* header= strdup(gen->EST_id);
+  if (header == NULL) return false;
 
-  char* p=strstr(EST_info->EST_id, "chr");
-  if(p == NULL){
-	 p=strstr(EST_info->EST_id, "CHR");
-  }
-  if(p != NULL){
-	 p+=3;
-	 EST_info->EST_chr=c_palloc(10);
-	 int i=0;
-	 //fare una versione safe!!
-	 while(p!=NULL && *p != ':' && i < 9){
-		EST_info->EST_chr[i]=*p;
-		p++;
-		i++;
-	 }
-	 EST_info->EST_chr[i]='\0';
-	 DEBUG("CHR ==> %s", EST_info->EST_chr);
- }
-  else{
-	 DEBUG("CHR ==> unknown");
-  }
+  char* chr= strsep(&header, ":");
+  if (chr == NULL) return false;
+  chr= strdup(chr);
+
+  char* start= strsep(&header, ":");
+  if (start == NULL) return false;
+
+  char* end= strsep(&header, ":");
+  if (end == NULL) return false;
+
+  char* strand= strsep(&header, ":");
+  if (strand == NULL) return false;
+  strand= strdup(strand);
+
+  char* last= strsep(&header, ":");
+  if (last != NULL) return false;
+
+// Check that everything is correct
+  int abs_start= atoi(start);
+  int abs_end= atoi(end);
+  int EST_strand= atoi(strand);
+  if ((abs_start < 1) || (abs_end < 1) ||
+		((EST_strand != -1) && (EST_strand != +1)))
+	 return false;
+
+  INFO("Genomic chromosome: %s", chr);
+  INFO("Genomic abs start:  %d", abs_start);
+  INFO("Genomic abs end:    %d", abs_end);
+  INFO("Genomic strand:     %s", strand);
+
+  gen->EST_chr= chr;
+  gen->abs_start= abs_start;
+  gen->abs_end= abs_end;
+  gen->EST_strand= EST_strand;
+  gen->EST_strand_as_read= strand;
+
+  return true;
 }
 
-void set_Chromosome_coordinates(pEST_info EST_info){
-	  my_assert(EST_info != NULL);
-	  my_assert(EST_info->EST_id != NULL);
+static bool
+genomic_header_defaults(pEST_info gen) {
+// Parse the genomic header in the following format
+// >chrNN:NNNNN:NNNN:+-1
+// return true if successful
+  char* chr= strdup("unknown");
+  char* strand= strdup("+1");
 
-	  char *p=strchr(EST_info->EST_id, ':');
-	  char *l=strrchr(EST_info->EST_id, ':');
+  int abs_start= 1;
+  int abs_end= strlen(gen->EST_seq);
+  int EST_strand= atoi(strand);
 
-	  if(p != NULL && p != l){
-		 my_assert(p < l);
+  ERROR("The header of the genomic file is not in the correct standard!");
+  ERROR("This may lead to prediction errors.");
+  ERROR("Please correct the header if possible.");
+  ERROR("Guessed values:");
+  INFO("Genomic chromosome: %s", chr);
+  INFO("Genomic abs start:  %d", abs_start);
+  INFO("Genomic abs end:    %d", abs_end);
+  INFO("Genomic strand:     %s", strand);
 
-		 char *inner_str=c_palloc(2*LEN_ABSCOORD_ARRAY+2);
-		 strcpy(inner_str,"");
-		 p++;
-		 int index=0;
-		 while(p != l){
-			 inner_str[index]=*p;
-			 p++;
-			 index++;
-		 }
-		 inner_str[index]='\0';
+  gen->EST_chr= chr;
+  gen->abs_start= abs_start;
+  gen->abs_end= abs_end;
+  gen->EST_strand= EST_strand;
+  gen->EST_strand_as_read= strand;
 
-		 if(strcmp(inner_str, "")){
-
-			 char *c1=strchr(inner_str, ':');
-			 char *c2=strrchr(inner_str, ':');
-
-			 if(c1 == NULL || c1 != c2){
-				 INFO("Genomic strand ==> unknown");
-				 fail();
-			 }
-			 c2++;
-			 *c1='\0';
-			 EST_info->abs_start=atoi(inner_str);
-			 EST_info->abs_end=atoi(c2);
-		 }
-	  }
-	  else{
-		 INFO("Genomic strand ==> unknown");
-		 fail();
-	  }
+  return true;
 }
 
-void set_Genomic_Strand(pEST_info EST_info){
-  my_assert(EST_info != NULL);
-  my_assert(EST_info->EST_id != NULL);
 
-  char* p=strrchr(EST_info->EST_id, ':');
-
-  if(p != NULL){
-	 EST_info->EST_strand_as_read=c_palloc(LEN_STRAND_ARRAY+1);
-	 int i=0;
-	 do{
-		p++;
-		EST_info->EST_strand_as_read[i]=*p;
-		i++;
-	 }while((*p != '1') && (i<LEN_STRAND_ARRAY));
-	 EST_info->EST_strand_as_read[i]='\0';
-	 INFO("Genomic strand %s", EST_info->EST_strand_as_read);
+void parse_genomic_header(pEST_info gen) {
+  my_assert(gen != NULL);
+  my_assert(gen->EST_id != NULL);
+  bool ris= parse_genomic_header_standard(gen);
+  if (!ris) {
+// Compute resonable defaults
+	 ris= genomic_header_defaults(gen);
   }
-  else{
-	 INFO("Genomic strand ==> unknown");
+  my_assert(ris);
+  if (!ris) {
+	 ERROR("Something went wrong when parsing the genomic header.");
 	 fail();
   }
 }
+
 
 void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
   my_assert(EST_info != NULL);

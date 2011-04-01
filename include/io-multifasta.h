@@ -63,11 +63,7 @@ void write_single_EST_info(FILE*, pEST_info);
 
 void set_EST_GB_identification(pEST_info);
 
-void set_Chromosome(pEST_info);
-
-void set_Chromosome_coordinates(pEST_info);
-
-void set_Genomic_Strand(pEST_info);
+void parse_genomic_header(pEST_info);
 
 void set_EST_Strand_and_RC(pEST_info, pEST_info);
 

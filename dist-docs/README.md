@@ -22,7 +22,7 @@ of transcripts (ESTs and mRNAs) respectively.
 
 ### Input file formats
 
-The genomic sequence file is a FASTA file whose header must adhere to the
+The genomic sequence file is a FASTA file whose header should adhere to the
 following structure
 
       >chrZZ:start:end:strand
@@ -37,6 +37,9 @@ or -1 (3'5' direction).
 
 The provided nucleotide sequence must be on the direction specified by *strand* in the header
 FASTA.
+The genomic sequence file may have a FASTA header whose format is
+different from the above standard *but*, in this case, rare prediction
+errors might arise.
 
 The file of transcripts is a multiFASTA file containing all the transcript sequences (ESTs and
 mRNAs). The header of each sequence must contain the following field:
