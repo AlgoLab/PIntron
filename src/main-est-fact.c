@@ -172,10 +172,8 @@ int main(int argc, char** argv) {
   pEST_info gen= (pEST_info)list_head(gen_list);
   list_destroy(gen_list, noop_free);
 
-  DEBUG("Set the chromosome");
-  set_Chromosome(gen);
-  DEBUG("Set the genomic strand");
-  set_Genomic_Strand(gen);
+  parse_genomic_header(gen);
+
   DEBUG("Removing N tails");
   Ntails_removal(gen);
 

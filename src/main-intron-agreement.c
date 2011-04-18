@@ -92,12 +92,7 @@ int main(void) {
   fclose(fgen);
   my_assert(list_size(gen_list)==1);
   pEST_info gen= (pEST_info)list_head(gen_list);
-  DEBUG("Set the chromosome");
-  set_Chromosome(gen);
-  DEBUG("Set the genomic strand");
-  set_Genomic_Strand(gen);
-  DEBUG("Set the absolute coordinates");
-  set_Chromosome_coordinates(gen);
+  parse_genomic_header(gen);
 
   list_destroy(gen_list, noop_free);
 

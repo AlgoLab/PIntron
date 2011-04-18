@@ -47,18 +47,32 @@ foreach my $dir (@ARGV) {
     print STDERR "Analyzing directory $dir\n";
 
     open GEN, "<".$dir."/genomic.txt" or die "Can't open file. $!";
+    my $chr_start= -1;
+    my $chr_end= -1;
+    my $strand= -1;
+
+    my $gen_header=<GEN>;
+    chomp $gen_header;
+
+    if ($gen_header =~ m/^>chr([xXyY\d]+):(\d+):(\d+):([-+]{0,1}1)/i) {
+        $chr_start=($2 < $3)?($2):($3);
+        $chr_end=($2 < $3)?($3):($2);
+        $strand=$4;
+    } else {
+        # Read the genomic sequence for computing its length
+        $chr_start= 1;
+        $chr_end= 0;
+        $strand= "+1";
+        while (<GEN>) {
+            chomp;
+            $chr_end += length ($_);
+        }
+    }
+    close GEN;
+
     open IN, "<".$dir."/predicted-introns.txt" or die "Can't open file. $!";
     open INC, "<".$dir."/out-after-intron-agree.txt" or die "Can't open file. $!";
     open OUT, ">".$dir."/gene-struct.txt" or die "Can't create file. $!";
-
-    my $gen_header=<GEN>;
-    close GEN;
-    chomp $gen_header;
-    $gen_header =~ m/^>chr([xXyY\d]+):(\d+):(\d+):([-+]{0,1}1)/i or die "Header in genomic.txt uncorrect!\n";
- 
-    my $chr_start=($2 < $3)?($2):($3);
-    my $chr_end=($2 < $3)?($3):($2);
-    my $strand=$4;
 
     my @pred_intron_list=();
 
