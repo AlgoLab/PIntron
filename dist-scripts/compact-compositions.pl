@@ -55,16 +55,32 @@ my $min_ext=30;
 
 open(GEN, "<genomic.txt") or die "Can't open the genomic file! $!\n";
 
+my $abs_left= -1;
+my $abs_right= -1;
+my $strand= -1;
+my $boundary= -1;
+
 my $gen_header=<GEN>;
-close GEN;
-
 chomp $gen_header;
-$gen_header =~ m/^>chr([xXyY\d]+):(\d+):(\d+):([-+]{0,1}1)/i or die "Header in genomic.txt uncorrect!\n";
 
-my $abs_left=($2 < $3)?($2):($3);
-my $abs_right=($2 < $3)?($3):($2);
-my $strand=$4;
-my $boundary=0;
+if ($gen_header =~ m/^>chr([xXyY\d]+):(\d+):(\d+):([-+]{0,1}1)/i) {
+    $abs_left=($2 < $3)?($2):($3);
+    $abs_right=($2 < $3)?($3):($2);
+    $strand=$4;
+    $boundary=0;
+} else {
+    # Read the genomic sequence for computing its length
+    $abs_left= 1;
+    $abs_right= 0;
+    $strand= "+1";
+    while (<GEN>) {
+        chomp;
+        $abs_right += length ($_);
+    }
+    $boundary= 0;
+}
+
+close GEN;
 
 print $abs_left, "\n";
 print $abs_right, "\n";
