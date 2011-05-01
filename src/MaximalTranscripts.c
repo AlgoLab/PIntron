@@ -3151,11 +3151,15 @@ void Filter_Path_Transcripts_by_Introns(){
 			 }
 		  } else {
 			 fprintf(stderr, "Intron not found!\n");
+			 filtered[i]=1;
+			 actual_path_number--;
+/*
 #ifdef HALT_EXIT_MODE
 			 exit(1);
 #else
 			 exit(EXIT_FAILURE);
 #endif
+*/
 		  }
 		  j++;
 		}
