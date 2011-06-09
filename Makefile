@@ -519,6 +519,7 @@ FULL_SRC_DIST_DIR= $(DIST_DIR)/pintron-$(___SRC_DESC)-src
 
 all	: build
 
+script_copy_to_bin = cp $(script) $(BASE_BIN_DIR)/$(notdir $(basename $(script))) &&
 
 all	:
 	@echo "${PHF}All compiled!${SF}"
@@ -535,7 +536,8 @@ clean 	:
 		$(DIST_DIR)/*
 
 build	: .make est-fact min-factorization intron-agreement max-transcr cds-annotation # build-transcr
-	@echo "Configuration: ${COMPFLAGS}"; \
+	@$(foreach script,$(DIST_SCRIPTS),$(script_copy_to_bin)) \
+	echo "Configuration: ${COMPFLAGS}"; \
 	echo "Compiler:      ${CC}"; \
 	echo "Symbols:       ${DFLAGS}"; \
 	echo '${PHF}All built!${SF}'
