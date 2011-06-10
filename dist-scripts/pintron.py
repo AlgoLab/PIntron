@@ -336,6 +336,40 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             # throw exception and die
             logging.exception("*** Fatal error: Could not read "+file+"\n")
 
+
+    with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
+        factorizations = {}
+        current = ''
+        for line in fd:
+            l=line.rstrip()
+            if l[0] == '>':
+                current = l
+                factorizations[current] = {
+                    'polyA' : False,
+                    'PAS' : False,
+                    'exons' : []
+                }
+            elif re.match('#polya=1', l):
+                factorizations[current]['polyA'] = True
+            elif re.match('#polyad(\S*)=1', l):
+                factorizations[current]['PAS'] = True
+            elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+) \S+$', l):
+                # Since we use the factorizations only for detecting PAS, there is no need
+                # for storing unused
+                new = [int(x) for x in  re.split(' ', l)]
+                exon = {
+                    'begin relative' : int[new[0]],
+                    'end relative'   : int[new[1]],
+                    'begin absolute' : int[new[2]],
+                    'end absolute'   : int[new[3]]
+                }
+                factorizations[current]['exons'].append(exon)
+        # At the end, remove all factorizations without exons, sinche they are not useful
+        PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
+        pprint.pprint(PAS_factorizations)
+
+
+
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
         gene['length_genomic_sequence'] = int(fd.readline().rstrip())
@@ -496,6 +530,8 @@ def check_executables(bindir, exes):
 
     full_exes= {}
     if bindir:
+        if bindir[0] == '~':
+            bindir = os.environ["HOME"] + bindir[1:]
         paths= [ bindir ] + os.environ["PATH"].split(os.pathsep)
     else:
         paths= os.environ["PATH"].split(os.pathsep)
@@ -689,8 +725,7 @@ def pintron_pipeline(options):
         json2gtf(options.output_filename, options.gtf_filename, options.genome_filename,
                  options.gene, False)
     if options.extended_gtf_filename:
-        logging.debug("""WARNING: you are creating a file that is not consistent with the
-        GTF specifications.
+        logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.
         See http://mblab.wustl.edu/GTF22.html""")
         json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename,
                  options.gene, True)
