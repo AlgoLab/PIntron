@@ -455,9 +455,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                         isoform['canonical start codon?'] = False if a == '<' else True
                         isoform['canonical end codon?']   = False if b == '>' else True
                 elif k == "RefSeq":
-                    if v != '..' and v != '' and 'CDS' in isoform:
-                        m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
-
+                    if v == '..' or v == '':
+                        continue
+                    m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
+                    if m :
                         (isoform['RefSeq'], a, b)=(m.group(1), m.group(3), m.group(4))
                         isoform['conserved start codon?'] = False if a == 'N' else True
                         isoform['conserved end codon?']   = False if b == 'N' else True
@@ -515,17 +516,18 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                    'chromosome end' )
         return all(True for field in fields if a[field] != b[field])
 
-    for isoform in gene.keys():
+    # pprint.pprint(gene)
+    for isoform in gene['isoforms'].keys():
         # Check if we have to add PAS
-        if not gene[isoform]['polyA?']:
+        if not gene['isoforms'][isoform]['polyA?']:
             continue
-            exon = gene[isoform][exons][-1]
-            # If PAS_factorizations has an exon with the same coordinates,
-            # we have a PAS
-            if any(x for x in factorizations.values() if same_coordinates(x, exon)):
-                isoform['PAS?']=True
+        exon = gene['isoforms'][isoform]['exons'][-1]
+        # If PAS_factorizations has an exon with the same coordinates,
+        # we have a PAS
+        if any(x for x in factorizations.values() if same_coordinates(x, exon)):
+            gene['isoforms'][isoform]['PAS?']=True
 
-
+    # import pdb; pdb.set_trace()
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
