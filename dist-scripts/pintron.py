@@ -358,10 +358,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 # for storing unused
                 new = [int(x) for x in  re.split(' ', l)]
                 exon = {
-                    'begin relative' : int[new[0]],
-                    'end relative'   : int[new[1]],
-                    'begin absolute' : int[new[2]],
-                    'end absolute'   : int[new[3]]
+                    'relative start'   : int[new[0]],
+                    'relative end'     : int[new[1]],
+                    'chromosome start' : int[new[2]],
+                    'chromosome end'   : int[new[3]]
                 }
                 factorizations[current]['exons'].append(exon)
         # At the end, remove all factorizations without exons, sinche they are not useful
@@ -397,6 +397,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                     'exons' : [],
                     'coding length' : 0,
                     'polyA?' : True,
+                    'PAS?' : False,
                     'annotated CDS?' : True
                     }
 
@@ -509,6 +510,22 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
 
             gene['introns'].append(intron)
 
+    def same_coordinates(a, b):
+        fields = ( 'relative start', 'relative end', 'chromosome start',
+                   'chromosome end' )
+        return all(True for field in fields if a[field] != b[field])
+
+    for isoform in gene.keys():
+        # Check if we have to add PAS
+        if not gene[isoform]['polyA?']:
+            continue
+            exon = gene[isoform][exons][-1]
+            # If PAS_factorizations has an exon with the same coordinates,
+            # we have a PAS
+            if any(x for x in factorizations.values() if same_coordinates(x, exon)):
+                isoform['PAS?']=True
+
+
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
@@ -523,6 +540,7 @@ def exec_system_command(command, error_comment, logfile, output_file="", from_sc
                 print(error_comment, -retcode, file=sys.stderr)
         except OSError as e:
             print("Execution failed:", e, file=sys.stderr)
+            raise PIntronError
 
 def check_executables(bindir, exes):
     """Check if the executables are in the path or in the specified directory.
