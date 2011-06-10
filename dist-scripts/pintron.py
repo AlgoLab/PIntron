@@ -459,11 +459,11 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                         continue
                     m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
                     if m :
-                        (isoform['RefSeq'], a, b)=(m.group(1), m.group(3), m.group(4))
+                        (r, a, b)=(m.group(1), m.group(3), m.group(4))
                         isoform['conserved start codon?'] = False if a == 'N' else True
                         isoform['conserved end codon?']   = False if b == 'N' else True
-                        if isoform['RefSeq'] == '':
-                            del isoform['RefSeq']
+                        if r != None:
+                            isoform['RefSeq'] =r
                 elif k == "ProtL":
                     if v != '..' and 'CDS' in isoform:
                         m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
@@ -479,9 +479,14 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                         # pprint.pprint(isoform)
                         # pprint.pprint(ref)
                         # pprint.pprint(isoform['reference?'])
-                        raise ValueError("Wrong reference for isoform n. " + str(index) + "\n" +
-                                         line)
-                    if not isoform['reference?']:
+                        raise ValueError(format("Wrong reference for isoform n. {}\n{}",
+                                                str(index), line)
+                    if isoform['reference?']:
+                        if 'RefSeq' in isoform:
+                            isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
+                        else:
+                            isoform['Type'] = "(Reference TR)"
+                    else:
                         isoform['Type'] = re.sub('\s+$', '', v)
                 elif not re.match('^\s*\#', line):
                     raise ValueError("Could not parse GTF file "+ variant_file  + "(" + k + "=>" + v + ")\n" + line + "\n")
