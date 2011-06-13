@@ -780,3 +780,6 @@ src-dist	: prepare-src-dist
 	tar czf $(FULL_SRC_DIST_DIR).tar.gz -C $(DIST_DIR) `basename $(FULL_SRC_DIST_DIR)` && \
 	echo '${PHF}   ...done.${SF}'; \
 	echo '${PHF}** The source of software package has been prepared in file $(FULL_SRC_DIST_DIR).tar.gz${SF}';
+
+check-syntax:
+	    gcc -o /dev/null -D$(DEFINE) $(CFLAGS) -S ${CHK_SOURCES}
