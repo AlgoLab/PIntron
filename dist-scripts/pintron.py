@@ -45,9 +45,11 @@ import csv
 # from Bio import SeqIO
 from optparse import OptionParser
 
+
 class PIntronError(Exception):
     """Base class for exceptions of the PIntron pipeline."""
     pass
+
 
 class PIntronIOError(PIntronError):
     """Exception raised for errors related to I/O operations.
@@ -63,6 +65,7 @@ class PIntronIOError(PIntronError):
 
     def __str__(self):
         return '{0} (offending file: "{1}")'.format(self.msg, self.e_file)
+
 
 def parse_command_line():
     usage = "usage: %prog [options]"
@@ -81,7 +84,8 @@ def parse_command_line():
     #                   dest="step1", default=False,
     #                   help="do not compute the full-lengths")
     parser.add_option("-o", "--output",
-                      dest="output_filename", default="pintron-full-output.json",
+                      dest="output_filename",
+                      default="pintron-full-output.json",
                       help="full output file (default = 'pintron-full-output.json')",
                       metavar="FILE")
     parser.add_option("-z", "--compress", action="store_true",
@@ -96,27 +100,27 @@ def parse_command_line():
     parser.add_option("-b", "--bin-dir",
                       dest="bindir", default="",
                       help="DIRECTORY containing the programs (default = system PATH)")
-    parser.add_option("-n","--organism",
+    parser.add_option("-n", "--organism",
                       dest="organism", default="unknown",
                       help="Organism originating the ESTs (default = 'unknown')")
-    parser.add_option("-e","--gene",
+    parser.add_option("-e", "--gene",
                       dest="gene", default="unknown",
                       help="Gene symbol (or ID) of the locus which the ESTs refer to (default = 'unknown')")
     parser.add_option("-k", "--keep-intermediate-files", action="store_true",
                       dest="no_clean", default=False,
                       help="keep all intermediate or temporary files (default = False)")
     parser.add_option("-t", "--gtf",
-                      dest="gtf_filename", default="pintron-cds-annotated-isoforms.gtf",
+                      dest="gtf_filename",
+                      default="pintron-cds-annotated-isoforms.gtf",
                       help="output GTF FILE with the isoforms that have a CDS annotation "
                       "(default = 'pintron-cds-annotated-isoforms.gtf')",
                       metavar="GTF_FILE")
     parser.add_option("--extended-gtf",
-                      dest="extended_gtf_filename", default="pintron-all-isoforms.gtf",
+                      dest="extended_gtf_filename",
+                      default="pintron-all-isoforms.gtf",
                       help="output GTF FILE with all the predicted isoforms "
                       "(default = 'pintron-all-isoforms.gtf')",
                       metavar="GTF_FILE")
-
-
 
     # parser.add_option("--strand",
     #                   dest="strand", type="int", default=1,
@@ -204,16 +208,13 @@ def parse_command_line():
                       dest="max_intron_agreement_time", type="int", default=30,
                       help="[Expert use only] Set a time limit (in mins) for the intron agreement step")
 
-
-
-
     (options, args) = parser.parse_args()
     if options.bindir:
-        options.bindir= os.path.normpath(options.bindir)
+        options.bindir = os.path.normpath(options.bindir)
 
     return(options)
 
-#
+
 # Transform a JSON file into a GTF
 def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
     def write_gtf_line(file, seqname, feature, start, end, score, strand, frame, gene, transcript):
@@ -246,17 +247,17 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
     # print(entry['length_genomic_sequence'])
 
     with open(outfile, 'w', encoding='utf-8') as f:
-        data_strand = { 'first': { "label"         : "5UTR",
-                                   "delimiter"     : "start_codon",
-                                   "codons"        : ["ATG"],
-                                   "offset"  : 0,
-                                   },
-                        'last' : { "label"         : "3UTR",
-                                   "delimiter"     : "stop_codon",
-                                   "codons"        : ["TGA", "TAG", "TAA"],
-                                   "offset"        : 3,
-                                   }
-                        }
+        data_strand = {'first': {"label": "5UTR",
+                                 "delimiter": "start_codon",
+                                 "codons": ["ATG"],
+                                 "offset": 0,
+                             },
+                       'last' : {"label" : "3UTR",
+                                 "delimiter" : "stop_codon",
+                                 "codons"        : ["TGA", "TAG", "TAA"],
+                                 "offset"        : 3,
+                             }
+                   }
         # if strand == '-':
         #     data_strand['temp']=data_strand['first']
         #     data_strand['first']=data_strand['last']
@@ -536,7 +537,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
-def exec_system_command(command, error_comment, logfile, output_file="", from_scratch=True):
+def exec_system_command(command, error_comment, logfile, output_file="",
+                        from_scratch=True):
     if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)) :
         logging.debug(str(time.localtime()))
         logging.debug(command)
