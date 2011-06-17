@@ -302,7 +302,7 @@ void print_n_factorization_complete(pEST est,int n)
 
 	 cont=cont+1;
 	 if(cont==n){
-		printf("#polya=%d\n#polyadenil=%d\n", (polya == true)?(1):(0), (polyadenil == true)?(1):(0));
+		printf("#polya=%d\n#polyad=%d\n", (polya == true)?(1):(0), (polyadenil == true)?(1):(0));
 		plist_it_factor=list_first(pfact);
 		while(listit_has_next(plist_it_factor)) {
 		  pf=listit_next(plist_it_factor);
