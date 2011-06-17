@@ -477,11 +477,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 elif k == "Type":
                     ref = True if v == 'Ref' else False
                     if ref != isoform['reference?']:
-                        # pprint.pprint(isoform)
-                        # pprint.pprint(ref)
-                        # pprint.pprint(isoform['reference?'])
                         raise ValueError(format("Wrong reference for isoform n. {}\n{}",
-                                                str(index), line)
+                                                str(index), line))
                     if isoform['reference?']:
                         if 'RefSeq' in isoform:
                             isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
@@ -490,10 +487,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                     else:
                         isoform['Type'] = re.sub('\s+$', '', v)
                 elif not re.match('^\s*\#', line):
-                    raise ValueError("Could not parse GTF file "+ variant_file  + "(" + k + "=>" + v + ")\n" + line + "\n")
+                    raise ValueError("Could not parse GTF file " + variant_file + "(" + k + "=>" + v + ")\n" + line + "\n")
 
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
-        gene['introns']=[]
+        gene['introns'] = []
         for line in fd:
             intron = {}
             (intron['relative start'], intron['relative end'],
@@ -506,10 +503,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
 
             for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
                           'BPS position'):
-                intron[field]=int(intron[field])
+                intron[field] = int(intron[field])
             for field in ('donor alignment average error', 'acceptor alignment average error', 'donor score',
                           'acceptor score', 'BPS score'):
-                intron[field]=float(intron[field])
+                intron[field] = float(intron[field])
 
             del intron['repeat sequence']
             if intron['BPS position'] < 0:
