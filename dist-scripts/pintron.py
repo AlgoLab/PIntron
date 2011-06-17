@@ -335,14 +335,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
     for file in [ccds_file, variant_file]:
         if not os.access(file, os.R_OK):
             # throw exception and die
-            logging.exception("*** Fatal error: Could not read "+file+"\n")
-
+            logging.exception("*** Fatal error: Could not read " + file + "\n")
 
     with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
         factorizations = {}
         current = ''
         for line in fd:
-            l=line.rstrip()
+            l = line.rstrip()
             if l[0] == '>':
                 current = l
                 factorizations[current] = {
@@ -354,37 +353,35 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 factorizations[current]['polyA'] = True
             elif re.match('#polyad(\S*)=1', l):
                 factorizations[current]['PAS'] = True
-            elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+) \S+$', l):
+            elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l):
                 # Since we use the factorizations only for detecting PAS, there is no need
                 # for storing unused
-                new = [int(x) for x in  re.split(' ', l)]
+                new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
                 exon = {
-                    'relative start'   : int[new[0]],
-                    'relative end'     : int[new[1]],
-                    'chromosome start' : int[new[2]],
-                    'chromosome end'   : int[new[3]]
+                    'relative start'   : int(new[0]),
+                    'relative end'     : int(new[1]),
+                    'chromosome start' : int(new[2]),
+                    'chromosome end'   : int(new[3])
                 }
                 factorizations[current]['exons'].append(exon)
-        # At the end, remove all factorizations without exons, sinche they are not useful
+        # At the end, remove all factorizations without exons, since they are not useful
         PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
         pprint.pprint(PAS_factorizations)
-
-
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
         gene['length_genomic_sequence'] = int(fd.readline().rstrip())
         gene['isoforms'] = {}
-        isoforms={}
+        isoforms = {}
         for line in fd:
-            l=line.rstrip()
-            l=re.sub('\s+', '', l)
-            l=re.sub('#.*', '', l)
+            l = line.rstrip()
+            l = re.sub('\s+', '', l)
+            l = re.sub('#.*', '', l)
 
             if re.match('^>', l):
                 # New isoform
-                l=l[1:]
-                isoform={}
+                l = l[1:]
+                isoform = {}
                 # print(l)
                 fields = [int(x) for x in  re.split(':', l)]
 
@@ -406,7 +403,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 # Row contains exon metadata
                 exon = {}
                 (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
-                 polyA, exon["5utr length"], exon["3utr length"]) = [max(0,int(x)) for x in  re.split(':', l)]
+                 polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
                 if (polyA == 0):
                     gene['isoforms'][index]['polyA?'] = False
                 gene['isoforms'][index]['annotated CDS?'] = False
@@ -420,7 +417,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
                                                              exon["5utr length"] - exon["3utr length"])
 
-
                 if int(re.split(':', l)[4]) < 0:
                     del(exon["5utr length"])
                 if int(re.split(':', l)[5]) < 0:
@@ -428,9 +424,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 gene['isoforms'][index]['exons'].append(exon)
 
             elif re.match('^[acgtACGT]+$', l):
-                last_exon=gene['isoforms'][index]['exons'][-1]['sequence']=l
+                last_exon = gene['isoforms'][index]['exons'][-1]['sequence'] = l
             elif not re.match('^\s*\#', line):
-                raise ValueError("Could not parse CCDS file "+ ccds_file + " at line:\n" + line + "\n")
+                raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
 
 
@@ -441,10 +437,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             index=int(re.sub('^.*\#', '', row.pop(0)))
             isoform=gene['isoforms'][index]
             for t in row:
-                (k,v) = re.split('=', t, 2)
+                (k, v) = re.split('=', t, 2)
                 if k == "nex":
                     if int(v) != isoform['number exons']:
-                        raise ValueError("Wrong number of exons: "+ str(index) +"\n " + v + "!= " +
+                        raise ValueError("Wrong number of exons: " + str(index) + "\n " + v + "!= " +
                                          isoform['number exons'] +"\n")
                 elif k == "L":
                     isoform["CDS length"] = int(v)
@@ -456,15 +452,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                         isoform['canonical start codon?'] = False if a == '<' else True
                         isoform['canonical end codon?']   = False if b == '>' else True
                 elif k == "RefSeq":
-                    if v == '..' or v == '':
-                        continue
                     m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
-                    if m :
-                        (r, a, b)=(m.group(1), m.group(3), m.group(4))
+                    if m:
+                        (r, a, b) = (m.group(1), m.group(3), m.group(4))
                         isoform['conserved start codon?'] = False if a == 'N' else True
                         isoform['conserved end codon?']   = False if b == 'N' else True
-                        if r != None:
-                            isoform['RefSeq'] =r
+                        if r != None and r:
+                            isoform['RefSeq'] = r
                 elif k == "ProtL":
                     if v != '..' and 'CDS' in isoform:
                         m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
@@ -515,8 +509,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             gene['introns'].append(intron)
 
     def same_coordinates(a, b):
-        fields = ( 'relative start', 'relative end', 'chromosome start',
-                   'chromosome end' )
+        fields = ('relative start', 'relative end', 'chromosome start', 'chromosome end')
         return all(True for field in fields if a[field] != b[field])
 
     # pprint.pprint(gene)
@@ -534,9 +527,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
+
 def exec_system_command(command, error_comment, logfile, output_file="",
                         from_scratch=True):
-    if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)) :
+    if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
         logging.debug(str(time.localtime()))
         logging.debug(command)
 
@@ -548,24 +542,25 @@ def exec_system_command(command, error_comment, logfile, output_file="",
             print("Execution failed:", e, file=sys.stderr)
             raise PIntronError
 
+
 def check_executables(bindir, exes):
     """Check if the executables are in the path or in the specified directory.
     """
 
-    full_exes= {}
+    full_exes = {}
     if bindir:
         if bindir[0] == '~':
             bindir = os.environ["HOME"] + bindir[1:]
-        paths= [ bindir ] + os.environ["PATH"].split(os.pathsep)
+        paths = [bindir] + os.environ["PATH"].split(os.pathsep)
     else:
-        paths= os.environ["PATH"].split(os.pathsep)
+        paths = os.environ["PATH"].split(os.pathsep)
     for exe in exes:
-        full_exes[exe]= None
+        full_exes[exe] = None
         for path in paths:
             if os.access(os.path.join(path, exe), os.X_OK):
-                real_path= os.path.realpath(os.path.abspath(os.path.join(path, exe)))
+                real_path = os.path.realpath(os.path.abspath(os.path.join(path, exe)))
                 logging.debug("Using program '{}' in dir '{}'".format(exe, real_path))
-                full_exes[exe]= real_path
+                full_exes[exe] = real_path
                 break
         if full_exes[exe] == None:
             raise PIntronIOError(exe, "Could not find program '{}'!\n"
