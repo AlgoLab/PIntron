@@ -337,25 +337,24 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             # throw exception and die
             logging.exception("*** Fatal error: Could not read " + file + "\n")
 
+    factorizations = {}
     with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
-        factorizations = {}
         current = ''
         for line in fd:
             l = line.rstrip()
             if l[0] == '>':
                 current = l
                 factorizations[current] = {
-                    'polyA' : False,
+                    'polyA?' : False,
                     'PAS' : False,
-                    'exons' : []
                 }
             elif re.match('#polya=1', l):
-                factorizations[current]['polyA'] = True
+                factorizations[current]['polyA?'] = True
             elif re.match('#polyad(\S*)=1', l):
                 factorizations[current]['PAS'] = True
             elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l):
                 # Since we use the factorizations only for detecting PAS, there is no need
-                # for storing unused
+                # for storing unused information
                 new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
                 exon = {
                     'relative start'   : int(new[0]),
@@ -363,10 +362,11 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                     'chromosome start' : int(new[2]),
                     'chromosome end'   : int(new[3])
                 }
-                factorizations[current]['exons'].append(exon)
-        # At the end, remove all factorizations without exons, since they are not useful
-        PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
-        pprint.pprint(PAS_factorizations)
+                factorizations[current]['exon']=exon
+    # At the end, remove all factorizations without exons, since they are not useful
+    PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
+#    pprint.pprint(PAS_factorizations)
+    del factorizations
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
@@ -394,7 +394,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                     'NMD flag' : fields[4],
                     'exons' : [],
                     'coding length' : 0,
-                    'polyA?' : True,
+                    'polyA?' : False,
                     'PAS?' : False,
                     'annotated CDS?' : True
                     }
@@ -404,8 +404,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 exon = {}
                 (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
                  polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
-                if (polyA == 0):
-                    gene['isoforms'][index]['polyA?'] = False
+                if (polyA == 1):
+                    gene['isoforms'][index]['polyA?'] = True
                 gene['isoforms'][index]['annotated CDS?'] = False
                     # # pprint.pprint(exon)
                     # print(line)
@@ -517,10 +517,11 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
         # Check if we have to add PAS
         if not gene['isoforms'][isoform]['polyA?']:
             continue
+#        import pdb; pdb.set_trace()
         exon = gene['isoforms'][isoform]['exons'][-1]
         # If PAS_factorizations has an exon with the same coordinates,
         # we have a PAS
-        if any(x for x in factorizations.values() if same_coordinates(x, exon)):
+        if any(x for x in PAS_factorizations.values() if same_coordinates(x['exon'], exon)):
             gene['isoforms'][isoform]['PAS?']=True
 
     # import pdb; pdb.set_trace()
