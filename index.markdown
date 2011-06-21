@@ -16,7 +16,7 @@ Please refer to the file [dist-docs/README.md](https://github.com/AlgoLab/PIntro
 
 ## Download
 
-The latest stable version of PIntron is **v1.0.0** (*Feb. 10, 2011*).
+The latest stable version of PIntron is **v1.2.0** (*June 21, 2011*).
 
 PIntron is distributed as source code and as pre-built binary packages for some common platforms.
 
