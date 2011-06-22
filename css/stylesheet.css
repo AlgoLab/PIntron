@@ -38,6 +38,21 @@ html>body #wrapper {
 	cursor: pointer;
 	color: white;
 }
+#content h1 {
+        display: none;
+}
+
+#pagenav {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 85%;
+}
+
+#pagenav a {
+    color: #ebebeb;
+    text-decoration: none;
+}
 
 #navigation {
 	background: #232323;

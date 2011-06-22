@@ -1,0 +1,12 @@
+---
+title: PIntron
+github_repository: PIntron
+github_user: AlgoLab
+nav:
+  - name: Home
+    link: "index.html"
+  - name: Installation
+    link: "install.html"
+  - name: Usage
+    link: "usage.html"
+---
