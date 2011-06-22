@@ -26,8 +26,14 @@ It is also possible to clone the source repository using the following command:
     git clone https://github.com/AlgoLab/PIntron.git
 
 
-The binary packages are available from the [AlgoLab webpage](http://www.algolab.eu/PIntron).
+The latest pre-built binary packages are available for the following platforms and architectures:
 
+*    [Linux (32-bit)](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-Linux-32bit.tar.gz), tested and supported on Ubuntu Linux 10.04 and later
+*    [Linux (64-bit)](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-Linux-64bit.tar.gz), tested and supported on Ubuntu Linux 10.04 and later
+*    [MacOS X](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-MacOS.tar.gz) (Universal Binary 32/64-bit)
+
+
+Older versione are also [available](http://www.algolab.eu/datasets/PIntron/binaries/)
 
 ## Install
 
@@ -47,8 +53,6 @@ A copy of the GNU Affero General Public License is distributed along with PIntro
 
 The joint main contributors of this project are Yuri Pirola (<yuri.pirola@gmail.com>) and Raffaella Rizzi (<rizzi@disco.unimib.it>).
 
-The work has also greatly benefited from the contribution and the supervision of Paola Bonizzoni (<bonizzoni@disco.unimib.it>) and Gianluca Della Vedova (<gianluca.dellavedova@unimib.it>).
+The work has also greatly benefited from the contribution and the supervision of Paola Bonizzoni (<bonizzoni@disco.unimib.it>) and [Gianluca Della Vedova](http://gianluca@dellavedova.org).
 
-For any information, please contact one of the authors.
-
-
+For ask for information, please contact any of the authors.
