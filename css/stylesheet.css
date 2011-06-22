@@ -98,7 +98,7 @@ html>body #wrapper {
 #content { /* IE workaround */
 	margin: 0;
 	padding: 25px;
-	width: 95%;
+	width:  95%;
 	height: 584px; /* (64+2*20+2)*6 - 2 - 2*25 */
 	background: #fff;
 }
@@ -107,7 +107,7 @@ html>body #content {
 	padding: 25px;
 	width: auto;
 	height: auto;
-	max-width: 95%;
+	max-width: 100%;
 	min-height: 584px; /* (64+2*20+2)*6 - 2 - 2*25 */
 	background: #fff;
 }
