@@ -12,7 +12,7 @@ Each gene has keys  "length_genomic_sequence",
   the only key and each value is a single isoform), "introns" (a list).
 
 Each isoform has keys "canonical start codon?",
-  "canonical end codon?", "NMD flag", "polyA?", "annotated CDS?", "start",
+  "canonical end codon?", "NMD flag", "polyA?", "annotated CDS?", "start", "PAS?"
   "end", "number exons", "Type", "length", "coding length", "reference?", "from RefSeq?",
   "exons" (a list of exons).
 
