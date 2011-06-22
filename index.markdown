@@ -86,4 +86,4 @@ The work has also greatly benefited from the contribution and the
 supervision of Paola Bonizzoni (<bonizzoni@disco.unimib.it>) and
 [Gianluca Della Vedova](http://gianluca.dellavedova.org).
 
-For ask for information, please contact any of the authors.
+To  ask for information, please contact any of the authors.
