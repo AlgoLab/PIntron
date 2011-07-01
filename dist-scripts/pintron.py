@@ -207,6 +207,9 @@ def parse_command_line():
     parser.add_option("--set-max-intron-agreement-time",
                       dest="max_intron_agreement_time", type="int", default=30,
                       help="[Expert use only] Set a time limit (in mins) for the intron agreement step")
+    parser.add_option("--pas-tolerance",
+                      dest="pas_tolerance", type="int", default=30,
+                      help="[Expert use only] Maximum allowed difference on the exon final coordinate to identify a PAS")
 
     (options, args) = parser.parse_args()
     if options.bindir:
@@ -329,7 +332,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
+def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance):
     gene={'version': 2} # Hardcoding version number
     index=0
     for file in [ccds_file, variant_file]:
@@ -509,8 +512,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             gene['introns'].append(intron)
 
     def same_coordinates(a, b):
-        fields = ('relative start', 'relative end', 'chromosome start', 'chromosome end')
-        return all(True for field in fields if a[field] != b[field])
+        return True if (a['relative start'] == b['relative start'] and
+                        30 >= a['relative end'] - b['relative end'] >= -30 else False
+
 
     # pprint.pprint(gene)
     for isoform in gene['isoforms'].keys():
@@ -737,9 +741,12 @@ def pintron_pipeline(options):
     # Output the desired file
     logging.info("STEP  9:  Saving outputs...")
 
-    json_output=compute_json(ccds_file="CCDS_transcripts.txt", variant_file="VariantGTF.txt",
-                             logfile=options.logfile, output_file=options.output_filename,
-                             from_scratch=options.from_scratch)
+    json_output=compute_json(ccds_file="CCDS_transcripts.txt",
+                             variant_file="VariantGTF.txt",
+                             logfile=options.logfile,
+                             output_file=options.output_filename,
+                             from_scratch=options.from_scratch,
+                             pas_tolerance=options.pas_tolerance)
 
     if options.gtf_filename:
         json2gtf(options.output_filename, options.gtf_filename, options.genome_filename,
