@@ -513,7 +513,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 
     def same_coordinates(a, b):
         return True if (a['relative start'] == b['relative start'] and
-                        30 >= a['relative end'] - b['relative end'] >= -30 else False
+                        30 >=  a['relative end'] - b['relative end'] >= -30) else False
 
 
     # pprint.pprint(gene)
