@@ -360,10 +360,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 # for storing unused information
                 new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
                 exon = {
-                    'relative start'   : int(new[0]),
-                    'relative end'     : int(new[1]),
-                    'chromosome start' : int(new[2]),
-                    'chromosome end'   : int(new[3])
+                    'relative start'   : int(new[2]),
+                    'relative end'     : int(new[3]),
                 }
                 factorizations[current]['exon']=exon
     # At the end, remove all factorizations without exons, since they are not useful
@@ -431,8 +429,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
-
-
+#    import pdb; pdb.set_trace()
+    for isoform in gene['isoforms'].values():
+        isoform['exons'].sort(key=lambda x: x['relative end'])
 
     with open(variant_file, mode='r', encoding='utf-8') as fd:
         for line in fd:
@@ -521,7 +520,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         # Check if we have to add PAS
         if not gene['isoforms'][isoform]['polyA?']:
             continue
-#        import pdb; pdb.set_trace()
         exon = gene['isoforms'][isoform]['exons'][-1]
         # If PAS_factorizations has an exon with the same coordinates,
         # we have a PAS
