@@ -369,7 +369,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
     # At the end, remove all factorizations without exons, since they are not useful
     PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
 #    pprint.pprint(PAS_factorizations)
-    del factorizations
+#    del factorizations
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
