@@ -207,6 +207,9 @@ def parse_command_line():
     parser.add_option("--set-max-intron-agreement-time",
                       dest="max_intron_agreement_time", type="int", default=30,
                       help="[Expert use only] Set a time limit (in mins) for the intron agreement step")
+    parser.add_option("--pas-tolerance",
+                      dest="pas_tolerance", type="int", default=30,
+                      help="[Expert use only] Maximum allowed difference on the exon final coordinate to identify a PAS")
 
     (options, args) = parser.parse_args()
     if options.bindir:
@@ -329,7 +332,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
+def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance):
     gene={'version': 2} # Hardcoding version number
     index=0
     for file in [ccds_file, variant_file]:
@@ -357,16 +360,14 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 # for storing unused information
                 new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
                 exon = {
-                    'relative start'   : int(new[0]),
-                    'relative end'     : int(new[1]),
-                    'chromosome start' : int(new[2]),
-                    'chromosome end'   : int(new[3])
+                    'relative start'   : int(new[2]),
+                    'relative end'     : int(new[3]),
                 }
                 factorizations[current]['exon']=exon
     # At the end, remove all factorizations without exons, since they are not useful
     PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
 #    pprint.pprint(PAS_factorizations)
-    del factorizations
+#    del factorizations
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
@@ -428,8 +429,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
-
-
+#    import pdb; pdb.set_trace()
+    for isoform in gene['isoforms'].values():
+        isoform['exons'].sort(key=lambda x: x['relative end'])
 
     with open(variant_file, mode='r', encoding='utf-8') as fd:
         for line in fd:
@@ -509,15 +511,15 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             gene['introns'].append(intron)
 
     def same_coordinates(a, b):
-        fields = ('relative start', 'relative end', 'chromosome start', 'chromosome end')
-        return all(True for field in fields if a[field] != b[field])
+        return True if (a['relative start'] == b['relative start'] and
+                        30 >=  a['relative end'] - b['relative end'] >= -30) else False
+
 
     # pprint.pprint(gene)
     for isoform in gene['isoforms'].keys():
         # Check if we have to add PAS
         if not gene['isoforms'][isoform]['polyA?']:
             continue
-#        import pdb; pdb.set_trace()
         exon = gene['isoforms'][isoform]['exons'][-1]
         # If PAS_factorizations has an exon with the same coordinates,
         # we have a PAS
@@ -737,9 +739,12 @@ def pintron_pipeline(options):
     # Output the desired file
     logging.info("STEP  9:  Saving outputs...")
 
-    json_output=compute_json(ccds_file="CCDS_transcripts.txt", variant_file="VariantGTF.txt",
-                             logfile=options.logfile, output_file=options.output_filename,
-                             from_scratch=options.from_scratch)
+    json_output=compute_json(ccds_file="CCDS_transcripts.txt",
+                             variant_file="VariantGTF.txt",
+                             logfile=options.logfile,
+                             output_file=options.output_filename,
+                             from_scratch=options.from_scratch,
+                             pas_tolerance=options.pas_tolerance)
 
     if options.gtf_filename:
         json2gtf(options.output_filename, options.gtf_filename, options.genome_filename,
