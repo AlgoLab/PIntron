@@ -34,7 +34,7 @@ file in the source distribution for the detailed usage notes.
 
 ## Download
 
-The latest stable version of PIntron is **v1.2.0** (*June 21, 2011*).
+The latest stable version of PIntron is **v1.2.1** (*July  4, 2011*).
 
 PIntron is distributed as source code and as pre-built binary packages for some common platforms.
 
