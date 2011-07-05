@@ -45,9 +45,11 @@ import csv
 # from Bio import SeqIO
 from optparse import OptionParser
 
+
 class PIntronError(Exception):
     """Base class for exceptions of the PIntron pipeline."""
     pass
+
 
 class PIntronIOError(PIntronError):
     """Exception raised for errors related to I/O operations.
@@ -63,6 +65,7 @@ class PIntronIOError(PIntronError):
 
     def __str__(self):
         return '{0} (offending file: "{1}")'.format(self.msg, self.e_file)
+
 
 def parse_command_line():
     usage = "usage: %prog [options]"
@@ -81,7 +84,8 @@ def parse_command_line():
     #                   dest="step1", default=False,
     #                   help="do not compute the full-lengths")
     parser.add_option("-o", "--output",
-                      dest="output_filename", default="pintron-full-output.json",
+                      dest="output_filename",
+                      default="pintron-full-output.json",
                       help="full output file (default = 'pintron-full-output.json')",
                       metavar="FILE")
     parser.add_option("-z", "--compress", action="store_true",
@@ -96,27 +100,27 @@ def parse_command_line():
     parser.add_option("-b", "--bin-dir",
                       dest="bindir", default="",
                       help="DIRECTORY containing the programs (default = system PATH)")
-    parser.add_option("-n","--organism",
+    parser.add_option("-n", "--organism",
                       dest="organism", default="unknown",
                       help="Organism originating the ESTs (default = 'unknown')")
-    parser.add_option("-e","--gene",
+    parser.add_option("-e", "--gene",
                       dest="gene", default="unknown",
                       help="Gene symbol (or ID) of the locus which the ESTs refer to (default = 'unknown')")
     parser.add_option("-k", "--keep-intermediate-files", action="store_true",
                       dest="no_clean", default=False,
                       help="keep all intermediate or temporary files (default = False)")
     parser.add_option("-t", "--gtf",
-                      dest="gtf_filename", default="pintron-cds-annotated-isoforms.gtf",
+                      dest="gtf_filename",
+                      default="pintron-cds-annotated-isoforms.gtf",
                       help="output GTF FILE with the isoforms that have a CDS annotation "
                       "(default = 'pintron-cds-annotated-isoforms.gtf')",
                       metavar="GTF_FILE")
     parser.add_option("--extended-gtf",
-                      dest="extended_gtf_filename", default="pintron-all-isoforms.gtf",
+                      dest="extended_gtf_filename",
+                      default="pintron-all-isoforms.gtf",
                       help="output GTF FILE with all the predicted isoforms "
                       "(default = 'pintron-all-isoforms.gtf')",
                       metavar="GTF_FILE")
-
-
 
     # parser.add_option("--strand",
     #                   dest="strand", type="int", default=1,
@@ -203,17 +207,17 @@ def parse_command_line():
     parser.add_option("--set-max-intron-agreement-time",
                       dest="max_intron_agreement_time", type="int", default=30,
                       help="[Expert use only] Set a time limit (in mins) for the intron agreement step")
-
-
-
+    parser.add_option("--pas-tolerance",
+                      dest="pas_tolerance", type="int", default=30,
+                      help="[Expert use only] Maximum allowed difference on the exon final coordinate to identify a PAS")
 
     (options, args) = parser.parse_args()
     if options.bindir:
-        options.bindir= os.path.normpath(options.bindir)
+        options.bindir = os.path.normpath(options.bindir)
 
     return(options)
 
-#
+
 # Transform a JSON file into a GTF
 def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
     def write_gtf_line(file, seqname, feature, start, end, score, strand, frame, gene, transcript):
@@ -246,17 +250,17 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
     # print(entry['length_genomic_sequence'])
 
     with open(outfile, 'w', encoding='utf-8') as f:
-        data_strand = { 'first': { "label"         : "5UTR",
-                                   "delimiter"     : "start_codon",
-                                   "codons"        : ["ATG"],
-                                   "offset"  : 0,
-                                   },
-                        'last' : { "label"         : "3UTR",
-                                   "delimiter"     : "stop_codon",
-                                   "codons"        : ["TGA", "TAG", "TAA"],
-                                   "offset"        : 3,
-                                   }
-                        }
+        data_strand = {'first': {"label": "5UTR",
+                                 "delimiter": "start_codon",
+                                 "codons": ["ATG"],
+                                 "offset": 0,
+                             },
+                       'last' : {"label" : "3UTR",
+                                 "delimiter" : "stop_codon",
+                                 "codons"        : ["TGA", "TAG", "TAA"],
+                                 "offset"        : 3,
+                             }
+                   }
         # if strand == '-':
         #     data_strand['temp']=data_strand['first']
         #     data_strand['first']=data_strand['last']
@@ -328,28 +332,57 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
+def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance):
     gene={'version': 2} # Hardcoding version number
     index=0
     for file in [ccds_file, variant_file]:
         if not os.access(file, os.R_OK):
             # throw exception and die
-            logging.exception("*** Fatal error: Could not read "+file+"\n")
+            logging.exception("*** Fatal error: Could not read " + file + "\n")
+
+    factorizations = {}
+    with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
+        current = ''
+        for line in fd:
+            l = line.rstrip()
+            if l[0] == '>':
+                current = l
+                factorizations[current] = {
+                    'polyA?' : False,
+                    'PAS' : False,
+                }
+            elif re.match('#polya=1', l):
+                factorizations[current]['polyA?'] = True
+            elif re.match('#polyad(\S*)=1', l):
+                factorizations[current]['PAS'] = True
+            elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l):
+                # Since we use the factorizations only for detecting PAS, there is no need
+                # for storing unused information
+                new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
+                exon = {
+                    'relative start'   : int(new[2]),
+                    'relative end'     : int(new[3]),
+                }
+                factorizations[current]['exon']=exon
+    # At the end, remove all factorizations without exons, since they are not useful
+    PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
+#    pprint.pprint(PAS_factorizations)
+#    del factorizations
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
         gene['length_genomic_sequence'] = int(fd.readline().rstrip())
         gene['isoforms'] = {}
-        isoforms={}
+        isoforms = {}
         for line in fd:
-            l=line.rstrip()
-            l=re.sub('\s+', '', l)
-            l=re.sub('#.*', '', l)
+            l = line.rstrip()
+            l = re.sub('\s+', '', l)
+            l = re.sub('#.*', '', l)
 
             if re.match('^>', l):
                 # New isoform
-                l=l[1:]
-                isoform={}
+                l = l[1:]
+                isoform = {}
                 # print(l)
                 fields = [int(x) for x in  re.split(':', l)]
 
@@ -362,7 +395,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                     'NMD flag' : fields[4],
                     'exons' : [],
                     'coding length' : 0,
-                    'polyA?' : True,
+                    'polyA?' : False,
+                    'PAS?' : False,
                     'annotated CDS?' : True
                     }
 
@@ -370,9 +404,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 # Row contains exon metadata
                 exon = {}
                 (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
-                 polyA, exon["5utr length"], exon["3utr length"]) = [max(0,int(x)) for x in  re.split(':', l)]
-                if (polyA == 0):
-                    gene['isoforms'][index]['polyA?'] = False
+                 polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
+                if (polyA == 1):
+                    gene['isoforms'][index]['polyA?'] = True
                 gene['isoforms'][index]['annotated CDS?'] = False
                     # # pprint.pprint(exon)
                     # print(line)
@@ -384,7 +418,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
                                                              exon["5utr length"] - exon["3utr length"])
 
-
                 if int(re.split(':', l)[4]) < 0:
                     del(exon["5utr length"])
                 if int(re.split(':', l)[5]) < 0:
@@ -392,12 +425,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 gene['isoforms'][index]['exons'].append(exon)
 
             elif re.match('^[acgtACGT]+$', l):
-                last_exon=gene['isoforms'][index]['exons'][-1]['sequence']=l
+                last_exon = gene['isoforms'][index]['exons'][-1]['sequence'] = l
             elif not re.match('^\s*\#', line):
-                raise ValueError("Could not parse CCDS file "+ ccds_file + " at line:\n" + line + "\n")
+                raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
-
-
+#    import pdb; pdb.set_trace()
+    for isoform in gene['isoforms'].values():
+        isoform['exons'].sort(key=lambda x: x['relative end'])
 
     with open(variant_file, mode='r', encoding='utf-8') as fd:
         for line in fd:
@@ -405,10 +439,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
             index=int(re.sub('^.*\#', '', row.pop(0)))
             isoform=gene['isoforms'][index]
             for t in row:
-                (k,v) = re.split('=', t, 2)
+                (k, v) = re.split('=', t, 2)
                 if k == "nex":
                     if int(v) != isoform['number exons']:
-                        raise ValueError("Wrong number of exons: "+ str(index) +"\n " + v + "!= " +
+                        raise ValueError("Wrong number of exons: " + str(index) + "\n " + v + "!= " +
                                          isoform['number exons'] +"\n")
                 elif k == "L":
                     isoform["CDS length"] = int(v)
@@ -420,14 +454,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                         isoform['canonical start codon?'] = False if a == '<' else True
                         isoform['canonical end codon?']   = False if b == '>' else True
                 elif k == "RefSeq":
-                    if v != '..' and v != '' and 'CDS' in isoform:
-                        m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
-
-                        (isoform['RefSeq'], a, b)=(m.group(1), m.group(3), m.group(4))
+                    m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
+                    if m:
+                        (r, a, b) = (m.group(1), m.group(3), m.group(4))
                         isoform['conserved start codon?'] = False if a == 'N' else True
                         isoform['conserved end codon?']   = False if b == 'N' else True
-                        if isoform['RefSeq'] == '':
-                            del isoform['RefSeq']
+                        if r != None and r:
+                            isoform['RefSeq'] = r
                 elif k == "ProtL":
                     if v != '..' and 'CDS' in isoform:
                         m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
@@ -440,18 +473,20 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
                 elif k == "Type":
                     ref = True if v == 'Ref' else False
                     if ref != isoform['reference?']:
-                        # pprint.pprint(isoform)
-                        # pprint.pprint(ref)
-                        # pprint.pprint(isoform['reference?'])
-                        raise ValueError("Wrong reference for isoform n. " + str(index) + "\n" +
-                                         line)
-                    if not isoform['reference?']:
+                        raise ValueError(format("Wrong reference for isoform n. {}\n{}",
+                                                str(index), line))
+                    if isoform['reference?']:
+                        if 'RefSeq' in isoform:
+                            isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
+                        else:
+                            isoform['Type'] = "(Reference TR)"
+                    else:
                         isoform['Type'] = re.sub('\s+$', '', v)
                 elif not re.match('^\s*\#', line):
-                    raise ValueError("Could not parse GTF file "+ variant_file  + "(" + k + "=>" + v + ")\n" + line + "\n")
+                    raise ValueError("Could not parse GTF file " + variant_file + "(" + k + "=>" + v + ")\n" + line + "\n")
 
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
-        gene['introns']=[]
+        gene['introns'] = []
         for line in fd:
             intron = {}
             (intron['relative start'], intron['relative end'],
@@ -464,10 +499,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
 
             for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
                           'BPS position'):
-                intron[field]=int(intron[field])
+                intron[field] = int(intron[field])
             for field in ('donor alignment average error', 'acceptor alignment average error', 'donor score',
                           'acceptor score', 'BPS score'):
-                intron[field]=float(intron[field])
+                intron[field] = float(intron[field])
 
             del intron['repeat sequence']
             if intron['BPS position'] < 0:
@@ -475,11 +510,30 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch):
 
             gene['introns'].append(intron)
 
+    def same_coordinates(a, b):
+        return True if (a['relative start'] == b['relative start'] and
+                        30 >=  a['relative end'] - b['relative end'] >= -30) else False
+
+
+    # pprint.pprint(gene)
+    for isoform in gene['isoforms'].keys():
+        # Check if we have to add PAS
+        if not gene['isoforms'][isoform]['polyA?']:
+            continue
+        exon = gene['isoforms'][isoform]['exons'][-1]
+        # If PAS_factorizations has an exon with the same coordinates,
+        # we have a PAS
+        if any(x for x in PAS_factorizations.values() if same_coordinates(x['exon'], exon)):
+            gene['isoforms'][isoform]['PAS?']=True
+
+    # import pdb; pdb.set_trace()
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
-def exec_system_command(command, error_comment, logfile, output_file="", from_scratch=True):
-    if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)) :
+
+def exec_system_command(command, error_comment, logfile, output_file="",
+                        from_scratch=True):
+    if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
         logging.debug(str(time.localtime()))
         logging.debug(command)
 
@@ -489,23 +543,27 @@ def exec_system_command(command, error_comment, logfile, output_file="", from_sc
                 print(error_comment, -retcode, file=sys.stderr)
         except OSError as e:
             print("Execution failed:", e, file=sys.stderr)
+            raise PIntronError
+
 
 def check_executables(bindir, exes):
     """Check if the executables are in the path or in the specified directory.
     """
 
-    full_exes= {}
+    full_exes = {}
     if bindir:
-        paths= [ bindir ] + os.environ["PATH"].split(os.pathsep)
+        if bindir[0] == '~':
+            bindir = os.environ["HOME"] + bindir[1:]
+        paths = [bindir] + os.environ["PATH"].split(os.pathsep)
     else:
-        paths= os.environ["PATH"].split(os.pathsep)
+        paths = os.environ["PATH"].split(os.pathsep)
     for exe in exes:
-        full_exes[exe]= None
+        full_exes[exe] = None
         for path in paths:
             if os.access(os.path.join(path, exe), os.X_OK):
-                real_path= os.path.realpath(os.path.abspath(os.path.join(path, exe)))
+                real_path = os.path.realpath(os.path.abspath(os.path.join(path, exe)))
                 logging.debug("Using program '{}' in dir '{}'".format(exe, real_path))
-                full_exes[exe]= real_path
+                full_exes[exe] = real_path
                 break
         if full_exes[exe] == None:
             raise PIntronIOError(exe, "Could not find program '{}'!\n"
@@ -681,16 +739,18 @@ def pintron_pipeline(options):
     # Output the desired file
     logging.info("STEP  9:  Saving outputs...")
 
-    json_output=compute_json(ccds_file="CCDS_transcripts.txt", variant_file="VariantGTF.txt",
-                             logfile=options.logfile, output_file=options.output_filename,
-                             from_scratch=options.from_scratch)
+    json_output=compute_json(ccds_file="CCDS_transcripts.txt",
+                             variant_file="VariantGTF.txt",
+                             logfile=options.logfile,
+                             output_file=options.output_filename,
+                             from_scratch=options.from_scratch,
+                             pas_tolerance=options.pas_tolerance)
 
     if options.gtf_filename:
         json2gtf(options.output_filename, options.gtf_filename, options.genome_filename,
                  options.gene, False)
     if options.extended_gtf_filename:
-        logging.debug("""WARNING: you are creating a file that is not consistent with the
-        GTF specifications.
+        logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.
         See http://mblab.wustl.edu/GTF22.html""")
         json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename,
                  options.gene, True)
