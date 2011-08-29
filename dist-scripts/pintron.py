@@ -408,12 +408,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 if (polyA == 1):
                     gene['isoforms'][index]['polyA?'] = True
                 gene['isoforms'][index]['annotated CDS?'] = False
-                    # # pprint.pprint(exon)
-                    # print(line)
-                    # pprint.pprint(max(exon["relative end"], exon["relative start"]))
-                    # pprint.pprint(min(exon["relative end"], exon["relative start"]))
-                    # pprint.pprint(exon["5utr length"])
-                    # pprint.pprint(exon["3utr length"])
+                # pprint.pprint(exon)
+                logging.debug("Reading CCDS_transcripts: Row contains exon metadata\n")
+                logging.debug(line)
+                logging.debug(max(exon["relative end"], exon["relative start"]))
+                logging.debug(min(exon["relative end"], exon["relative start"]))
+                logging.debug(exon["5utr length"])
+                logging.debug(exon["3utr length"])
                 gene['isoforms'][index]["coding length"] += (max(exon["relative end"], exon["relative start"]) -
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
                                                              exon["5utr length"] - exon["3utr length"])
@@ -504,7 +505,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                           'acceptor score', 'BPS score'):
                 intron[field] = float(intron[field])
 
-            del intron['repeat sequence']
             if intron['BPS position'] < 0:
                 del intron['BPS position']
 
