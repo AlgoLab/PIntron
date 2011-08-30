@@ -272,7 +272,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
             if not all_isoforms and not isoform["annotated CDS?"]:
                 continue
             whole_cds_len = 0
-            total_cds_length = isoform['coding length'] -3 # Because the stop codon is outside the CDS
+            total_cds_length = isoform['CDS length'] -3 # Because the stop codon is outside the CDS
             for p in ['first', 'last']:
                 data_strand[p]['codon']    = ''
                 data_strand[p]['codon_ok'] = False
@@ -394,7 +394,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                     'from RefSeq?' : False if fields[3] == 0 else True,
                     'NMD flag' : fields[4],
                     'exons' : [],
-                    'coding length' : 0,
+                    'CDS length' : 0,
                     'polyA?' : False,
                     'PAS?' : False,
                     'annotated CDS?' : True
@@ -415,7 +415,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 logging.debug(min(exon["relative end"], exon["relative start"]))
                 logging.debug(exon["5utr length"])
                 logging.debug(exon["3utr length"])
-                gene['isoforms'][index]["coding length"] += (max(exon["relative end"], exon["relative start"]) -
+                gene['isoforms'][index]["CDS length"] += (max(exon["relative end"], exon["relative start"]) -
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
                                                              exon["5utr length"] - exon["3utr length"])
 
@@ -446,7 +446,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                         raise ValueError("Wrong number of exons: " + str(index) + "\n " + v + "!= " +
                                          isoform['number exons'] +"\n")
                 elif k == "L":
-                    isoform["CDS length"] = int(v)
+                    isoform["length"] = int(v)
                 elif k == "CDS":
                     if v != '..':
                         m = re.match('^(<?)(\d+)\.\.(\d+)(>?)$', v)
@@ -494,7 +494,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
              intron['chromosome start'], intron['chromosome end'], intron['length'], intron['number supporting EST'], EST_list,
              intron['donor alignment average error'], intron['acceptor alignment average error'], intron['donor score'],
              intron['acceptor score'], intron['BPS score'], intron['BPS position'], intron['type'], intron['pattern'],
-             intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],
+             intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],  
              intron['acceptor prefix']) = re.split("\t", line.rstrip())
             intron['EST list'] = [i for i in re.split(',', EST_list) if i != '']
 
