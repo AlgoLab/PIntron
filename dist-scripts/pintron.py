@@ -458,8 +458,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                     m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
                     if m:
                         (r, a, b) = (m.group(1), m.group(3), m.group(4))
-                        isoform['conserved start codon?'] = False if a == 'N' else True
-                        isoform['conserved end codon?']   = False if b == 'N' else True
+                        isoform['reference CDS start codon?'] = False if a == 'N' else True
+                        isoform['reference CDS end codon?']   = False if b == 'N' else True
                         if r != None and r:
                             isoform['RefSeq'] = r
                 elif k == "ProtL":
