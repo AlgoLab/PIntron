@@ -470,7 +470,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 elif k == "Frame":
                     if v != '..' and 'CDS' in isoform:
                         m = re.match('^y', v, flags=re.IGNORECASE)
-                        isoform['Frame'] = True if m != None else False
+                        isoform['Reference frame'] = True if m != None else False
                 elif k == "Type":
                     ref = True if v == 'Ref' else False
                     if ref != isoform['reference?']:
@@ -494,7 +494,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
              intron['chromosome start'], intron['chromosome end'], intron['length'], intron['number supporting EST'], EST_list,
              intron['donor alignment average error'], intron['acceptor alignment average error'], intron['donor score'],
              intron['acceptor score'], intron['BPS score'], intron['BPS position'], intron['type'], intron['pattern'],
-             intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],  
+             intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],
              intron['acceptor prefix']) = re.split("\t", line.rstrip())
             intron['EST list'] = [i for i in re.split(',', EST_list) if i != '']
 
