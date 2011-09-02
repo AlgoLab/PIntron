@@ -269,7 +269,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
 
         #pprint.pprint(data_strand)
         for isoform_id, isoform in entry["isoforms"].items():
-            if not all_isoforms and not isoform["annotated CDS?"]:
+            if not all_isoforms or not isoform["annotated CDS?"]:
                 continue
             whole_cds_len = 0
             total_cds_length = isoform['CDS length'] -3 # Because the stop codon is outside the CDS
@@ -333,14 +333,18 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
 
 
 def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance):
-    gene={'version': 2} # Hardcoding version number
-    index=0
+    gene={
+        'version': 2, # Hardcoding version number
+        'isoforms': {},
+    }
+
     for file in [ccds_file, variant_file]:
         if not os.access(file, os.R_OK):
             # throw exception and die
             logging.exception("*** Fatal error: Could not read " + file + "\n")
 
     factorizations = {}
+
     with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
         current = ''
         for line in fd:
@@ -369,11 +373,71 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 #    pprint.pprint(PAS_factorizations)
 #    del factorizations
 
+    with open(variant_file, mode='r', encoding='utf-8') as fd:
+        for line in fd:
+            row = re.split(' /', line.rstrip())
+            index=int(re.sub('^.*\#', '', row.pop(0)))
+            isoform = {
+                'exons' : [],
+                'polyA?' : False,
+                'PAS?' : False,
+                'annotated CDS?' : False,
+                'Reference frame?' : False,
+            }
+            for t in row:
+                (k, v) = re.split('=', t, 2)
+                logging.debug("Reading VariantGTF: " + k + "=>" + v + "!\n")
+                print("Reading VariantGTF: " + k + "=>" + v + "!\n")
+
+                if k == "nex":
+                    isoform['number exons'] = int(v)
+                elif k == "L":
+                    isoform["length"] = int(v)
+                elif k == "CDS":
+                    if v != '..':
+                        isoform["annotated CDS?"] = True
+                        isoform['CDS length'] = 0
+                        m = re.match('^(<?)(\d+)\.\.(\d+)(>?)$', v)
+                        (a, isoform["CDS start"], isoform["CDS end"], b) = (m.group(1), int(m.group(2)),
+                                                                            int(m.group(3)), m.group(4))
+                        isoform['canonical start codon?'] = False if a == '<' else True
+                        isoform['canonical end codon?']   = False if b == '>' else True
+                elif k == "RefSeq":
+                    m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
+                    if m:
+                        (r, a, b) = (m.group(1), m.group(3), m.group(4))
+                        isoform['reference CDS start codon?'] = False if a == 'N' else True
+                        isoform['reference CDS end codon?']   = False if b == 'N' else True
+                        if r != None and r:
+                            isoform['RefSeq'] = r
+                elif k == "ProtL":
+                    if v != '..' and isoform["annotated CDS?"]:
+                        m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
+                        (a, isoform['protein length']) = (m.group(1), int(m.group(2)))
+                        isoform['protein missing codon?'] = False if a != '>' else True
+                elif k == "Frame":
+                    m = re.match('^y', v, flags=re.IGNORECASE)
+                    if m != None and isoform["annotated CDS?"]:
+                        isoform['Reference frame?'] = True
+                elif k == "Type":
+                    ref = True if v == 'Ref' else False
+                    # if ref != isoform['Reference frame?']:
+                    #     raise ValueError(format("Wrong reference for isoform n. {}\n{}",
+                    #                             str(index), line))
+                    if isoform['Reference frame?']:
+                        if 'RefSeq' in isoform:
+                            isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
+                        else:
+                            isoform['Type'] = "(Reference TR)"
+                    else:
+                        isoform['Type'] = re.sub('\s+$', '', v)
+                elif not re.match('^\s*\#', line):
+                    raise ValueError("Could not parse GTF file " + variant_file + "(" + k + "=>" + v + ")\n" + line + "\n")
+            gene['isoforms'][index] = isoform
+
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
         gene['length_genomic_sequence'] = int(fd.readline().rstrip())
-        gene['isoforms'] = {}
-        isoforms = {}
         for line in fd:
             l = line.rstrip()
             l = re.sub('\s+', '', l)
@@ -382,23 +446,21 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             if re.match('^>', l):
                 # New isoform
                 l = l[1:]
-                isoform = {}
                 # print(l)
                 fields = [int(x) for x in  re.split(':', l)]
 
                 # pprint.pprint(fields)
                 index = fields[0]
-                gene['isoforms'][index] = {
-                    'number exons' : fields[1],
-                    'reference?' : False if fields[2] == 0 else True,
-                    'from RefSeq?' : False if fields[3] == 0 else True,
-                    'NMD flag' : fields[4],
-                    'exons' : [],
-                    'CDS length' : 0,
-                    'polyA?' : False,
-                    'PAS?' : False,
-                    'annotated CDS?' : True
-                    }
+                if not index in gene['isoforms']:
+                    raise ValueError("CCDS file " + ccds_file + "contains isoform with index " + index + " not in variant_file\n")
+                if fields[1] > gene['isoforms'][index]['number exons']:
+                    import pdb; pdb.set_trace()
+                    raise ValueError("Wrong number of exons: " + str(index) + "\n " + str(fields[1]) + "!= " +
+                                     str(isoform['number exons']) +"\n")
+
+                gene['isoforms'][index]['reference?'] = False if fields[2] == 0 else True
+                gene['isoforms'][index]['from RefSeq?'] = False if fields[3] == 0 else True
+                gene['isoforms'][index]['NMD flag'] = fields[4]
 
             elif re.match('^(\d+:){5}(-?\d+:)(-?\d+)$', l):
                 # Row contains exon metadata
@@ -407,7 +469,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                  polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
                 if (polyA == 1):
                     gene['isoforms'][index]['polyA?'] = True
-                gene['isoforms'][index]['annotated CDS?'] = False
                 # pprint.pprint(exon)
                 logging.debug("Reading CCDS_transcripts: Row contains exon metadata\n")
                 logging.debug(line)
@@ -415,7 +476,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 logging.debug(min(exon["relative end"], exon["relative start"]))
                 logging.debug(exon["5utr length"])
                 logging.debug(exon["3utr length"])
-                gene['isoforms'][index]["CDS length"] += (max(exon["relative end"], exon["relative start"]) -
+                if gene['isoforms'][index]['annotated CDS?']:
+                    gene['isoforms'][index]["CDS length"] += (max(exon["relative end"], exon["relative start"]) -
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
                                                              exon["5utr length"] - exon["3utr length"])
 
@@ -433,58 +495,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 #    import pdb; pdb.set_trace()
     for isoform in gene['isoforms'].values():
         isoform['exons'].sort(key=lambda x: x['relative end'])
-
-    with open(variant_file, mode='r', encoding='utf-8') as fd:
-        for line in fd:
-            row = re.split(' /', line.rstrip())
-            index=int(re.sub('^.*\#', '', row.pop(0)))
-            isoform=gene['isoforms'][index]
-            for t in row:
-                (k, v) = re.split('=', t, 2)
-                if k == "nex":
-                    if int(v) != isoform['number exons']:
-                        raise ValueError("Wrong number of exons: " + str(index) + "\n " + v + "!= " +
-                                         isoform['number exons'] +"\n")
-                elif k == "L":
-                    isoform["length"] = int(v)
-                elif k == "CDS":
-                    if v != '..':
-                        m = re.match('^(<?)(\d+)\.\.(\d+)(>?)$', v)
-                        (a, isoform["CDS start"], isoform["CDS end"], b) = (m.group(1), int(m.group(2)),
-                                                                            int(m.group(3)), m.group(4))
-                        isoform['canonical start codon?'] = False if a == '<' else True
-                        isoform['canonical end codon?']   = False if b == '>' else True
-                elif k == "RefSeq":
-                    m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
-                    if m:
-                        (r, a, b) = (m.group(1), m.group(3), m.group(4))
-                        isoform['reference CDS start codon?'] = False if a == 'N' else True
-                        isoform['reference CDS end codon?']   = False if b == 'N' else True
-                        if r != None and r:
-                            isoform['RefSeq'] = r
-                elif k == "ProtL":
-                    if v != '..' and 'CDS' in isoform:
-                        m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
-                        (a, isoform['protein length']) = (m.group(1), int(m.group(2)))
-                        isoform['protein missing codon?'] = False if a != '>' else True
-                elif k == "Frame":
-                    if v != '..' and 'CDS' in isoform:
-                        m = re.match('^y', v, flags=re.IGNORECASE)
-                        isoform['Reference frame'] = True if m != None else False
-                elif k == "Type":
-                    ref = True if v == 'Ref' else False
-                    if ref != isoform['reference?']:
-                        raise ValueError(format("Wrong reference for isoform n. {}\n{}",
-                                                str(index), line))
-                    if isoform['reference?']:
-                        if 'RefSeq' in isoform:
-                            isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
-                        else:
-                            isoform['Type'] = "(Reference TR)"
-                    else:
-                        isoform['Type'] = re.sub('\s+$', '', v)
-                elif not re.match('^\s*\#', line):
-                    raise ValueError("Could not parse GTF file " + variant_file + "(" + k + "=>" + v + ")\n" + line + "\n")
 
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
         gene['introns'] = []
