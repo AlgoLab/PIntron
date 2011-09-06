@@ -94,8 +94,8 @@ def parse_command_line():
     parser.add_option("-l", "--logfile",
                       dest="logfile", default="pintron-log.txt",
                       help="log filename (default = 'pintron-log.txt')")
-    parser.add_option("-c", "--continue", action="store_false",
-                      dest="from_scratch", default=True,
+    parser.add_option("-c", "--continue", action="store_true",
+                      dest="from_scratch", default=False,
                       help="resume a previosly interrupted computation (default = False)")
     parser.add_option("-b", "--bin-dir",
                       dest="bindir", default="",
@@ -336,6 +336,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
     gene={
         'version': 2, # Hardcoding version number
         'isoforms': {},
+        'introns': {},
+        'exons': {},
     }
 
     for file in [ccds_file, variant_file]:
@@ -492,12 +494,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
-#    import pdb; pdb.set_trace()
-    for isoform in gene['isoforms'].values():
-        isoform['exons'].sort(key=lambda x: x['relative end'])
-
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
-        gene['introns'] = []
+        index=1
         for line in fd:
             intron = {}
             (intron['relative start'], intron['relative end'],
@@ -518,7 +516,26 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             if intron['BPS position'] < 0:
                 del intron['BPS position']
 
-            gene['introns'].append(intron)
+            gene['introns'][index]=intron
+            index += 1
+
+    # add introns to each isoform
+    for isoform in gene['isoforms'].values():
+        isoform['exons'].sort(key=lambda x: x['relative end'])
+        isoform['introns'] = []
+        pairs = zip(isoform['exons'][1:], isoform['exons'][:-2])
+        for pair in pairs:
+            list_extremes = [pair[0]['chromosome end'], pair[0]['chromosome start'],
+                             pair[1]['chromosome end'], pair[1]['chromosome start']]
+            list_extremes.sort()
+            left_border = list_extremes[1]+1
+            right_border = list_extremes[2]-1
+            for index in gene['introns'].keys():
+                intron=gene['introns'][index]
+                if intron['chromosome start'] == left_border and intron['chromosome end'] == right_border or intron['chromosome end'] == left_border and intron['chromosome start'] == right_border:
+
+                    isoform['introns'].append(index)
+#        import pdb; pdb.set_trace()
 
     def same_coordinates(a, b):
         return True if (a['relative start'] == b['relative start'] and
@@ -543,7 +560,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 
 def exec_system_command(command, error_comment, logfile, output_file="",
                         from_scratch=True):
-    if from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
+    if not from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
         logging.debug(str(time.localtime()))
         logging.debug(command)
 
