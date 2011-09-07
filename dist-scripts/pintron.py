@@ -523,7 +523,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
     for isoform in gene['isoforms'].values():
         isoform['exons'].sort(key=lambda x: x['relative end'])
         isoform['introns'] = []
-        pairs = zip(isoform['exons'][1:], isoform['exons'][:-2])
+        pairs = zip(isoform['exons'][1:], isoform['exons'][:-1])
+#        import pdb; pdb.set_trace()
         for pair in pairs:
             list_extremes = [pair[0]['chromosome end'], pair[0]['chromosome start'],
                              pair[1]['chromosome end'], pair[1]['chromosome start']]
@@ -535,7 +536,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 if intron['chromosome start'] == left_border and intron['chromosome end'] == right_border or intron['chromosome end'] == left_border and intron['chromosome start'] == right_border:
 
                     isoform['introns'].append(index)
-#        import pdb; pdb.set_trace()
 
     def same_coordinates(a, b):
         return True if (a['relative start'] == b['relative start'] and
