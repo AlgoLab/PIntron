@@ -588,10 +588,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         gene['introns'][index]['supporting ESTs'] = []
         for [donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
             gene['introns'][index]['supporting ESTs'].append( {
-                'est acceptor prefix' : acceptor_factor['est sequence'][:len(gene['introns'][index]['acceptor prefix'])],
-                'est donor suffix'    : donor_factor['est sequence'][-len(gene['introns'][index]['donor suffix']):],
-                'begin est acceptor prefix' : acceptor_factor['relative start'],
-                'end est donor suffix'      : donor_factor['relative end'],
+                'est acceptor prefix' : donor_factor['est sequence'][:len(gene['introns'][index]['donor prefix'])],
+                'est donor suffix'    : acceptor_factor['est sequence'][-len(gene['introns'][index]['acceptor suffix']):],
+                'begin est acceptor prefix' : donor_factor['relative start'],
+                'end est donor suffix'      : acceptor_factor['relative end'],
                 # 'est prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
                 # 'est suffix next exon'  : gene['introns'][index]['donor suffix'],
             # 'est prefix end'   : acceptor_exon['est end'],
