@@ -228,21 +228,11 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
     logging.debug(str(time.localtime()))
     logging.debug(json2gtf)
     logging.debug(infile + ':' + outfile + ':' + genomic_seq)
-    # Find the sequence ID
-    # It is stored in the first line of the genomic sequence
-    with open(genomic_seq, 'r', encoding='utf-8') as f:
-        line=f.readline().rstrip("\r\n")
-        m=re.search('^>[^\d]*(\d+):.*:([+-]?\d+)$',line)
-        sequence_id = line[1:]
-        strand=m.group(2)
-        if strand == '-1' or strand == '-':
-            strand = '-'
-        else:
-            strand = '+'
-
     with open(infile, 'r', encoding='utf-8') as f:
         entry = json.load(f)
 
+    strand = entry['genome']['strand']
+    sequence_id = entry['genome']['sequence_id']
     # The genomic sequence length stored in the JSON file
     # cannot be trusted.
     # seq_record=next(SeqIO.parse(genomic_seq, "fasta"))
@@ -261,11 +251,10 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                                  "offset"        : 3,
                              }
                    }
-        # if strand == '-':
-        #     data_strand['temp']=data_strand['first']
-        #     data_strand['first']=data_strand['last']
-        #     data_strand['last']=data_strand['temp']
-        #     del data_strand['temp']
+        if strand == '-':
+            temp=data_strand['first']['label']
+            data_strand['first']['label']=data_strand['last']['label']
+            data_strand['last']['label']=temp
 
         #pprint.pprint(data_strand)
         for isoform_id, isoform in entry["isoforms"].items():
@@ -276,8 +265,8 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
             for p in ['first', 'last']:
                 data_strand[p]['codon']    = ''
                 data_strand[p]['codon_ok'] = False
-            if strand == '-':
-                isoform["exons"].reverse()
+            # if strand == '-':
+            #     isoform["exons"].reverse()
 
             for exon in isoform["exons"]:
                 # if the transcript is taken with a direction opposite to
@@ -332,12 +321,29 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance):
+def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance, genomic_seq):
+    # Find the sequence ID
+    # It is stored in the first line of the genomic sequence
+    with open(genomic_seq, 'r', encoding='utf-8') as f:
+        line=f.readline().rstrip("\r\n")
+        m=re.search('^>[^\d]*(\d+):.*:([+-]?\d+)$',line)
+        sequence_id = line[1:]
+        strand=m.group(2)
+        if strand == '-1' or strand == '-':
+            strand = '-'
+        else:
+            strand = '+'
+
+
     gene={
-        'version': 2, # Hardcoding version number
+        'version': 3, # Hardcoding version number
         'isoforms': {},
         'introns': {},
-        'exons': {},
+        'factorizations': {},
+        'genome': {
+            'sequence_id': sequence_id,
+            'strand': strand,
+        },
     }
 
     for file in [ccds_file, variant_file]:
@@ -345,33 +351,41 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             # throw exception and die
             logging.exception("*** Fatal error: Could not read " + file + "\n")
 
-    factorizations = {}
-
     with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
         current = ''
         for line in fd:
             l = line.rstrip()
             if l[0] == '>':
-                current = l
-                factorizations[current] = {
+                new = re.match('^>\/gb=(\S+)\/gb=(\S+)\/clone_end=([35])\'$', l).groups()
+                current=new[0]
+
+                gene['factorizations'][current] = {
                     'polyA?' : False,
                     'PAS' : False,
+                    'exons' : [],
+                    'EST' : new[0],
+                    'EST1' : new[1],
+                    'clone end' : new[2],
                 }
             elif re.match('#polya=1', l):
-                factorizations[current]['polyA?'] = True
+                gene['factorizations'][current]['polyA?'] = True
             elif re.match('#polyad(\S*)=1', l):
-                factorizations[current]['PAS'] = True
-            elif factorizations[current]['PAS'] and re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l):
-                # Since we use the factorizations only for detecting PAS, there is no need
-                # for storing unused information
-                new = re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l).groups()
+                gene['factorizations'][current]['PAS'] = True
+            elif re.match('(\d+) (\d+) (\d+) (\d+)( \S+)? \S+$', l):
+                new = re.match('(\d+) (\d+) (\d+) (\d+) (\S+) (\S+)$', l).groups()
+                # pprint.pprint(l)
+                # pprint.pprint(new)
                 exon = {
+                    'est start'        : int(new[0]),
+                    'est end'          : int(new[1]),
                     'relative start'   : int(new[2]),
                     'relative end'     : int(new[3]),
+                    'est sequence'     : new[4],
+                    'genome sequence'  : new[5],
                 }
-                factorizations[current]['exon']=exon
-    # At the end, remove all factorizations without exons, since they are not useful
-    PAS_factorizations = {k:v for k,v in factorizations.items() if factorizations[k]['PAS'] }
+                gene['factorizations'][current]['exons'].append(exon)
+                if gene['factorizations'][current]['PAS']:
+                    gene['factorizations'][current]['exon']=exon
 #    pprint.pprint(PAS_factorizations)
 #    del factorizations
 
@@ -389,8 +403,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             for t in row:
                 (k, v) = re.split('=', t, 2)
                 logging.debug("Reading VariantGTF: " + k + "=>" + v + "!\n")
-                print("Reading VariantGTF: " + k + "=>" + v + "!\n")
-
                 if k == "nex":
                     isoform['number exons'] = int(v)
                 elif k == "L":
@@ -469,6 +481,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 exon = {}
                 (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
                  polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
+                # if gene['genome']['strand'] == '-':
+                #     (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"]) = (exon["chromosome end"], exon["chromosome start"], exon["relative end"], exon["relative end"])
                 if (polyA == 1):
                     gene['isoforms'][index]['polyA?'] = True
                 # pprint.pprint(exon)
@@ -494,6 +508,10 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
+    # When the strand is negative, the exons are in reverse order
+    for isoform in gene['isoforms'].keys():
+        gene['isoforms'][isoform]['exons'].reverse()
+
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
         index=1
         for line in fd:
@@ -504,6 +522,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
              intron['acceptor score'], intron['BPS score'], intron['BPS position'], intron['type'], intron['pattern'],
              intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],
              intron['acceptor prefix']) = re.split("\t", line.rstrip())
+             # intron['begin donor'] = intron['relative end'] - len(intron['donor suffix']) +1
+             # intron['end acceptor'] = intron['relative begin'] - len(intron['acceptor prefix']) -1
             intron['EST list'] = [i for i in re.split(',', EST_list) if i != '']
 
             for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
@@ -524,7 +544,6 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         isoform['exons'].sort(key=lambda x: x['relative end'])
         isoform['introns'] = []
         pairs = zip(isoform['exons'][1:], isoform['exons'][:-1])
-#        import pdb; pdb.set_trace()
         for pair in pairs:
             list_extremes = [pair[0]['chromosome end'], pair[0]['chromosome start'],
                              pair[1]['chromosome end'], pair[1]['chromosome start']]
@@ -534,8 +553,51 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             for index in gene['introns'].keys():
                 intron=gene['introns'][index]
                 if intron['chromosome start'] == left_border and intron['chromosome end'] == right_border or intron['chromosome end'] == left_border and intron['chromosome start'] == right_border:
-
                     isoform['introns'].append(index)
+
+    # for each intron, add the alignment of the sorrounding exons.
+    # Since different factorizations can support the same intron, the first
+    # step is to find all pairs of exons supporting an intron
+    def supporting_factors(intron):
+        pairs = []
+        for est in intron['EST list']:
+            factor = gene['factorizations'][est]
+            if est == factor['EST']:
+            #                    import pdb; pdb.set_trace()
+                good_left =  [ exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] -1 ]
+                good_right = [ exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] +1 ]
+                if len(good_left) == 1 and len(good_right) == 1:
+                    pairs.append([good_left[0], good_right[0]])
+        if len(pairs) != intron['number supporting EST']:
+            pprint.pprint(factor)
+            print("\n")
+            pprint.pprint(intron)
+            print("\n")
+            pprint.pprint(pairs)
+            raise PIntronError
+        return(pairs)
+
+    #
+    # Each intron has the list of supporting ESTs.
+    # For each such EST we provide the suffix/prefix of the prev/next exon
+    for index in gene['introns'].keys():
+            # donor_exon = [ exon for exon in isoform['exons'] if (exon['relative end'] == intron['relative start'] - 1) ][0]
+            # acceptor_exon = [ exon for exon in isoform['exons'] if (exon['relative start'] == intron['relative end'] + 1) ][0]
+            # add the alignment to each intron
+            #                    import pdb; pdb.set_trace()
+        gene['introns'][index]['supporting ESTs'] = []
+        for [donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
+            gene['introns'][index]['supporting ESTs'].append( {
+                'est acceptor prefix' : acceptor_factor['est sequence'][:len(gene['introns'][index]['acceptor prefix'])],
+                'est donor suffix'    : donor_factor['est sequence'][-len(gene['introns'][index]['donor suffix']):],
+                'begin est acceptor prefix' : acceptor_factor['relative start'],
+                'end est donor suffix'      : donor_factor['relative end'],
+                # 'est prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
+                # 'est suffix next exon'  : gene['introns'][index]['donor suffix'],
+            # 'est prefix end'   : acceptor_exon['est end'],
+            # 'est suffix start' : donor_exon['est start'],
+            })
+
 
     def same_coordinates(a, b):
         return True if (a['relative start'] == b['relative start'] and
@@ -550,13 +612,15 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         exon = gene['isoforms'][isoform]['exons'][-1]
         # If PAS_factorizations has an exon with the same coordinates,
         # we have a PAS
-        if any(x for x in PAS_factorizations.values() if same_coordinates(x['exon'], exon)):
+        if any(x for x in gene['factorizations'].values() if x['PAS'] and same_coordinates(x['exon'], exon)):
             gene['isoforms'][isoform]['PAS?']=True
+
+    # Clean up
+    del gene['factorizations']
 
     # import pdb; pdb.set_trace()
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
-
 
 def exec_system_command(command, error_comment, logfile, output_file="",
                         from_scratch=True):
@@ -771,16 +835,15 @@ def pintron_pipeline(options):
                              logfile=options.logfile,
                              output_file=options.output_filename,
                              from_scratch=options.from_scratch,
-                             pas_tolerance=options.pas_tolerance)
+                             pas_tolerance=options.pas_tolerance,
+                             genomic_seq=options.genome_filename)
 
     if options.gtf_filename:
-        json2gtf(options.output_filename, options.gtf_filename, options.genome_filename,
-                 options.gene, False)
+        json2gtf(options.output_filename, options.gtf_filename, options.genome_filename, options.gene, False)
     if options.extended_gtf_filename:
         logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.
         See http://mblab.wustl.edu/GTF22.html""")
-        json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename,
-                 options.gene, True)
+        json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename, options.gene, True)
 
 
     # Clean mess
