@@ -528,7 +528,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
         index=1
         for line in fd:
-            intron = {}
+            intron = { "supporting ESTs": {}}
             (intron['relative start'], intron['relative end'],
              intron['chromosome start'], intron['chromosome end'], intron['length'], intron['number supporting EST'], EST_list,
              intron['donor alignment average error'], intron['acceptor alignment average error'], intron['donor score'],
@@ -537,7 +537,9 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
              intron['acceptor prefix']) = re.split("\t", line.rstrip())
              # intron['begin donor'] = intron['relative end'] - len(intron['donor suffix']) +1
              # intron['end acceptor'] = intron['relative begin'] - len(intron['acceptor prefix']) -1
-            intron['EST list'] = [i for i in re.split(',', EST_list) if i != '']
+            intron["supporting ESTs"] = {i: {} for i in re.split(',', EST_list) if i != ''}
+            #pprint.pprint(intron["supporting ESTs"])
+            #import pdb; pdb.set_trace()
 
             for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
                           'BPS position'):
@@ -573,14 +575,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
     # step is to find all pairs of exons supporting an intron
     def supporting_factors(intron):
         pairs = []
-        for est in intron['EST list']:
+        for est in intron["supporting ESTs"].keys():
             factor = gene['factorizations'][est]
-            if est == factor['EST']:
             #                    import pdb; pdb.set_trace()
-                good_left =  [ exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] -1 ]
-                good_right = [ exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] +1 ]
-                if len(good_left) == 1 and len(good_right) == 1:
-                    pairs.append([good_left[0], good_right[0]])
+            good_left  = [ exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] -1 ]
+            good_right = [ exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] +1 ]
+            if len(good_left) == 1 and len(good_right) == 1:
+                pairs.append([est, good_left[0], good_right[0]])
         if len(pairs) != intron['number supporting EST']:
             pprint.pprint(factor)
             print("\n")
@@ -597,19 +598,20 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             # donor_exon = [ exon for exon in isoform['exons'] if (exon['relative end'] == intron['relative start'] - 1) ][0]
             # acceptor_exon = [ exon for exon in isoform['exons'] if (exon['relative start'] == intron['relative end'] + 1) ][0]
             # add the alignment to each intron
-            #                    import pdb; pdb.set_trace()
-        gene['introns'][index]['supporting ESTs'] = []
-        for [donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
-            gene['introns'][index]['supporting ESTs'].append( {
-                'est acceptor suffix' : donor_factor['est sequence'][:len(gene['introns'][index]['donor suffix'])],
-                'est donor prefix'    : acceptor_factor['est sequence'][-len(gene['introns'][index]['acceptor prefix']):],
-                'begin est acceptor suffix' : donor_factor['relative start'],
-                'end est donor prefix'      : acceptor_factor['relative end'],
+        for [est, donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
+#            import pdb; pdb.set_trace()
+            gene['introns'][index]['supporting ESTs'][est] = {
+                'est donor suffix' : donor_factor['est sequence'][-len(gene['introns'][index]['donor suffix']):],
+                'est acceptor prefix'    : acceptor_factor['est sequence'][:len(gene['introns'][index]['acceptor prefix'])],
+                'begin est acceptor prefix' : acceptor_factor['est start'],
+                'end est donor suffix'      : donor_factor['est end'],
+                'end est acceptor prefix' : acceptor_factor['est end'],
+                'begin est donor suffix'      : donor_factor['est start'],
                 # 'est prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
                 # 'est suffix next exon'  : gene['introns'][index]['donor suffix'],
             # 'est prefix end'   : acceptor_exon['est end'],
             # 'est suffix start' : donor_exon['est start'],
-            })
+            }
 
 
     def same_coordinates(a, b):
