@@ -77,8 +77,8 @@ def parse_command_line():
                       default="genomic.txt",
                       help="FILE containing the genomic sequence",
                       metavar="GENOMIC_FILE")
-    parser.add_option("-s", "--est",
-                      dest="est_filename", default="ests.txt",
+    parser.add_option("-s", "--EST",
+                      dest="EST_filename", default="ests.txt",
                       help="FILE containing the ESTs", metavar="ESTs_FILE")
     # parser.add_option("-1", "--no-full-lengths", action="store_true",
     #                   dest="step1", default=False,
@@ -128,8 +128,8 @@ def parse_command_line():
     # parser.add_option("--chromosome",
     #                   dest="chromosome", default=False,
     #                   help="[Expert use only] print status messages to stdout")
-    # parser.add_option("--est-cluster",
-    #                   dest="est_cluster", default=False,
+    # parser.add_option("--EST-cluster",
+    #                   dEST="EST_cluster", default=False,
     #                   help="[Expert use only] print status messages to stdout")
     # parser.add_option("--min-factor-length",
     #                   dest="min_factor_length", type="int", default=15,
@@ -182,8 +182,8 @@ def parse_command_line():
     # parser.add_option("--suffix-prefix-length-intron",
     #                   dest="suffix_prefix_length_intron", type="int", default=70,
     #                   help="[Expert use only] TODO")
-    # parser.add_option("--suffix-prefix-length-est",
-    #                   dest="suffix_prefix_length_est", type="int", default=30,
+    # parser.add_option("--suffix-prefix-length-EST",
+    #                   dest="suffix_prefix_length_EST", type="int", default=30,
     #                   help="[Expert use only] TODO")
     # parser.add_option("--suffix-prefix-length-genomic",
     #                   dest="suffix_prefix_length_genomic", type="int", default=30,
@@ -389,11 +389,11 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 # pprint.pprint(l)
                 # pprint.pprint(new)
                 exon = {
-                    'est start'        : int(new[0]),
-                    'est end'          : int(new[1]),
+                    'EST start'        : int(new[0]),
+                    'EST end'          : int(new[1]),
                     'relative start'   : int(new[2]),
                     'relative end'     : int(new[3]),
-                    'est sequence'     : new[4],
+                    'EST sequence'     : new[4],
                     'genome sequence'  : new[5],
                 }
                 gene['factorizations'][current]['exons'].append(exon)
@@ -601,16 +601,16 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         for [est, donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
 #            import pdb; pdb.set_trace()
             gene['introns'][index]['supporting ESTs'][est] = {
-                'est donor suffix' : donor_factor['est sequence'][-len(gene['introns'][index]['donor suffix']):],
-                'est acceptor prefix'    : acceptor_factor['est sequence'][:len(gene['introns'][index]['acceptor prefix'])],
-                'begin est acceptor prefix' : acceptor_factor['est start'],
-                'end est donor suffix'      : donor_factor['est end'],
-                'end est acceptor prefix' : acceptor_factor['est end'],
-                'begin est donor suffix'      : donor_factor['est start'],
-                # 'est prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
-                # 'est suffix next exon'  : gene['introns'][index]['donor suffix'],
-            # 'est prefix end'   : acceptor_exon['est end'],
-            # 'est suffix start' : donor_exon['est start'],
+                'EST donor factor suffix' : donor_factor['EST sequence'][-len(gene['introns'][index]['donor suffix']):],
+                'EST acceptor factor prefix'    : acceptor_factor['EST sequence'][:len(gene['introns'][index]['acceptor prefix'])],
+                'begin EST acceptor factor' : acceptor_factor['EST start'],
+                'end EST donor factor'      : donor_factor['EST end'],
+                'end EST acceptor factor' : acceptor_factor['EST end'],
+                'begin EST donor factor'      : donor_factor['EST start'],
+                # 'EST prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
+                # 'EST suffix next exon'  : gene['introns'][index]['donor suffix'],
+            # 'EST prefix end'   : acceptor_exon['EST end'],
+            # 'EST suffix start' : donor_exon['EST start'],
             }
 
 
@@ -711,16 +711,16 @@ def pintron_pipeline(options):
     if not os.path.isfile(options.genome_filename) or not os.access(options.genome_filename, os.R_OK):
         raise PIntronIOError(options.genome_filename,
                              'Could not read file "' + options.genome_filename + '"!')
-    if not os.path.isfile(options.est_filename) or not os.access(options.est_filename, os.R_OK):
-        raise PIntronIOError(options.est_filename,
-                             'Could not read file "' + options.est_filename + '"!')
+    if not os.path.isfile(options.EST_filename) or not os.access(options.EST_filename, os.R_OK):
+        raise PIntronIOError(options.EST_filename,
+                             'Could not read file "' + options.EST_filename + '"!')
     if ( os.access('genomic.txt', os.F_OK) and
          not os.path.samefile('genomic.txt', options.genome_filename) and
          not os.access('genomic.txt', os.W_OK) ):
         raise PIntronIOError('genomic.txt',
                              'Could not write file "genomic.txt"!')
     if ( os.access('ests.txt', os.F_OK) and
-         not os.path.samefile('ests.txt', options.est_filename) and
+         not os.path.samefile('ests.txt', options.EST_filename) and
          not os.access('ests.txt', os.W_OK) ):
         raise PIntronIOError('ests.txt',
                              'Could not write file "ests.txt"!')
@@ -736,12 +736,12 @@ def pintron_pipeline(options):
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
-    if os.path.isfile('ests.txt') and os.path.samefile('ests.txt', options.est_filename):
+    if os.path.isfile('ests.txt') and os.path.samefile('ests.txt', options.EST_filename):
         logging.debug('Files "%s" and "ests.txt" refer to the same file: skip copy.',
-                      options.est_filename)
+                      options.EST_filename)
     else:
         exec_system_command(
-            command="cp " + options.est_filename + " ests.txt ",
+            command="cp " + options.EST_filename + " ests.txt ",
             error_comment="Could not prepare ESTs input file",
             logfile=options.logfile,
             output_file='raw-multifasta-out.txt',
