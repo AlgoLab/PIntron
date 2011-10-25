@@ -42,9 +42,10 @@ import pprint
 import traceback
 import csv
 
-# from Bio import SeqIO
 from optparse import OptionParser
 
+## Program version
+pintron_version='_____%PINTRON_VERSION%_____'
 
 class PIntronError(Exception):
     """Base class for exceptions of the PIntron pipeline."""
@@ -350,6 +351,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 
     gene={
         'version': 3, # Hardcoding version number
+        'program_version': pintron_version, # Program version
         'isoforms': {},
         'introns': {},
         'factorizations': {},
@@ -364,11 +366,13 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             # throw exception and die
             logging.exception("*** Fatal error: Could not read " + file + "\n")
 
+    n_proc_ests= 0
     with open('out-after-intron-agree.txt', mode='r', encoding='utf-8') as fd:
         current = ''
         for line in fd:
             l = line.rstrip()
             if l[0] == '>':
+                n_proc_est= n_proc_ests+1
                 new = re.match('^>\/gb=(\S+)\/gb=(\S+)\/clone_end=([35])\'$', l).groups()
                 current=new[0]
 
@@ -399,8 +403,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
                 gene['factorizations'][current]['exons'].append(exon)
                 if gene['factorizations'][current]['PAS']:
                     gene['factorizations'][current]['exon']=exon
-#    pprint.pprint(PAS_factorizations)
-#    del factorizations
+
+    gene['number of processed ESTs']= n_proc_ests
 
     with open(variant_file, mode='r', encoding='utf-8') as fd:
         for line in fd:
@@ -682,7 +686,6 @@ def pintron_pipeline(options):
     """Executes the whole pipeline, using the input options.
     """
 
-    pintron_version='_____%PINTRON_VERSION%_____'
     if (pintron_version[0] == '_' and
         pintron_version[1:] == '____%PINTRON_VERSION%_____'):
         pintron_version= ''
