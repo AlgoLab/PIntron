@@ -44,8 +44,6 @@ import csv
 
 from optparse import OptionParser
 
-## Program version
-pintron_version='_____%PINTRON_VERSION%_____'
 
 class PIntronError(Exception):
     """Base class for exceptions of the PIntron pipeline."""
@@ -351,7 +349,7 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
 
     gene={
         'version': 3, # Hardcoding version number
-        'program_version': pintron_version, # Program version
+        'program_version': options.version, # Program version
         'isoforms': {},
         'introns': {},
         'factorizations': {},
@@ -372,18 +370,20 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
         for line in fd:
             l = line.rstrip()
             if l[0] == '>':
-                n_proc_est= n_proc_ests+1
-                new = re.match('^>\/gb=(\S+)\/gb=(\S+)\/clone_end=([35])\'$', l).groups()
-                current=new[0]
+                n_proc_est = n_proc_ests+1
+                print(l)
+                new = re.match('^>(\/clone_end=([35])\')?\/gb=(\S+)\/gb=(\S+)(\/clone_end=([35])\')?$', l).groups()
+                current=new[2]
 
                 gene['factorizations'][current] = {
                     'polyA?' : False,
                     'PAS' : False,
                     'exons' : [],
-                    'EST' : new[0],
-                    'EST1' : new[1],
-                    'clone end' : new[2],
-                }
+                    'EST' : current,
+                    'EST1' : new[3],
+                    'clone end' : new[1] if new[0] == '' else new[5],
+                    }
+
             elif re.match('#polya=1', l):
                 gene['factorizations'][current]['polyA?'] = True
             elif re.match('#polyad(\S*)=1', l):
@@ -686,9 +686,6 @@ def pintron_pipeline(options):
     """Executes the whole pipeline, using the input options.
     """
 
-    if (pintron_version[0] == '_' and
-        pintron_version[1:] == '____%PINTRON_VERSION%_____'):
-        pintron_version= ''
 
     logging.info("PIntron%s", pintron_version)
     logging.info("Copyright (C) 2010  Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi.")
@@ -909,6 +906,13 @@ if __name__ == '__main__':
 
     try:
         options = parse_command_line()
+## Program version
+        pintron_version='_____%PINTRON_VERSION%_____'
+        if (pintron_version[0] == '_' and
+            pintron_version[1:] == '____%PINTRON_VERSION%_____'):
+            options.version = ''
+        else:
+            options.version = pintron_version
         prepare_loggers(options)
         pintron_pipeline(options)
     except PIntronError as err:
