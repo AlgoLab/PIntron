@@ -371,8 +371,8 @@ def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pa
             l = line.rstrip()
             if l[0] == '>':
                 n_proc_est = n_proc_ests+1
-                print(l)
-                new = re.match('^>(\/clone_end=([35])\')?\/gb=(\S+)\/gb=(\S+)(\/clone_end=([35])\')?$', l).groups()
+#                print(l)
+                new = re.match('^>(\/clone_end=([35])\'?)?\/gb=(\S+)\/gb=(\S+)(\/clone_end=([35])\')?$', l).groups()
                 current=new[2]
 
                 gene['factorizations'][current] = {
