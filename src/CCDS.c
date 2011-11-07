@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2010  Raffaella Rizzi
+ * Copyright (C) 2010,2011  Yuri Pirola, Raffaella Rizzi
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -179,7 +179,8 @@ struct new_label_for_exon{
 
   int left, right;
 
-  char character;
+  char *representation;
+  //char character;
 };
 
 int align_dim;  //Dimensione della matrice di allineamento
@@ -267,7 +268,7 @@ static void SetPrintOrder(int ref);
 static int SetREFToLongestTranscript();
 static char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime p);
 
-static struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char *character);
+static struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char **representation);
 
 static void ComputeAlignment(char *EST_exon, char *genomic_exon);
 static void ComputeAlignMatrix(char *EST_exon, char *genomic_exon, int n, int m, char **Mdir);
@@ -275,6 +276,8 @@ static void TracebackAlignment(char *EST_exon, char *genomic_exon, char **Mdir, 
 static void GetExonAlignments();
 static void GetGenomicExons(char *fileName);
 static char *GetGENexonSequence(int rel_left, int rel_right);
+
+char* int2alpha(unsigned int num);
 
 int Tcds;       //Lunghezza minima per le ORF
 
@@ -1838,7 +1841,10 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
   char add[20];
   char extr_variant=1;
-  char label_char=0;
+
+  //char label_char=0;
+  char *representation;
+
   char localize_str[20];
   char first_time=1;
 
@@ -1889,16 +1895,16 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          if(exons[trs[index].exon_index[0]].left < exons[trs[ref].exon_index[0]].left){
                 r_index=0;
          }
-         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &label_char);
+         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &representation);
 
          if(strand == 1){
-                sprintf(label, "init(E%d%c),", r_index, label_char);
+                sprintf(label, "init(E%d%s),", r_index, representation);
          }
          else{
                 if(r_index == 1)
-                  sprintf(label, "term(E%d%c),", trs[ref].exons, label_char);
+                  sprintf(label, "term(E%d%s),", trs[ref].exons, representation);
                 else
-                  sprintf(label, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(label, "term(%da%s),", trs[ref].exons, representation);
          }
 
          strcat(label, localize_str);
@@ -1908,13 +1914,13 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          first_time=0;
 
          while(i < trs[index].exons && exons[trs[index].exon_index[i]].right < exons[trs[ref].exon_index[0]].left){
-                list_of_new_labels[0]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[0], exons[trs[index].exon_index[i]].left, exons[trs[index].exon_index[i]].right, &label_char);
+                list_of_new_labels[0]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[0], exons[trs[index].exon_index[i]].left, exons[trs[index].exon_index[i]].right, &representation);
 
                 if(strand == 1){
-                  sprintf(add, "init(E0%c),", label_char);
+                  sprintf(add, "init(E0%s),", representation);
                 }
                 else{
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
                 }
 
                 strcat(label, add);
@@ -1967,16 +1973,16 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          if(exons[trs[index].exon_index[trs[index].exons-1]].right > exons[trs[ref].exon_index[trs[ref].exons-1]].right){
                 r_index=trs[ref].exons+1;
          }
-         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &label_char);
+         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &representation);
 
          if(strand == 1){
                 if(r_index == trs[ref].exons)
-                  sprintf(add, "term(E%d%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(E%d%s),", trs[ref].exons, representation);
                 else
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
          }
          else{
-                sprintf(add, "init(E%d%c),", (trs[ref].exons-r_index+1), label_char);
+                sprintf(add, "init(E%d%s),", (trs[ref].exons-r_index+1), representation);
          }
 
          strcat(label, add);
@@ -1986,13 +1992,13 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
          while(j >= 0 && exons[trs[index].exon_index[j]].left > exons[trs[ref].exon_index[trs[ref].exons-1]].right){
 
-                list_of_new_labels[trs[ref].exons+1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[trs[ref].exons+1], exons[trs[index].exon_index[j]].left, exons[trs[index].exon_index[j]].right, &label_char);
+                list_of_new_labels[trs[ref].exons+1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[trs[ref].exons+1], exons[trs[index].exon_index[j]].left, exons[trs[index].exon_index[j]].right, &representation);
 
                 if(strand == 1){
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
                 }
                 else{
-                  sprintf(add, "init(E0%c),", label_char);
+                  sprintf(add, "init(E0%s),", representation);
                 }
 
                 strcat(label, add);
@@ -2013,9 +2019,9 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
          if(q < trs[ref].exons && exons[trs[ref].exon_index[q]].left > exons[trs[index].exon_index[k]].right){
                 GetLocalization(localize_str, ref, q-1);
-                list_of_new_labels[q-1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[q-1], exons[trs[index].exon_index[k]].left, exons[trs[index].exon_index[k]].right, &label_char);
+                list_of_new_labels[q-1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[q-1], exons[trs[index].exon_index[k]].left, exons[trs[index].exon_index[k]].right, &representation);
 
-                sprintf(add, "new(E%d%c),", (strand == 1)?(q):(trs[ref].exons-q), label_char);
+                sprintf(add, "new(E%d%s),", (strand == 1)?(q):(trs[ref].exons-q), representation);
 
                 strcat(label, add);
                 strcat(label, localize_str);
@@ -3094,10 +3100,10 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                   return 1;
                 }
 
-                struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char *character){
+              struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char **representation){
                   struct new_label_for_exon *head=arg_newlabel_list;
                   struct new_label_for_exon *tail=NULL;
-                  int counter=0;
+                  unsigned int counter=0;
                   char stop=0;
 
                   stop=0;
@@ -3113,7 +3119,7 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                   }
 
                   if(stop){
-                         *character=head->character;
+	                         *representation=head->representation;
                   }
                   else{
                          computed_newlabel_copy=(struct new_label_for_exon *)malloc(sizeof(struct new_label_for_exon));
@@ -3130,8 +3136,12 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                          computed_newlabel_copy->right=right;
                          computed_newlabel_copy->next=NULL;
                          computed_newlabel_copy->prev=tail;
-                         computed_newlabel_copy->character=97+counter;
-                         *character=computed_newlabel_copy->character;
+
+                         //computed_newlabel_copy->character=97+counter;
+                         computed_newlabel_copy->representation=int2alpha(counter);
+
+                         //*character=computed_newlabel_copy->character;
+                         *representation=computed_newlabel_copy->representation;
 
                          if(tail == NULL)
                                 arg_newlabel_list=computed_newlabel_copy;
@@ -3393,4 +3403,25 @@ char *GetGENexonSequence(int rel_left, int rel_right){
          return head->sequence;
   else
          return NULL;
+}
+
+char* int2alpha(unsigned int num) {
+  unsigned int n_digits= 0;
+  unsigned int drift= 0;
+  while ((drift+1)*26<=num) {
+	 drift= (drift+1)*26;
+	 ++n_digits;
+  };
+  ++n_digits;
+  //printf("%6d ", drift);
+  char* repr= (char*)calloc(sizeof(char), n_digits+1);
+  unsigned int quotient= num-drift;
+  unsigned int i= n_digits;
+  do {
+	 unsigned int remainder= quotient % 26;
+	 quotient= quotient / 26;
+	 --i;
+	 repr[i]= 'a'+remainder;
+  } while (i>0);
+  return repr;
 }
