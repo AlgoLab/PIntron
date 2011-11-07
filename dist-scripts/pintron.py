@@ -41,8 +41,19 @@ import json
 import pprint
 import traceback
 import csv
+import hashlib
 
 from optparse import OptionParser
+
+def md5Checksum(filePath):
+    fh = open(filePath, 'rb')
+    m = hashlib.md5()
+    while True:
+        data = fh.read(8192)
+        if not data:
+            break
+        m.update(data)
+    return m.hexdigest()
 
 
 class PIntronError(Exception):
@@ -85,40 +96,45 @@ def parse_command_line():
     parser.add_option("-o", "--output",
                       dest="output_filename",
                       default="pintron-full-output.json",
-                      help="full output file (default = 'pintron-full-output.json')",
+                      help="full output file (default = '%default')",
                       metavar="FILE")
     parser.add_option("-z", "--compress", action="store_true",
                       dest="compress", default=False,
-                      help="compress output (default = False)")
+                      help="compress output (default = %default)")
     parser.add_option("-l", "--logfile",
-                      dest="logfile", default="pintron-log.txt",
-                      help="log filename (default = 'pintron-log.txt')")
+                      dest="plogfile", default="pintron-pipeline-log.txt",
+                      help="log filename of the pipeline steps (default = '%default')",
+                      metavar="FILE")
+    parser.add_option("--general-logfile",
+                      dest="glogfile", default="pintron-log.txt",
+                      help="log filename of the pipline orchestration module (default = '%default')",
+                      metavar="FILE")
     parser.add_option("-c", "--continue", action="store_true",
                       dest="from_scratch", default=False,
-                      help="resume a previosly interrupted computation (default = False)")
+                      help="resume a previosly interrupted computation (default = %default)")
     parser.add_option("-b", "--bin-dir",
                       dest="bindir", default="",
                       help="DIRECTORY containing the programs (default = system PATH)")
     parser.add_option("-n", "--organism",
                       dest="organism", default="unknown",
-                      help="Organism originating the ESTs (default = 'unknown')")
+                      help="Organism originating the ESTs (default = '%default')")
     parser.add_option("-e", "--gene",
                       dest="gene", default="unknown",
-                      help="Gene symbol (or ID) of the locus which the ESTs refer to (default = 'unknown')")
+                      help="Gene symbol (or ID) of the locus which the ESTs refer to (default = '%default')")
     parser.add_option("-k", "--keep-intermediate-files", action="store_true",
                       dest="no_clean", default=False,
-                      help="keep all intermediate or temporary files (default = False)")
+                      help="keep all intermediate or temporary files (default = %default)")
     parser.add_option("-t", "--gtf",
                       dest="gtf_filename",
                       default="pintron-cds-annotated-isoforms.gtf",
                       help="output GTF FILE with the isoforms that have a CDS annotation "
-                      "(default = 'pintron-cds-annotated-isoforms.gtf')",
+                      "(default = '%default')",
                       metavar="GTF_FILE")
     parser.add_option("--extended-gtf",
                       dest="extended_gtf_filename",
                       default="pintron-all-isoforms.gtf",
                       help="output GTF FILE with all the predicted isoforms "
-                      "(default = 'pintron-all-isoforms.gtf')",
+                      "(default = '%default')",
                       metavar="GTF_FILE")
 
     # parser.add_option("--strand",
@@ -333,7 +349,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, logfile, output_file, from_scratch, pas_tolerance, genomic_seq):
+def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
     # Find the sequence ID
     # It is stored in the first line of the genomic sequence
     with open(genomic_seq, 'r', encoding='utf-8') as f:
@@ -670,7 +686,8 @@ def check_executables(bindir, exes):
         for path in paths:
             if os.access(os.path.join(path, exe), os.X_OK):
                 real_path = os.path.realpath(os.path.abspath(os.path.join(path, exe)))
-                logging.debug("Using program '{}' in dir '{}'".format(exe, real_path))
+                md5hex = md5Checksum(real_path)
+                logging.debug("Using program '{}' in dir '{}' (md5: {})".format(exe, real_path, md5hex))
                 full_exes[exe] = real_path
                 break
         if full_exes[exe] == None:
@@ -686,7 +703,7 @@ def pintron_pipeline(options):
 
 
     logging.info("PIntron%s", pintron_version)
-    logging.info("Copyright (C) 2010  Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi.")
+    logging.info("Copyright (C) 2010,2011  Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi.")
     logging.info("This program is distributed under the terms of the GNU Affero General Public License (AGPL), either version 3 of the License, or (at your option) any later version.")
     logging.info("This program comes with ABSOLUTELY NO WARRANTY. See the GNU Affero General Public License for more details.")
     logging.info("This is free software, and you are welcome to redistribute it under the conditions specified by the license.")
@@ -697,6 +714,8 @@ def pintron_pipeline(options):
     # Check and copy input data
     logging.info("STEP  1:  Checking executables and preparing input data...")
 
+    logging.debug("Using main program 'pintron' in dir '{}' (md5: {})".format(os.path.realpath(os.path.abspath(sys.argv[0])),
+                                                                              md5Checksum(sys.argv[0])))
     exes= check_executables(options.bindir, ["est-fact",
                                              "min-factorization",
                                              "intron-agreement",
@@ -730,7 +749,7 @@ def pintron_pipeline(options):
         exec_system_command(
             command="cp " + options.genome_filename + " genomic.txt ",
             error_comment="Could not prepare genomic input file",
-            logfile=options.logfile,
+            logfile=options.plogfile,
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
@@ -741,7 +760,7 @@ def pintron_pipeline(options):
         exec_system_command(
             command="cp " + options.EST_filename + " ests.txt ",
             error_comment="Could not prepare ESTs input file",
-            logfile=options.logfile,
+            logfile=options.plogfile,
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
@@ -753,7 +772,7 @@ def pintron_pipeline(options):
         command="ulimit -t "+ str(options.max_factorization_time * 60) + " && ulimit -v " +
         str(options.max_factorization_memory * 1024) + " && " + exes["est-fact"],
         error_comment="Could not compute the factorizations",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='raw-multifasta-out.txt',
         from_scratch=options.from_scratch)
 
@@ -765,7 +784,7 @@ def pintron_pipeline(options):
         command="ulimit -t "+ str(options.max_exon_agreement_time * 60) +" && " +
         exes["min-factorization"] + " < raw-multifasta-out.txt >out-agree.txt",
         error_comment="Could not minimize the factorizations",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='out-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -777,7 +796,7 @@ def pintron_pipeline(options):
         command="ulimit -t "+ str(options.max_intron_agreement_time*60) +" && " +
         exes["intron-agreement"],
         error_comment="Could not compute the factorizations",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -788,7 +807,7 @@ def pintron_pipeline(options):
     exec_system_command(
         command=exes["gene-structure"] + " ./",
         error_comment="Could not compute maximal transcripts",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -805,7 +824,7 @@ def pintron_pipeline(options):
     exec_system_command(
         command=exes["compact-compositions"] + " < out-after-intron-agree.txt > build-ests.txt",
         error_comment="Could not transform factorizations into exons",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='build-ests.txt',
         from_scratch=options.from_scratch)
 
@@ -816,13 +835,13 @@ def pintron_pipeline(options):
     exec_system_command(
         command=exes["maximal-transcripts"] + " < build-ests.txt",
         error_comment="Could not compute maximal transcripts",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
     exec_system_command(
         command="cp -f TRANSCRIPTS1_1.txt isoforms.txt",
         error_comment="Could not link isoforms",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
@@ -833,7 +852,7 @@ def pintron_pipeline(options):
     exec_system_command(
         command=exes["cds-annotation"] + " ./ ./ " + options.gene + " " + options.organism,
         error_comment="Could not annotate the CDSs",
-        logfile=options.logfile,
+        logfile=options.plogfile,
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
@@ -845,7 +864,6 @@ def pintron_pipeline(options):
 
     json_output=compute_json(ccds_file="CCDS_transcripts.txt",
                              variant_file="VariantGTF.txt",
-                             logfile=options.logfile,
                              output_file=options.output_filename,
                              from_scratch=options.from_scratch,
                              pas_tolerance=options.pas_tolerance,
@@ -863,7 +881,9 @@ def pintron_pipeline(options):
     logging.info("STEP 10:  Finalizing...")
 
     if options.compress:
-        exec_system_command("gzip -q9 " + options.output_filename + " "+ options.logfile,
+        exec_system_command("gzip -q9 " + " ".join( [ options.output_filename,
+                                                      options.plogfile,
+                                                      options.glogfile ] ),
                             error_comment="Could not compress final files",
                             logfile="/dev/null",
         output_file=options.output_filename + '.gz')
@@ -883,11 +903,11 @@ def pintron_pipeline(options):
 def prepare_loggers(options):
     """Prepare loggers.
 
-    Save DEBUG and higher messages to options.logfile, and INFO and higher messages to stdout
+    Save DEBUG and higher messages to options.glogfile, and INFO and higher messages to stdout
     Code adapted from
     http://docs.python.org/py3k/library/logging.html?highlight=logging#logging-to-multiple-destinations
     """
-    logging.basicConfig(filename=options.logfile,
+    logging.basicConfig(filename=options.glogfile,
                         filemode='w',
                         format='%(levelname)s:%(name)s:%(asctime)s%(msecs)d:%(message)s',
                         datefmt='%Y%m%d-%H%M%S',
