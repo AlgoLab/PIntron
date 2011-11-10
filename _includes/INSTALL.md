@@ -36,16 +36,11 @@ as the aforementioned GNU make utility and a recent C compiler (tested on
 `gcc v4.4`).
 
 The command will produce a compressed archive `dist/pintron-*.tar.gz`
-that can be used for the installation or the execution as described in
-the following section.
+that can be used for the installation or the execution.
 
-
-### Installing from a pre-compiled archive
-
-The pre-built binary packages (or the custom package built from scratch)
-contain the directory `bin`, containing all the executables needed to run
-PIntron, and the directory `doc`, containing the documentation and a
-simple complete example.
+The binary package is composed by the directory `bin`, containing all the
+executables needed to run PIntron, and the directory `doc`, containing
+the documentation and a simple complete example.
 For installing PIntron, you should copy the executables of the `bin/`
 directory to a directory of the PATH or to a custom directory.
 In the second case, you should specify the custom directory during the

@@ -34,24 +34,16 @@ file in the source distribution for the detailed usage notes.
 
 ## Download
 
-The latest stable version of PIntron is **v1.2.1** (*July  4, 2011*).
+The latest stable version of PIntron is **v1.2.15** (*Nov. 10, 2011*).
 
-PIntron is distributed as source code and as pre-built binary packages for some common platforms.
+PIntron is only distributed as source code.
 
 The latest source code version can be downloaded from the [GitHub page](https://github.com/AlgoLab/PIntron) as a [zip](https://github.com/AlgoLab/PIntron/zipball/master) or as [tar](https://github.com/AlgoLab/PIntron/tarball/master) archive.
 It is also possible to clone the source repository using the following command:
 
     git clone https://github.com/AlgoLab/PIntron.git
 
-
-The latest pre-built binary packages are available for the following platforms and architectures:
-
-* [Linux (32-bit)](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-Linux-32bit.tar.gz), tested and supported on Ubuntu Linux 10.04 and later
-* [Linux (64-bit)](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-Linux-64bit.tar.gz), tested and supported on Ubuntu Linux 10.04 and later
-* [MacOS X](http://www.algolab.eu/datasets/PIntron/binaries/pintron-latest-MacOS.tar.gz) (Universal Binary 32/64-bit)
-
-
-Older versions are also [available](http://www.algolab.eu/datasets/?dir=./PIntron/binaries).
+Older versions are also [available](https://github.com/AlgoLab/PIntron/tags).
 
 
 ## Install
@@ -86,4 +78,4 @@ The work has also greatly benefited from the contribution and the
 supervision of Paola Bonizzoni (<bonizzoni@disco.unimib.it>) and
 [Gianluca Della Vedova](http://gianluca.dellavedova.org).
 
-To  ask for information, please contact any of the authors.
+To ask for information, please contact any of the authors.
