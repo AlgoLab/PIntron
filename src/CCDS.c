@@ -332,7 +332,7 @@ int main(int argc, char *argv[]){
   sprintf(temp,"%scds",in_path);
   GetCDSAnnotations(temp);
 
-   sprintf(temp,"%sisoforms.txt",out_path);
+  sprintf(temp,"%sisoforms.txt",out_path);
   Get_Transcripts_from_File_FASTA_format(temp);
 
   sprintf(temp,"%spredicted-introns.txt",out_path);
@@ -926,19 +926,26 @@ void GetCDSAnnotations(char *fileName){
 
   while(!feof(in)){
          fscanf(in, "%d\n", &length);
-         a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
-         if(a_cds == NULL){
-                fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
-                exit(0);
+
+         if(length > 0){
+		a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
+		if(a_cds == NULL){
+			fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
+			exit(0);
+		}
+
+		fscanf(in, "%s\t%d\t%d\t%d\t%s\n", temp_ID, &rel_start, &rel_end, &exons, a_cds[counter].RefSeq_sequence);
+		strcpy(a_cds[counter].RefSeq, temp_ID);
+		a_cds[counter].rel_start=rel_start;
+		a_cds[counter].rel_end=rel_end;
+		a_cds[counter].exons=exons;
+
+		counter++;
+         } else {
+		fprintf(stderr, "WARNING: CDS annotation %s file not correct!\n", fileName);
+		fscanf(in, "%s\t%d\t%d\t%d\n", temp_ID, &rel_start, &rel_end, &exons);
+		fprintf(stderr, "\tRefSeq %s has null length!\n", temp_ID);
          }
-
-         fscanf(in, "%s\t%d\t%d\t%d\t%s\n", temp_ID, &rel_start, &rel_end, &exons, a_cds[counter].RefSeq_sequence);
-         strcpy(a_cds[counter].RefSeq, temp_ID);
-         a_cds[counter].rel_start=rel_start;
-         a_cds[counter].rel_end=rel_end;
-         a_cds[counter].exons=exons;
-
-         counter++;
   }
 
   fclose(in);
