@@ -273,7 +273,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
 
         #pprint.pprint(data_strand)
         for isoform_id, isoform in entry["isoforms"].items():
-            if not all_isoforms or not isoform["annotated CDS?"]:
+            if not all_isoforms and not isoform["annotated CDS?"]:
                 continue
             whole_cds_len = 0
             cds_sequence = ''
