@@ -277,7 +277,13 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                 continue
             whole_cds_len = 0
             cds_sequence = ''
-            total_cds_length = isoform['CDS length'] -3 # Because the stop codon is outside the CDS
+            if isoform["annotated CDS?"]:
+                total_cds_length = isoform['CDS length'] -3 # Because the stop codon is outside the CDS
+            else:
+                # In this case we have to compute the CDS length from the list of exons
+                total_cds_length = sum([exon['relative end'] - exon.get("3utr length", 0) -
+                                        (exon['relative start'] + exon.get("5utr length", 0)) + 1
+                                        for exon in isoform["exons"]])
             for p in ['first', 'last']:
                 data_strand[p]['codon']    = ''
                 data_strand[p]['codon_ok'] = False
@@ -336,17 +342,18 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                                 print ("Exon length: " + str(exon_length))
 
                 write_gtf_line(f, sequence_id, "exon", rel_start, rel_end, "0", "+", ".", gene_name, isoform_id)
-                write_gtf_line(f, sequence_id, data_strand['first']['label'], rel_start, cds_start-1, "0", "+",  ".", gene_name, isoform_id)
-                if data_strand['first']['print']:
-                    write_gtf_line(f, sequence_id, data_strand['first']['delimiter'], cds_start, cds_start+2,
+                if isoform["annotated CDS?"]:
+                    write_gtf_line(f, sequence_id, data_strand['first']['label'], rel_start, cds_start-1, "0", "+",  ".", gene_name, isoform_id)
+                    if data_strand['first']['print']:
+                        write_gtf_line(f, sequence_id, data_strand['first']['delimiter'], cds_start, cds_start+2,
                                    "0", "+", len(data_strand['first']['codon']) % 3, gene_name, isoform_id)
-                    data_strand['first']['codon_ok'] = True
-                write_gtf_line(f, sequence_id, "CDS", cds_start, cds_end, "0", "+", frame, gene_name, isoform_id)
-                if data_strand['last']['print']:
-                    write_gtf_line(f, sequence_id, data_strand['last']['delimiter'], cds_end-2+3, cds_end+3,
+                        data_strand['first']['codon_ok'] = True
+                    write_gtf_line(f, sequence_id, "CDS", cds_start, cds_end, "0", "+", frame, gene_name, isoform_id)
+                    if data_strand['last']['print']:
+                        write_gtf_line(f, sequence_id, data_strand['last']['delimiter'], cds_end-2+3, cds_end+3,
                                    "0", "+", len(data_strand['last']['codon']) % 3, gene_name, isoform_id)
-                    data_strand['last']['codon_ok'] = True
-                write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
+                        data_strand['last']['codon_ok'] = True
+                    write_gtf_line(f, sequence_id, data_strand['last']['label'], cds_end+1+len(data_strand['last']['new']), rel_end, "0", "+",  ".", gene_name, isoform_id)
 
 
 def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
