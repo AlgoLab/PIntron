@@ -180,12 +180,9 @@ void TracebackAlignment(size_t m, palignment alignment, char *EST_seq, char *gen
 }
 
 
-static size_t
-edit_distance(const char* const s1, const size_t l1,
-				  const char* const s2, const size_t l2) {
-  if ((l1 == l2) && (strcmp(s1, s2)==0)) {
-	 return 0;
-  }
+size_t*
+edit_distance_matrix(const char* const s1, const size_t l1,
+							const char* const s2, const size_t l2) {
   size_t* matrix= NPALLOC(size_t, (l1+1)*(l2+1));
   size_t i, j;
   for (i= 0; i<=l2; ++i) {
@@ -208,7 +205,17 @@ edit_distance(const char* const s1, const size_t l1,
 	 }
 	 base+= (l2+1);
   }
-  const size_t dist= matrix[base-1];
+  return matrix;
+}
+
+static size_t
+edit_distance(const char* const s1, const size_t l1,
+				  const char* const s2, const size_t l2) {
+  if ((l1 == l2) && (strcmp(s1, s2)==0)) {
+	 return 0;
+  }
+  size_t* matrix= edit_distance_matrix(s1, l1, s2, l2);
+  const size_t dist= matrix[(l1+1)*(l2+1)-1];
   pfree(matrix);
   return dist;
 }

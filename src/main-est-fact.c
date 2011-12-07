@@ -55,6 +55,8 @@
 #include "log.h"
 #include "log-build-info.h"
 
+#include "factorization-refinement.h"
+
 #ifndef MUMMER_EMULATION
 static void
 log_meg(pext_array V) {
@@ -388,6 +390,7 @@ int main(int argc, char** argv) {
 	 MYTIME_reset(pt_ccomp);
 	 MYTIME_start(pt_ccomp);
 	 pEST factorized_est=get_EST_factorizations(est, V, config, gen);
+	 refine_EST_factorizations(gen, factorized_est, config);
 	 MYTIME_stop(pt_ccomp);
 	 MYTIME_stop(pt_comp);
 

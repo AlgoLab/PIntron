@@ -367,12 +367,14 @@ stree_OBJ= \
 
 
 est_fact_SOURCE= \
+	$(SRC_DIR)/factorization-refinement.c \
 	$(SRC_DIR)/max-emb-graph.c \
 	$(SRC_DIR)/aug_suffix_tree.c \
 	$(SRC_DIR)/meg-simplification.c \
 	$(SRC_DIR)/main-est-fact.c
 
 est_fact_OBJ= \
+	$(OBJ_DIR)/factorization-refinement.o \
 	$(OBJ_DIR)/max-emb-graph.o \
 	$(OBJ_DIR)/aug_suffix_tree.o \
 	$(OBJ_DIR)/meg-simplification.o \

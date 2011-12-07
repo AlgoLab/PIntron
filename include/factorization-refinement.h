@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2010  Raffaella Rizzi
+ * Copyright (C) 2011  Yuri Pirola
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -27,41 +27,23 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-/**
- *
- * @file compute-alignment.h
- *
- * Procedures for computing alignments.
- *
- **/
+/*
+** factorization-refinement.h
+*/
 
-#ifndef _COMPUTE_ALIGNMENT_H_
-#define _COMPUTE_ALIGNMENT_H_
+#ifndef _FACTORIZATION_REFINEMENT_H_
+#define _FACTORIZATION_REFINEMENT_H_
+
+#include <stdio.h>
 
 #include "types.h"
+#include "configuration.h"
 
-/*
- * Returns a list of alignments
- */
-plist compute_alignment(char *, char *, bool);
+void
+refine_EST_factorizations(pEST_info genomic,
+								  pEST factorized_est,
+								  pconfiguration config);
 
-/*
- * Returns the direction matrix and the score in the score parameter
- */
-unsigned int
-ComputeAlignMatrix(const char * const EST_seq,
-						 const size_t EST_len,
-						 const char * const genomic_seq,
-						 const size_t genomic_len,
-						 char * const Mdir);
 
-void TracebackAlignment(size_t, palignment, char *, char *, char *, int, int);
 
-size_t*
-edit_distance_matrix(const char* const s1, const size_t l1,
-							const char* const s2, const size_t l2);
-
-bool K_band_edit_distance(char *, char *, unsigned int, unsigned int *);
-
-#endif
-
+#endif /* _FACTORIZATION_REFINEMENT_H_ */
