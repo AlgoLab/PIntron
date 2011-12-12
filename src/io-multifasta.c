@@ -410,7 +410,7 @@ void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
 
   EST_info->EST_strand_as_read= c_palloc(LEN_STRAND_ARRAY+1);
 
-  if(EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[0] == 'M'){
+  if(EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[1] == 'M'){
 	 strcpy(EST_info->EST_strand_as_read, "1");
 	 EST_info->EST_strand= 1;
 	 DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
