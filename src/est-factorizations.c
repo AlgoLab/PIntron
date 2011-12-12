@@ -1792,6 +1792,21 @@ plist clean_external_exons(plist factorization, char *genomic_sequence, char *es
 	return factorization;
 }
 
+static unsigned int
+compute_maximum_edit_distance_for_exons(const size_t exon_length) {
+  double max_error_rate= 0.0;
+  if (exon_length > 100)
+	 max_error_rate= 0.030;
+  else if (exon_length > 50)
+	 max_error_rate= 0.035;
+  else
+	 max_error_rate= 0.040;
+  const unsigned int max_error= (unsigned int)MAX(1.0, ceil(exon_length*max_error_rate));
+  TRACE("Exon length: %5zu.   Maximum edit distance: %ud", exon_length, max_error);
+  return max_error;
+}
+
+
 plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_sequence, bool only_internals){
 	my_assert(genomic_sequence != NULL);
 	my_assert(est_sequence != NULL);
@@ -1814,35 +1829,16 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 		pfactor exon=(pfactor)listit_next(plist_f_t_r);
 
 		int exon_length=exon->GEN_end-exon->GEN_start+1;
-		//3% of the exon length (decidere se e' il caso di alzare la soglia per esoni corti)
-		//XXX
 
-		//double perc=3.0/100.0;
-		//perc=((double)exon_length)*perc;
-		double perc=(double)exon_length;
-		perc=perc*3.0/100.0;
-
-		//int max_allowed_error=(int)((double)exon_length*(3.0/100.0));
-		int max_allowed_error=(int)perc;
-
-		if(max_allowed_error == 0){
-			//XXX
-			max_allowed_error=1;
-		}
+// See issue #5
+		unsigned int max_allowed_error= compute_maximum_edit_distance_for_exons(exon_length);
 
 		bool ok=false;
-		//int error=max_allowed_error+10;
 
 		//Provvisorio solo per evitare problemi (da sistemare prima)
 		if(exon->GEN_start <= exon->GEN_end){
 			char *gen_exon_seq=real_substring(exon->GEN_start, exon->GEN_end-exon->GEN_start+1, genomic_sequence);
 			char *est_exon_seq=real_substring(exon->EST_start, exon->EST_end-exon->EST_start+1, est_sequence);
-
-			/*size_t l1=strlen(gen_exon_seq);
-			size_t l2=strlen(est_exon_seq);
-			unsigned int* M=edit_distance(gen_exon_seq, l1, est_exon_seq, l2);
-			error=M[(l1+1)*(l2+1)-1];
-			pfree(M);*/
 
 			unsigned int edit;
 			ok=K_band_edit_distance(gen_exon_seq, est_exon_seq, max_allowed_error, &edit);
@@ -1852,9 +1848,10 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 		}
 
 		if(!ok){
-		//if(error > max_allowed_error){
-			//TRACE("\t exon %d-%d (%d-%d) has a high error (%d) and the maximum allowed is %d", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end, error, max_allowed_error);
-			TRACE("\t exon %d-%d (%d-%d) has a high error and the maximum allowed is %d", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end, max_allowed_error);
+			TRACE("\t exon %d-%d (%d-%d) has a high error and the maximum allowed is %u",
+					exon->GEN_start, exon->GEN_end,
+					exon->EST_start, exon->EST_end,
+					max_allowed_error);
 			intlist_add_to_tail(split_list, index);
 		}
 		index++;
