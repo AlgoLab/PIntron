@@ -34,6 +34,7 @@
 #include "bit_vector.h"
 #include <assert.h>
 #include "sempl_info.h"
+#include <stdint.h>
 
 bool valuate_list(pbit_vect comb, plist p)
 {
@@ -316,15 +317,32 @@ void print_n_factorization_complete(pEST est,int n)
   listit_destroy(plist_it_factorizations);
 }
 
-void print_factorizations_result(pbit_vect min_factors, plist p, plist list_of_unique_fact,psempl psemp)
+// See issue #7
+static void
+compute_coverage_and_exons(pfactorization pfact,
+									size_t * coverage, size_t * n_exons) {
+  *coverage= 0;
+  *n_exons= 0;
+  pfactor pf;
+  plistit plist_it_factor;
+  plist_it_factor= list_first(pfact);
+  while(listit_has_next(plist_it_factor)) {
+	 pf= listit_next(plist_it_factor);
+	 *coverage= (*coverage) + (pf->EST_end + 1 - pf->EST_start);
+	 *n_exons= *n_exons + 1;
+  }
+  listit_destroy(plist_it_factor);
+}
+
+
+// See issue #7
+void print_factorizations_result(pbit_vect min_factors, plist p,
+											plist list_of_unique_fact, psempl psemp)
 {
-  plistit list_it_est,list_it_bin;
-  plistit list_it;
+  pfactorization pfact;
+  plistit list_it_est, list_it_bin, list_it_fact;
   pEST est;
   pbit_vect bv;
-  pfactor pf;
-  int cont,num_fact;
-  bool contain;
   int count_est;
 
   if(min_factors!=NULL)inglobe(min_factors,psemp);
@@ -335,30 +353,45 @@ void print_factorizations_result(pbit_vect min_factors, plist p, plist list_of_u
   while(listit_has_next(list_it_est)){
 	 est=listit_next(list_it_est);
 
-	 list_it_bin=list_first(est->bin_factorizations);
-	 contain=false;
+	 size_t best_factorization= 0;
+	 size_t best_coverage= 0;
+	 size_t best_n_exons= SIZE_MAX;
+	 size_t current_factorization= 0;
 
-	 int fattorizzazione=0; //ora
+	 list_it_bin= list_first(est->bin_factorizations);
+	 list_it_fact= list_first(est->factorizations);
 
-	 while(listit_has_next(list_it_bin)&&(contain==false)){
-		fattorizzazione=fattorizzazione+1; //ora
+	 while (listit_has_next(list_it_bin)){
+		my_assert(listit_has_next(list_it_fact));
 
-		bv=listit_next(list_it_bin);
+		current_factorization= current_factorization+1;
 
-		if(contained(bv,psemp->factors_used)){
-			//Raffa ==> modifica per fare in modo che vengano stampate tutte le fattorizzazioni
-			//spiegate dall'insieme risultato
-		  //contain=true;
+		bv= listit_next(list_it_bin);
+		pfact= listit_next(list_it_fact);
 
-		  printf(">%s\n",est->info->EST_id);
-
-		  //fprintf(stdout, "Ok %d\n", BV_get(psemp->ests_ok,count_est));
-
-		  //print_n_factorization(est->factorizations,fattorizzazione);
-		  print_n_factorization_complete(est,fattorizzazione);
+		if (contained(bv, psemp->factors_used)){
+		  size_t current_coverage= 0;
+		  size_t current_n_exons= SIZE_MAX;
+		  compute_coverage_and_exons(pfact, &current_coverage, &current_n_exons);
+		  if ((best_coverage < current_coverage) ||
+				((best_coverage == current_coverage) &&
+				 (best_n_exons > current_n_exons))) {
+			 DEBUG("Found a better factorization. Currently: coverage %zunt, no. of exons %zu.",
+					 current_coverage, current_n_exons);
+			 best_coverage= current_coverage;
+			 best_n_exons= current_n_exons;
+			 best_factorization= current_factorization;
+		  }
 		}
 	 }
 	 listit_destroy(list_it_bin);
+	 listit_destroy(list_it_fact);
+
+// Print the "best" factorization of the current EST
+	 INFO("Saving factorization %zu (coverage: %zunt, no. of exons: %zu) for EST '%s'",
+			best_factorization, best_coverage, best_n_exons, est->info->EST_id);
+	 printf(">%s\n",est->info->EST_id);
+	 print_n_factorization_complete(est, best_factorization);
 	 count_est++;
   }
   listit_destroy(list_it_est);
