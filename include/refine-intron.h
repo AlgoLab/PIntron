@@ -50,6 +50,9 @@ int Try_Burset_after_match(char *, char *, int *, int *, int *);
 
 int Check_Burset_patterns(char *, int, int);
 
+int getBursetFrequency_adaptor(const char* const t,
+										 const size_t cut1, const size_t cut2);
+
 int getBursetFrequency(char *, char *);
 
 //Returns a list of gap alignments

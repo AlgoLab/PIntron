@@ -360,6 +360,18 @@ int Check_Burset_patterns(char *genomic_sequence, int donor_left_on_gen, int acc
 	return frequency;
 }
 
+int getBursetFrequency_adaptor(const char* const t,
+										 const size_t cut1, const size_t cut2) {
+  char donor[3], acceptor[3];
+  donor[2]= acceptor[2]= '\0';
+  donor[0]= t[cut1];
+  donor[1]= t[cut1+1];
+  acceptor[0]= t[cut2-2];
+  acceptor[1]= t[cut2-1];
+  DEBUG("Get Burset frequency of intron %s-%s.", donor, acceptor);
+  return getBursetFrequency(donor, acceptor);
+}
+
 int getBursetFrequency(char *donor_pt, char *acceptor_pt){
 
 	char *up_donor_pt=To_upper(donor_pt);

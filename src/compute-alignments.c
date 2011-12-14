@@ -208,9 +208,10 @@ edit_distance_matrix(const char* const s1, const size_t l1,
   return matrix;
 }
 
-static size_t
-edit_distance(const char* const s1, const size_t l1,
-				  const char* const s2, const size_t l2) {
+
+size_t
+compute_edit_distance(const char* const s1, const size_t l1,
+							 const char* const s2, const size_t l2) {
   if ((l1 == l2) && (strcmp(s1, s2)==0)) {
 	 return 0;
   }
@@ -276,7 +277,7 @@ bool K_band_edit_distance(char *seq1, char *seq2, unsigned int upper_bound, unsi
 	const size_t k= upper_bound;
 
 	if (2*k+1 >= n) {
-	  *edit= edit_distance(seq1, n, seq2, m);
+	  *edit= compute_edit_distance(seq1, n, seq2, m);
 	  return (*edit)<=upper_bound;
 	}
 

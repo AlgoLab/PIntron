@@ -41,6 +41,7 @@
 
 #include "util.h"
 #include "log.h"
+#include "refine-intron.h"
 
 #define INDEL_COST 1
 #define MISMATCH_COST 1
@@ -81,7 +82,7 @@ unsigned int* M= NPALLOC(unsigned int, (ls1+1)*(ls2+1));
   return M;
 }
 
-char*
+static char*
 reverse(const char* const s, const size_t len) {
   char* const rs= c_palloc(len);
   for (size_t i= 0; i<len; ++i)
@@ -146,12 +147,18 @@ refine_borders(const char* const p,
   size_t off_t1= min_pos_pp[0];
   size_t off_t2= min_pos_sp[len_p];
   unsigned int min= min_pp[0]+min_sp[len_p];
+  int best_burset_freq= getBursetFrequency_adaptor(t, off_t1, len_t-off_t2);
   for (size_t i= 1; i<=len_p; ++i) {
-	 if (min>(min_pp[i]+min_sp[len_p-i])) {
-		min= (min_pp[i]+min_sp[len_p-i]);
+	 const int curr_burset_freq= getBursetFrequency_adaptor(t, min_pos_pp[i],
+																			  len_t-min_pos_sp[len_p-i]);
+	 const unsigned int curr= min_pp[i]+min_sp[len_p-i];
+	 if ((min>curr) ||
+		  ((min==curr) && (curr_burset_freq>best_burset_freq))) {
+		min= curr;
 		off_p= i;
 		off_t1= min_pos_pp[i];
 		off_t2= min_pos_sp[len_p-i];
+		best_burset_freq= curr_burset_freq;
 	 }
   }
   *out_offset_p= off_p;
