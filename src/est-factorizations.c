@@ -602,7 +602,7 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 	 return computed_sub_e;
   }
-  DEBUG("\t\tThe subtree embeddings are to be computed!\n");
+  DEBUG("\t\tThe subtree embeddings are to be computed!");
 
 //Recupero la lista di adiacenza del nodo in input
   adj_list=root->adjs;

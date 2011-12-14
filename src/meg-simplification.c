@@ -405,10 +405,10 @@ dfs_visit(pgraph G,
   do {
 	 while (!intlist_is_empty(S)) {
 		int id_v= intlist_remove_from_tail(S);
-		DEBUG("Extracted vertex %d.", id_v);
+		TRACE("Extracted vertex %d.", id_v);
 		ppairing v= EA_get(G, id_v);
 		if (color[id_v]==0) {
-		  DEBUG("Discovered pairing (%4d, %5d, %4d)", PAIRING(v));
+		  TRACE("Discovered pairing (%4d, %5d, %4d)", PAIRING(v));
 		  color[id_v]= 1;
 		  dtime[id_v]= time;
 		  ++time;
@@ -428,7 +428,7 @@ dfs_visit(pgraph G,
 			 }
 		  }
 		} else if (color[id_v]==1) {
-		  DEBUG("Finished visiting pairing (%4d, %5d, %4d)", PAIRING(v));
+		  TRACE("Finished visiting pairing (%4d, %5d, %4d)", PAIRING(v));
 		  color[id_v]= 2;
 		  ftime[id_v]= time;
 		  ++time;
