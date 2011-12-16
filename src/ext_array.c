@@ -97,6 +97,16 @@ EA_insert(pext_array arr, item it) {
   my_assert(arr->nel < arr->capacity);
 }
 
+item
+EA_pop(pext_array arr) {
+  my_assert(arr!=NULL);
+  my_assert(arr->nel > 0);
+  --arr->nel;
+  item data= arr->data[arr->nel];
+  arr->data[arr->nel]= NULL;
+  return data;
+}
+
 void
 EA_clear(pext_array arr, delete_function del) {
   my_assert(arr!= NULL);

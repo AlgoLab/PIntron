@@ -104,6 +104,17 @@ void
 EA_insert(pext_array arr, item data);
 
 /**
+ * Rimozione di un elemento in coda.
+ * Tempo costante.
+ * Precondizione: !EA_is_empty(@p arr)
+ *
+ * @param arr Array da cui rimuovere.
+ * @return Elemento.
+ **/
+item
+EA_pop(pext_array arr);
+
+/**
  * Ritorna true se l'array e' vuoto,
  * false altrimenti.
  * Tempo costante.
