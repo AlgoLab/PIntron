@@ -30,6 +30,7 @@
 /*
 ** factorization-refinement.c
 */
+//#define LOG_THRESHOLD LOG_LEVEL_TRACE
 
 #include "factorization-refinement.h"
 
@@ -38,15 +39,387 @@
 
 #include "compute-alignments.h"
 #include "refine.h"
+#include "refine-intron.h"
+#include "util.h"
+
+#include "lst_structs.h"
+#include "lst_stree.h"
+#include "lst_string.h"
+
+// ------------------------------------------------------------------------
+//
+// Search for potentially true small exons
+// Issue #11: Small exons not found
+//
+
+// Perfect matches shorter than this are never considered as exons
+#define _LB_SMALL_EXON_LENGTH_ 8
+// Exons longer than this are always considered NOT SMALL
+#define _UB_SMALL_EXON_LENGTH_ 15
+
+struct struct_lcs_visit_node;
+
+typedef struct struct_lcs_visit_node {
+  LST_Node* node;
+  SLIST_ENTRY(struct_lcs_visit_node) visit_list;
+} lcs_visit_node;
+
+static
+void
+find_longest_common_factor(char* const s1, const size_t l1,
+									char* const s2, const size_t l2,
+									size_t* const pocc1, size_t* const pocc2,
+									size_t* const plen) {
+  DEBUG("Searching for the longest common factor...");
+  *pocc1= *pocc2= *plen= 0;
+  LST_StringSet *set= lst_stringset_new();
+  LST_String * lst1= PALLOC(LST_String);
+  lst_string_init(lst1, s1, sizeof(char), l1);
+  lst_stringset_add(set, lst1);
+  LST_String * lst2= PALLOC(LST_String);
+  lst_string_init(lst2, s2, sizeof(char), l2);
+  lst_stringset_add(set, lst2);
+  LST_STree* tree = lst_stree_new(set);
+// Visit
+  lcs_visit_node* vnode;
+  LST_Edge *edge;
+  SLIST_HEAD(qhead, struct_lcs_visit_node) stack;
+  SLIST_INIT(&stack);
+  vnode= PALLOC(lcs_visit_node);
+  vnode->node= tree->root_node;
+  vnode->node->single_char= (char)0;
+  vnode->node->string_depth= 0;
+  vnode->node->slices= NULL;
+  SLIST_INSERT_HEAD(&stack, vnode, visit_list);
+
+  size_t max_comm_substr_len= 0;
+  LST_Node* max_comm_substr= NULL;
+  while (!SLIST_EMPTY(&stack)) {
+	 vnode= SLIST_FIRST(&stack);
+	 if ((vnode->node->kids.lh_first==NULL)||
+		  (vnode->node->single_char != (char)0)) {
+		my_assert(((char)0 <= vnode->node->single_char) &&
+					 (vnode->node->single_char < (char)4));
+		SLIST_REMOVE_HEAD(&stack, visit_list);
+		if (vnode->node->up_edge != NULL) {
+		  my_assert(vnode->node->up_edge->range.string == lst1 ||
+						vnode->node->up_edge->range.string == lst2);
+		  const char this_node=
+			 vnode->node->single_char |
+			 (char)(1<<(vnode->node->up_edge->range.string==lst1?0:1));
+		  vnode->node->single_char= this_node;
+		  vnode->node->up_edge->src_node->single_char |= this_node;
+		  if (this_node == (char)3) {
+// Common node
+			 const size_t new_comm_substr_len= vnode->node->string_depth;
+			 if (new_comm_substr_len>max_comm_substr_len) {
+				TRACE("Found a longer common substring... (length: %zu)", new_comm_substr_len);
+				max_comm_substr_len= new_comm_substr_len;
+				max_comm_substr= vnode->node;
+			 }
+		  }
+		}
+		pfree(vnode);
+	 } else {
+		const size_t string_depth= vnode->node->string_depth;
+		for (edge = vnode->node->kids.lh_first;
+			  edge != NULL;
+			  edge = edge->siblings.le_next) {
+		  vnode= PALLOC(lcs_visit_node);
+		  vnode->node= edge->dst_node;
+		  vnode->node->single_char= (char)0;
+		  vnode->node->string_depth= string_depth+lst_edge_get_length(edge);
+		  vnode->node->slices= NULL;
+		  SLIST_INSERT_HEAD(&stack, vnode, visit_list);
+		}
+	 }
+  }
+  DEBUG("The longest common substring has length: %zu", max_comm_substr_len);
+#ifdef LOG_DEBUG_ENABLED
+  {
+	 char* common= c_palloc(max_comm_substr_len+1);
+	 common[max_comm_substr_len]= '\0';
+	 LST_Node* nt= max_comm_substr;
+	 size_t cursor= max_comm_substr_len;
+	 while (nt->up_edge != NULL) {
+		cursor -= lst_edge_get_length(nt->up_edge);
+		strncpy(common + cursor,
+				  (char*)(nt->up_edge->range.string->data) + nt->up_edge->range.start_index,
+				  lst_edge_get_length(nt->up_edge));
+		nt= nt->up_edge->src_node;
+	 }
+	 DEBUG("The longest common substring is: %s", common);
+	 pfree(common);
+  }
+#endif
+
+  if (max_comm_substr_len==0) {
+	 DEBUG("The longest common substring is empty. Returning...");
+	 return;
+  }
+
+// Searching the first occurrence on the two strings
+  size_t pos[2]= { 0, 0};
+  SLIST_INIT(&stack);
+  vnode= PALLOC(lcs_visit_node);
+  vnode->node= max_comm_substr;
+  SLIST_INSERT_HEAD(&stack, vnode, visit_list);
+
+  while (!SLIST_EMPTY(&stack)) {
+	 vnode= SLIST_FIRST(&stack);
+	 SLIST_REMOVE_HEAD(&stack, visit_list);
+	 if (vnode->node->kids.lh_first==NULL) {
+		NOT_NULL(vnode->node->up_edge);
+		NOT_NULL(max_comm_substr->up_edge);
+		my_assert(vnode->node->up_edge->range.string == lst1 ||
+					 vnode->node->up_edge->range.string == lst2);
+		pos[(vnode->node->up_edge->range.string==lst1?0:1)]= *(vnode->node->up_edge->range.end_index)-vnode->node->string_depth+1;
+	 } else {
+		for (edge = vnode->node->kids.lh_first;
+			  edge != NULL;
+			  edge = edge->siblings.le_next) {
+		  lcs_visit_node* ivnode= PALLOC(lcs_visit_node);
+		  ivnode->node= edge->dst_node;
+		  SLIST_INSERT_HEAD(&stack, ivnode, visit_list);
+		}
+	 }
+	 pfree(vnode);
+  }
+  DEBUG("New maximal pairing: ( %zu, %zu, %zu).",
+		  pos[1], pos[0], max_comm_substr_len);
+  *pocc1= pos[0];
+  *pocc2= pos[1];
+  *plen= max_comm_substr_len;
+  lst_stree_free(tree);
+}
+
+static
+void
+search_small_exon(pfactor * pp1,
+						pfactor * pp2,
+						plistit pfactit,
+						pfactorization pfact,
+						pEST_info genomic,
+						pEST factorized_est,
+						pconfiguration config) {
+  NOT_NULL(pp1);
+  NOT_NULL(pp2);
+  NOT_NULL(*pp1);
+  NOT_NULL(*pp2);
+  pfactor p1= *pp1;
+  pfactor p2= *pp2;
+// Skip external exons
+  DEBUG("  ...analyzing pair of factors [%d-%d, %d-%d] -- [%d-%d, %d-%d]...",
+		  p1->EST_start, p1->EST_end,
+		  p1->GEN_start, p1->GEN_end,
+		  p2->EST_start, p2->EST_end,
+		  p2->GEN_start, p2->GEN_end);
+  my_assert(p1->EST_start <= p1->EST_end);
+  my_assert(p1->GEN_start <= p1->GEN_end);
+  my_assert(p2->EST_start <= p2->EST_end);
+  my_assert(p2->GEN_start <= p2->GEN_end);
+  const size_t e1len= p1->EST_end + 1 - p1->EST_start;
+  const size_t g1len= p1->GEN_end + 1 - p1->GEN_start;
+  const size_t e2len= p2->EST_end + 1 - p2->EST_start;
+  const size_t g2len= p2->GEN_end + 1 - p2->GEN_start;
+// Check if it is possible to decompose the three exons into one small exon and two normal exons
+  if ((e1len + e2len) >= (_LB_SMALL_EXON_LENGTH_ + 2*_UB_SMALL_EXON_LENGTH_)) {
+	 const size_t e1slen= MIN(MIN(e1len, g1len), _UB_SMALL_EXON_LENGTH_);
+	 char* const e1sfact= c_palloc(e1slen+1);
+	 strncpy(e1sfact, factorized_est->info->EST_seq + p1->EST_end - e1slen, e1slen);
+	 e1sfact[e1slen]= '\0';
+	 const size_t g1slen= MIN(MIN(e1len, g1len), _UB_SMALL_EXON_LENGTH_);
+	 char* const g1sfact= c_palloc(g1slen+1);
+	 strncpy(g1sfact, genomic->EST_seq + p1->GEN_end - g1slen, g1slen);
+	 g1sfact[g1slen]= '\0';
+	 TRACE("EST suffix: %s", e1sfact);
+	 TRACE("GEN suffix: %s", g1sfact);
+
+	 const size_t e2plen= MIN(MIN(e2len, g2len), _UB_SMALL_EXON_LENGTH_);
+	 char* const e2pfact= c_palloc(e2plen+1);
+	 strncpy(e2pfact, factorized_est->info->EST_seq + p2->EST_start - 1, e2plen);
+	 e2pfact[e2plen]= '\0';
+	 const size_t g2plen= MIN(MIN(e2len, g2len), _UB_SMALL_EXON_LENGTH_);
+	 char* const g2pfact= c_palloc(g2plen+1);
+	 strncpy(g2pfact, genomic->EST_seq + p2->GEN_start - 1, g2plen);
+	 g2pfact[g2plen]= '\0';
+	 TRACE("EST prefix: %s", e2pfact);
+	 TRACE("GEN prefix: %s", g2pfact);
+
+	 const size_t* const sed_matrix= edit_distance_matrix(e1sfact, e1slen, g1sfact, g1slen);
+	 const size_t* const ped_matrix= edit_distance_matrix(e2pfact, e2plen, g2pfact, g2plen);
+	 const size_t sed= sed_matrix[(e1slen+1)*(g1slen+1)-1];
+	 const size_t ped= ped_matrix[(e2plen+1)*(g2plen+1)-1];
+	 DEBUG("        original edit distance of the suffix of the first exon: %zu", sed);
+	 DEBUG("        original edit distance of the prefix of the second exon: %zu", ped);
+
+	 if ((sed + ped > 5) ||
+		  (sed > 3) ||
+		  (ped > 3)) {
+		DEBUG("Border alignment is not good. There could be a small exon.");
+// Search the longest common factor of e1sfact+e2pfact and allgfact
+		const size_t elen= e1slen+e2plen;
+		char* const efact= c_palloc(elen+1);
+		strncpy(efact, e1sfact, e1slen);
+		strncpy(efact + e1slen, e2pfact, e2plen);
+		efact[elen]= '\0';
+		const size_t allglen= p2->GEN_start - p1->GEN_end - 1 + g1slen + g2plen;
+		char* allgfact= c_palloc(allglen+1);
+		strncpy(allgfact, genomic->EST_seq + p1->GEN_end - g1slen, allglen);
+		allgfact[allglen]= '\0';
+		size_t pg, pe, cflen;
+		find_longest_common_factor(allgfact+g1slen, allglen-g1slen-g2plen, efact, elen,
+											&pg, &pe, &cflen);
+		if (cflen >= _LB_SMALL_EXON_LENGTH_) {
+		  DEBUG("Found a possible small exon of length (at most) %zu.", cflen);
+		  TRACE("First border refinement.");
+		  TRACE("Factor of the EST sequence: %.*s", pe+cflen, efact);
+		  TRACE("Factor of the genomic seq:  %.*s", pg+cflen, allgfact);
+		  size_t offset_p_1, offset_t1_1, offset_t2_1;
+		  unsigned int new_ed_1= allglen;
+		  const bool ref_res_1= refine_borders(efact, pe+cflen,
+															allgfact, pg+cflen+g1slen,
+															sed,
+															&offset_p_1, &offset_t1_1, &offset_t2_1,
+															&new_ed_1);
+		  TRACE("1st border refinement gave: "
+				  "Success? %s  "
+				  "offset_p: %zu  offset_t1: %zu  offset_t2: %zu  "
+				  "new_edit_distance: %u",
+				  ref_res_1?"OK":"NO", offset_p_1, offset_t1_1, offset_t2_1, new_ed_1);
+		  if (!ref_res_1) {
+			 DEBUG("The border alignments of the first intron is not good enough. Small exon discarded.");
+		  } else if (offset_t2_1 - offset_t1_1 < config->min_intron_length) {
+			 DEBUG("The first intron induced by the small exon is too short (%zunt). "
+					 "Small exon discarded.", offset_t2_1 - offset_t1_1);
+		  } else {
+			 TRACE("Second border refinement.");
+			 TRACE("Factor of the EST sequence: %.*s", elen-offset_p_1, efact+offset_p_1);
+			 TRACE("Factor of the genomic seq:  %.*s", allglen-offset_t2_1, allgfact+offset_t2_1);
+			 size_t offset_p_2, offset_t1_2, offset_t2_2;
+			 unsigned int new_ed_2= allglen;
+			 const bool ref_res_2= refine_borders(efact+offset_p_1, elen-offset_p_1,
+															  allgfact+offset_t2_1, allglen-offset_t2_1,
+															  ped,
+															  &offset_p_2, &offset_t1_2, &offset_t2_2,
+															  &new_ed_2);
+			 TRACE("2nd border refinement gave: "
+					 "Success? %s  "
+					 "offset_p: %zu  offset_t1: %zu  offset_t2: %zu  "
+					 "new_edit_distance: %u",
+					 ref_res_2?"OK":"NO", offset_p_2, offset_t1_2, offset_t2_2, new_ed_2);
+			 if (!ref_res_2) {
+				DEBUG("The border alignments of the second intron is not good enough. Small exon discarded.");
+			 } else if (offset_t2_2 - offset_t1_2 < config->min_intron_length) {
+				DEBUG("The second intron induced by the small exon is too short (%zunt). "
+						"Small exon discarded.", offset_t2_2 - offset_t1_2);
+			 } else if (offset_p_2 < _LB_SMALL_EXON_LENGTH_) {
+				DEBUG("The small exon is too short (%zunt). "
+						"Small exon discarded.", offset_p_2);
+			 } else if (offset_p_2 > _UB_SMALL_EXON_LENGTH_) {
+				DEBUG("The small exon is too long (%zunt). "
+						"Small exon discarded.", offset_p_2);
+			 } else {
+// Compare the "Burset scores"
+				const double prev_burset_freq=
+				  getBursetFrequency_adaptor(genomic->EST_seq,
+													  p1->GEN_end + 1,
+													  p2->GEN_start);
+				const double new_avg_burset_freq=
+				  (getBursetFrequency_adaptor(allgfact, offset_t1_1, offset_t2_1) +
+					getBursetFrequency_adaptor(allgfact+offset_t2_1, offset_t1_2, offset_t2_2)) / 2.0;
+				DEBUG("Previous 'Burset score': %.1f", prev_burset_freq);
+				DEBUG("New average 'Burset score': %.1f", new_avg_burset_freq);
+				if (new_avg_burset_freq >= prev_burset_freq) {
+				  INFO("A new small exon (%zunt) has been detected. "
+						 "The new factorization does not decrease intron score, thus the small exon will be added "
+						 "(old score: %.1f, new score %.1f).", offset_p_2, prev_burset_freq, new_avg_burset_freq);
+				  INFO("Previous 'local' factorization on EST:     (%8d -%8d)   ...   ...   ...    (%8d -%8d).",
+						 p1->EST_start, p1->EST_end,
+						 p2->EST_start, p2->EST_end);
+				  INFO("Previous 'local' factorization on genomic: (%8d -%8d)   ...   ...   ...    (%8d -%8d).",
+						 p1->GEN_start, p1->GEN_end,
+						 p2->GEN_start, p2->GEN_end);
+				  pfactor pnew= factor_create();
+				  pnew->EST_start= p1->EST_end - e1slen + offset_p_1;
+				  pnew->EST_end  = p1->EST_end - e1slen + offset_p_1 + offset_p_2 - 1;
+				  pnew->GEN_start= p1->GEN_end - g1slen + offset_t2_1;
+				  pnew->GEN_end  = p1->GEN_end - g1slen + offset_t2_1 + offset_t1_2 - 1;
+				  p2->EST_start= p1->EST_end - e1slen + offset_p_1 + offset_p_2;
+				  p2->GEN_start= p1->GEN_end - g1slen + offset_t2_1 + offset_t2_2;
+				  p1->EST_end  = p1->EST_end - e1slen + offset_p_1 - 1;
+				  p1->GEN_end  = p1->GEN_end - g1slen + offset_t1_1 - 1;
+				  INFO("Modified 'local' factorization on EST:     (%8d -%8d) (%8d -%8d) (%8d -%8d).",
+						 p1->EST_start, p1->EST_end,
+						 pnew->EST_start, pnew->EST_end,
+						 p2->EST_start, p2->EST_end);
+				  INFO("Modified 'local' factorization on genomic: (%8d -%8d) (%8d -%8d) (%8d -%8d).",
+						 p1->GEN_start, p1->GEN_end,
+						 pnew->GEN_start, pnew->GEN_end,
+						 p2->GEN_start, p2->GEN_end);
+				  list_add_before_iterator(pfactit, pfact, pnew);
+				  *pp1= pnew;
+				} else {
+				  DEBUG("The new placement decreases intron score, thus the small exon will NOT be added.");
+				}
+			 }
+		  }
+		}
+		pfree(efact);
+		pfree(allgfact);
+	 }
+
+	 pfree(sed_matrix);
+	 pfree(ped_matrix);
+	 pfree(e1sfact);
+	 pfree(e2pfact);
+	 pfree(g1sfact);
+	 pfree(g2pfact);
+  }
+}
+
+static
+void
+search_for_new_small_exons(pEST_info genomic,
+									pEST factorized_est,
+									pconfiguration config) {
+  DEBUG("Searching for possible small exons...");
+  const size_t totglen= strlen(genomic->EST_seq);
+  const size_t totelen= strlen(factorized_est->info->EST_seq);
+  plistit pl_f_it= list_first(factorized_est->factorizations);
+  while (listit_has_next(pl_f_it)) {
+	 DEBUG("Analyzing a factorization...");
+	 pfactorization pfact= listit_next(pl_f_it);
+
+	 pfactor p1= NULL, p2= NULL;
+	 plistit pl_factor_it= list_first(pfact);
+	 plistit pl_factor_it_prev= list_first(pfact);
+	 if (listit_has_next(pl_factor_it))
+		p1= listit_next(pl_factor_it);
+	 if (listit_has_next(pl_factor_it)) {
+		p2= listit_next(pl_factor_it);
+		listit_next(pl_factor_it_prev);
+	 }
+	 while (p2 != NULL) {
+		search_small_exon(&p1, &p2, pl_factor_it, pfact,
+								genomic, factorized_est, config);
+		p1= p2;
+		p2= NULL;
+		if (listit_has_next(pl_factor_it)) {
+		  p2= listit_next(pl_factor_it);
+		  listit_next(pl_factor_it_prev);
+		}
+	 }
+	 listit_destroy(pl_factor_it);
+  }
+  listit_destroy(pl_f_it);
+}
 
 // ------------------------------------------------------------------------
 //
 // Removing false small exons
 // Issue #3: Unnecessary exons
 //
-
-// Exons longer than this are always considered NOT SMALL
-#define _UB_SMALL_EXON_LENGTH_ 15
 
 static
 void
@@ -339,5 +712,6 @@ refine_EST_factorizations(pEST_info genomic,
   INFO("Further refinement of EST factorizations...");
   recover_lost_prefixes_and_suffixes(genomic, factorized_est, config);
   remove_false_small_exons(genomic, factorized_est, config);
+  search_for_new_small_exons(genomic, factorized_est, config);
 }
 
