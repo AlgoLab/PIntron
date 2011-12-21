@@ -56,6 +56,7 @@
 #define _LB_SMALL_EXON_LENGTH_ 8
 // Exons longer than this are always considered NOT SMALL
 #define _UB_SMALL_EXON_LENGTH_ 15
+#define _MAX_ERROR_RATE_ 0.17   //approx. 1 error every 6 bases
 
 struct struct_lcs_visit_node;
 
@@ -253,9 +254,9 @@ search_small_exon(pfactor * pp1,
 	 DEBUG("        original edit distance of the suffix of the first exon: %zu", sed);
 	 DEBUG("        original edit distance of the prefix of the second exon: %zu", ped);
 
-	 if ((sed + ped > 5) ||
-		  (sed > 3) ||
-		  (ped > 3)) {
+	 if ((sed + ped > 2.0*_MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_) ||
+		  (sed > _MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_) ||
+		  (ped > _MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_)) {
 		DEBUG("Border alignment is not good. There could be a small exon.");
 // Search the longest common factor of e1sfact+e2pfact and allgfact
 		const size_t elen= e1slen+e2plen;
@@ -567,8 +568,6 @@ remove_false_small_exons(pEST_info genomic,
 // Recovering "lost" prefixes and/or suffixes
 // Issue: #4
 //
-
-#define _MAX_ERROR_RATE_ 0.17   //approx. 1 error every 6 bases
 
 static
 bool
