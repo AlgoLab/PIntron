@@ -394,19 +394,19 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             l = line.rstrip()
             if l[0] == '>':
                 gene['number of processed ESTs'] = gene['number of processed ESTs'] + 1
-#                print(l)
-                new = re.search('\/clone_end=([35])', l).groups()
-                clone_end = new[0]
+                #                print(l)
                 new = re.search('\/gb=([A-Z_0-9]+)', l).groups()
                 current = new[0]
-
                 gene['factorizations'][current] = {
                     'polyA?' : False,
                     'PAS' : False,
                     'exons' : [],
                     'EST' : current,
-                    'clone end' : clone_end,
-                    }
+                }
+                if re.search('\/clone_end=([35])', l):
+                    new = re.search('\/clone_end=([35])', l).groups()
+                    gene['factorizations'][current]['clone end'] = new[0]
+
 
             elif re.match('#polya=1', l):
                 gene['factorizations'][current]['polyA?'] = True
