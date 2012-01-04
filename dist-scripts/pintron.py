@@ -248,7 +248,7 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
 
     strand = entry['genome']['strand']
     strand_signum = 1 if strand == '+' else -1
-    sequence_id = entry['genome']['sequence_id']
+    sequence_id = re.sub(':.*', '', entry['genome']['sequence_id'])
     # The genomic sequence length stored in the JSON file
     # cannot be trusted.
     # seq_record=next(SeqIO.parse(genomic_seq, "fasta"))
