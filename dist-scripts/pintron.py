@@ -510,11 +510,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                     if m != None and isoform["annotated CDS?"]:
                         isoform['Reference frame?'] = True
                 elif k == "Type":
-                    ref = True if v == 'Ref' else False
-                    # if ref != isoform['Reference frame?']:
-                    #     raise ValueError(format("Wrong reference for isoform n. {}\n{}",
-                    #                             str(index), line))
-                    if isoform['Reference frame?']:
+                    if v == 'Ref':
+                        isoform['Reference frame?'] = True
                         if 'RefSeq' in isoform:
                             isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
                         else:
