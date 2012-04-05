@@ -375,11 +375,11 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                         write_gtf_line(f, sequence_id, data_strand['last']['label'], suffix_start, suffix_end, "0", strand, ".", gene_name, isoform_id)
 
                 for p in ['first', 'last']:
-                    if data_strand[p]['print'] and len(data_strand['first']['codon']) >= 3:
-                        data_strand['first']['codon_ok'] = True
+                    if data_strand[p]['print'] and len(data_strand[p]['codon']) >= 3:
+                        data_strand[p]['codon_ok'] = True
 
                         if isoform["annotated CDS?"] and not (data_strand[p]['codon'].upper() in data_strand[p]['codons']):
-                            print("Warning: wrong " + data_strand[p]['delimiter'] +
+                            print("Warning: wrong delimiter" +
                                   ". Found " + data_strand[p]['codon'] + " instead of " +
                                   "/".join(data_strand[p]['codons']))
                             print("whole_cds_len:" + str(whole_cds_len))
