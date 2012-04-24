@@ -270,7 +270,9 @@ void list_remove_at_iterator(plistit it,
 
   --it->l->size;
 
+  _pnode new_prev= it->prev->prev;
   pfree(it->prev);
+  it->prev= new_prev;
 }
 
 void list_difference(plist l1, plist l2, comparator cmp, delete_function delete_node){

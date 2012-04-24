@@ -315,32 +315,57 @@ parse_genomic_header_standard(pEST_info gen) {
 // >chrNN:NNNNN:NNNN:+-1
 // return true if successful
   char* header= strdup(gen->EST_id);
+  char* bakheader= header;
   if (header == NULL) return false;
 
   char* chr= strsep(&header, ":");
-  if (chr == NULL) return false;
+  if (chr == NULL) {
+	 free(bakheader);
+	 return false;
+  }
   chr= strdup(chr);
 
   char* start= strsep(&header, ":");
-  if (start == NULL) return false;
+  if (start == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
 
   char* end= strsep(&header, ":");
-  if (end == NULL) return false;
+  if (end == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
 
   char* strand= strsep(&header, ":");
-  if (strand == NULL) return false;
+  if (strand == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
   strand= strdup(strand);
 
   char* last= strsep(&header, ":");
-  if (last != NULL) return false;
+  if (last != NULL) {
+	 free(bakheader);
+	 free(chr);
+	 free(strand);
+	 return false;
+  }
 
 // Check that everything is correct
   int abs_start= atoi(start);
   int abs_end= atoi(end);
   int EST_strand= atoi(strand);
   if ((abs_start < 1) || (abs_end < 1) ||
-		((EST_strand != -1) && (EST_strand != +1)))
+		((EST_strand != -1) && (EST_strand != +1))) {
+	 free(bakheader);
+	 free(chr);
+	 free(strand);
 	 return false;
+  }
 
   INFO("Genomic chromosome: %s", chr);
   INFO("Genomic abs start:  %d", abs_start);
@@ -353,6 +378,7 @@ parse_genomic_header_standard(pEST_info gen) {
   gen->EST_strand= EST_strand;
   gen->EST_strand_as_read= strand;
 
+  free(bakheader);
   return true;
 }
 

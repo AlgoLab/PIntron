@@ -486,7 +486,9 @@ int main(int argc, char** argv) {
   MYTIME_destroy(pt_st);
   MYTIME_destroy(pt_alg);
   MYTIME_destroy(pt_comp);
+  MYTIME_destroy(pt_ccomp);
   MYTIME_destroy(pt_io);
+  MYTIME_destroy(pt_meg);
 
   log_info(floginfo, "end");
 
