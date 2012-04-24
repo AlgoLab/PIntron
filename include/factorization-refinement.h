@@ -40,6 +40,9 @@
 #include "configuration.h"
 
 void
+remove_duplicated_factorizations(plist factorizations);
+
+void
 refine_EST_factorizations(pEST_info genomic,
 								  pEST factorized_est,
 								  pconfiguration config);

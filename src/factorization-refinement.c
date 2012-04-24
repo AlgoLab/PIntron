@@ -41,6 +41,82 @@
 
 // ------------------------------------------------------------------------
 //
+// Removing duplicated factorizations
+// Issue #14: Duplicated factorizations reported by 'est-fact'
+//
+
+void
+remove_duplicated_factorizations(plist factorizations) {
+  DEBUG("Removing possible duplicated factorizations...");
+  bool has_possible_duplicated= false;
+  unsigned int members= 0;
+  plistit pl_f_it= list_first(factorizations);
+  while (!has_possible_duplicated && listit_has_next(pl_f_it)) {
+	 DEBUG("Analyzing a new factorization...");
+	 pfactorization pfact= listit_next(pl_f_it);
+	 plistit pl_factor_it= list_first(pfact);
+	 unsigned int hashfact= 1;
+	 while (listit_has_next(pl_factor_it)) {
+		pfactor pcurr= listit_next(pl_factor_it);
+		unsigned int shift= (pcurr->EST_start + pcurr->EST_end +
+									pcurr->GEN_start + pcurr->GEN_end) % (sizeof(hashfact)*CHAR_BIT);
+		hashfact = (hashfact >> shift) | (hashfact << (sizeof(hashfact)*CHAR_BIT - shift));
+	 }
+	 has_possible_duplicated = (members & hashfact) != 0u;
+	 members |= hashfact;
+	 listit_destroy(pl_factor_it);
+  }
+  listit_destroy(pl_f_it);
+  if (has_possible_duplicated) {
+	 DEBUG("The computed factorizations could be duplicated. Performing a full-check...");
+	 plistit pl_f_it1= list_first(factorizations);
+	 size_t fact1_id= 0;
+	 while (listit_has_next(pl_f_it1)) {
+		++fact1_id;
+		DEBUG("Analyzing factorization %zu...", fact1_id);
+		pfactorization pfact1= listit_next(pl_f_it1);
+		plistit pl_f_it2= list_first(factorizations);
+		size_t fact2_id= 0;
+		while (listit_has_next(pl_f_it2)) {
+		  pfactorization pfact2= listit_next(pl_f_it2);
+		  if (pfact1 == pfact2)
+			 break;
+		  ++fact2_id;
+		  DEBUG("   ...comparing with factorization %zu...", fact2_id);
+		  if (list_size(pfact1) != list_size(pfact2))
+			 continue;
+		  plistit pl_factor_it1= list_first(pfact1);
+		  plistit pl_factor_it2= list_first(pfact2);
+		  bool is_equal= true;
+		  while (is_equal && listit_has_next(pl_factor_it1)) {
+			 pfactor pcurr1= listit_next(pl_factor_it1);
+			 pfactor pcurr2= listit_next(pl_factor_it2);
+			 is_equal= (pcurr1->EST_start==pcurr2->EST_start) &&
+				(pcurr1->EST_end==pcurr2->EST_end) &&
+				(pcurr1->GEN_start==pcurr2->GEN_start) &&
+				(pcurr1->GEN_end==pcurr2->GEN_end);
+		  }
+		  listit_destroy(pl_factor_it1);
+		  listit_destroy(pl_factor_it2);
+		  if (is_equal) {
+			 DEBUG("Factorizations %zu and %zu are duplicated. Deleting factorization %zu...",
+					 fact1_id, fact2_id, fact1_id);
+			 list_remove_at_iterator(pl_f_it1, factorization_destroy);
+			 break;
+		  }
+		}
+		listit_destroy(pl_f_it2);
+	 }
+	 listit_destroy(pl_f_it1);
+  } else {
+	 DEBUG("The computed factorizations are not duplicated. Continuing...");
+  }
+}
+
+
+
+// ------------------------------------------------------------------------
+//
 // Removing false small exons
 // Issue #3: Unnecessary exons
 //

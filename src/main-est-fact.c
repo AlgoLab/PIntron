@@ -390,6 +390,7 @@ int main(int argc, char** argv) {
 	 MYTIME_reset(pt_ccomp);
 	 MYTIME_start(pt_ccomp);
 	 pEST factorized_est=get_EST_factorizations(est, V, config, gen);
+	 DEBUG("Computed %u factorizations.", list_size(factorized_est->factorizations));
 	 refine_EST_factorizations(gen, factorized_est, config);
 	 MYTIME_stop(pt_ccomp);
 	 MYTIME_stop(pt_comp);
@@ -397,6 +398,8 @@ int main(int argc, char** argv) {
 	 if(!list_is_empty(factorized_est->factorizations)) {
 		MYTIME_start(pt_io);
 		INFO("...EST aligned!");
+		remove_duplicated_factorizations(factorized_est->factorizations);
+		my_assert(!list_is_empty(factorized_est->factorizations));
 		write_multifasta_output(gen, factorized_est, f_multif_out, config->retain_externals);
 		write_single_EST_info(est_multif_out, factorized_est->info);
 		fprintf(fintronic, ">%s\n", est->EST_id);
