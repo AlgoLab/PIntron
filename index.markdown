@@ -21,11 +21,11 @@ A detailed description of the pipeline is available
 [here](http://arxiv.org/abs/1005.1514).
 
 Please cite the following paper when using **PIntron**:   
-Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi,
+Yuri Pirola, Raffaella Rizzi, Ernesto Picardi, Graziano
+Pesole, Gianluca Della Vedova and Paola Bonizzoni.
 *PIntron: A fast method for gene structure prediction via maximal
-pairings of a pattern and a text,* Computational Advances in Bio and
-Medical Sciences, IEEE International Conference on, pp. 33-39, 2011.   
-[doi:10.1109/ICCABS.2011.5729935](http://dx.doi.org/10.1109/ICCABS.2011.5729935)
+pairings of a pattern and a text,* 
+BMC Bioinformatics 2012, 13(Suppl 5):S2 [doi:10.1186/1471-2105-13-S5-S2](http://dx.doi.org/10.1186/1471-2105-13-S5-S2)
 
 Please refer to this [page](usage.html) or to the
 [`README`](https://github.com/AlgoLab/PIntron/blob/master/dist-docs/README.md)
@@ -74,8 +74,10 @@ with PIntron and it is also available at the
 The joint main contributors of this project are Yuri Pirola
 (<yuri.pirola@gmail.com>) and Raffaella Rizzi (<rizzi@disco.unimib.it>).
 
-The work has also greatly benefited from the contribution and the
-supervision of Paola Bonizzoni (<bonizzoni@disco.unimib.it>) and
-[Gianluca Della Vedova](http://gianluca.dellavedova.org).
+## Known Issues
 
-To ask for information, please contact any of the authors.
+We use the issue tracker of
+[GitHub](https://github.com/AlgoLab/PIntron/issues) to report all
+software bugs as well as the progress on their solutions.
+
+Please report [there](https://github.com/AlgoLab/PIntron/issues) any problem you find with PIntron.

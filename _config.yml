@@ -9,4 +9,6 @@ nav:
     link: "install.html"
   - name: Usage
     link: "usage.html"
+  - name: Issues
+    link: "https://github.com/AlgoLab/PIntron/issues"
 ---
