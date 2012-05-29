@@ -87,11 +87,6 @@ check_and_copy(struct gengetopt_args_info* args) {
 		 "(to be used during factorization construction)",
 		 config->max_suffix_discarded);
 
-// DISABLED BECAUSE NEVER USED !!!
-  /* config->max_gap_onEST= -1; */
-  /* INFO("CONFIG: The maximum gap (bP) allowed on EST between two linked MEG nodes " */
-  /* 		 "(if set to -1, checking not performed): %d", config->max_gap_onEST); */
-
   fail_if(args->min_distance_of_splice_sites_arg<0);
   config->max_site_difference= args->min_distance_of_splice_sites_arg;
   INFO("CONFIG: The maximum difference (nt) in order to consider the same ss "
@@ -157,11 +152,6 @@ check_and_copy(struct gengetopt_args_info* args) {
   config->suffpref_length_on_gen=args->suff_pref_length_genomic_arg;
   INFO("CONFIG: The suffix/prefix exon length for intron gap alignment: %d.",
 		 config->suffpref_length_on_gen);
-
-//  fail_if(args->max_seq_in_gst_arg<=0);
-//  config->max_seq_in_gst= args->max_seq_in_gst_arg;
-//  INFO("CONFIG: The GST may contain at most %d sequences.",
-//		 config->max_seq_in_gst);
 
   config->trans_red= !args->no_transitive_reduction_flag;
   INFO("CONFIG: Perform the transitive reduction? %s.",

@@ -81,10 +81,6 @@ struct _configuration {
   //The maximum difference (nt) for considering the same two splicing sites
   unsigned int max_site_difference;
 
-  //The maximum gap allowed on EST between two linked MEG nodes. If their gap is greater than
-  //this value, all the paths through this link are discarded. If set to -1, this checking is not performed.
-  //int max_gap_onEST;
-
   //The maximum number of factorizations in order to consider an
   //EST not an artifact
   //If set to -1, this check is not performed
@@ -117,9 +113,6 @@ struct _configuration {
   //than it is plausible we are allowing too short pairings.
   unsigned int max_pairings_in_MEG;
   double max_freq_shortest_pairing;
-
-// The maximum number of sequences in a generalized suffix tree
-//  unsigned int max_seq_in_gst;
 
   //Parameters for performin gap alignment in intron refinment
   int suffpref_length_on_est;
