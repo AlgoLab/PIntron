@@ -193,6 +193,37 @@ check_and_copy(struct gengetopt_args_info* args) {
 	 FIELD(opt,given)= 1;										\
   }
 
+pconfiguration
+config_clone(pconfiguration src) {
+
+  pconfiguration config= PALLOC(struct _configuration);
+
+  config->min_factor_len= src->min_factor_len;
+  config->min_intron_length= src->min_intron_length;
+  config->max_intron_length= src->max_intron_length;
+  config->min_string_depth_rate= src->min_string_depth_rate;
+  config->max_prefix_discarded_rate= src->max_prefix_discarded_rate;
+  config->max_suffix_discarded_rate= src->max_suffix_discarded_rate;
+  config-> max_prefix_discarded= src-> max_prefix_discarded;
+  config-> max_suffix_discarded= src-> max_suffix_discarded;
+  config->max_site_difference= src->max_site_difference;
+  config->max_number_of_factorizations= src->max_number_of_factorizations;
+  config->max_coverage_diff= src->max_coverage_diff;
+  config->max_exonNUM_diff= src->max_exonNUM_diff;
+  config->max_gapLength_diff= src->max_gapLength_diff;
+  config->retain_externals= src->retain_externals;
+  config->max_pairings_in_MEG= src->max_pairings_in_MEG;
+  config->max_freq_shortest_pairing= src->max_freq_shortest_pairing;
+  config->suffpref_length_on_est= src->suffpref_length_on_est;
+  config->suffpref_length_for_intron= src->suffpref_length_for_intron;
+  config->suffpref_length_on_gen= src->suffpref_length_on_gen;
+  config->trans_red= src->trans_red;
+  config->short_edge_comp= src->short_edge_comp;
+
+  return config;
+}
+
+
 void config_destroy(pconfiguration config) {
   DEBUG("Destroying the struct for the configuration parameters.");
   my_assert(config!=NULL);

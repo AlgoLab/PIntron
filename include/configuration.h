@@ -127,6 +127,8 @@ typedef struct _configuration* pconfiguration;
 
 pconfiguration config_create(int argc, char** argv);
 
+pconfiguration config_clone(pconfiguration src);
+
 void config_destroy(pconfiguration config);
 
 
