@@ -189,8 +189,23 @@ FILE* open_statm_file(void) {
   return pf;
 }
 
-void log_info(FILE* const logfile, char* description) {
+void
+log_info(FILE* const logfile, char* description) {
+  log_info_extended(logfile, description, NULL);
+}
+
+void
+log_info_extended(FILE* const logfile, char* description, void* additional_info) {
   my_assert(logfile!=NULL);
+  if (description==NULL)
+	 description= "not-specified";
+  char* additional_info_str= NULL;
+  if (additional_info==NULL)
+	 additional_info_str="";
+  else {
+	 additional_info_str= c_palloc(2*sizeof(additional_info)+4);
+	 snprintf(additional_info_str, 2*sizeof(additional_info)+3, "\t%p", additional_info);
+  }
 #ifdef __APPLE__
   static struct timeval tv;
   if (description==NULL)
@@ -213,11 +228,12 @@ void log_info(FILE* const logfile, char* description) {
   } else {
 	 rewind(statmfile);
   }
-  if (description==NULL)
-	 description= "not-specified";
   my_getline(&buff, &bsize, statmfile);
   gettimeofday(&tv, NULL);
   INFO("log-information %s\t%lu\t%s", description, (unsigned long)tv.tv_sec, buff);
   fprintf(logfile, "%s\t%lu\t%s\n", description, (unsigned long)tv.tv_sec, buff);
 #endif
+  if (additional_info!=NULL) {
+	 pfree(additional_info_str);
+  }
 }

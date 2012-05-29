@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2010  Yuri Pirola
+ * Copyright (C) 2010,2012  Yuri Pirola
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -49,6 +49,7 @@
 #define DTYPE unsigned long long
 
 typedef struct _mytime* pmytime;
+typedef struct _mytime_parallel* pmytime_parallel;
 
 void
 MYTIME_print_interval(FILE*, pmytime);
@@ -68,11 +69,26 @@ MYTIME_destroy(pmytime pt);
 void
 MYTIME_start(pmytime pt);
 
+pmytime_parallel
+MYTIME_start_parallel(pmytime pt);
+
+#define MYTIME_START_PARALLEL(pt)											\
+  pmytime_parallel __local__##pt##__= MYTIME_start_parallel(pt)
+
+#define MYTIME_START_PARALLEL_REUSE(pt)			\
+  __local__##pt##__= MYTIME_start_parallel(pt)
+
 void
 MYTIME_reset(pmytime pt);
 
 void
 MYTIME_stop(pmytime pt);
+
+void
+MYTIME_stop_parallel(pmytime_parallel ppt);
+
+#define MYTIME_STOP_PARALLEL(pt)						\
+  MYTIME_stop_parallel(__local__##pt##__)
 
 const char*
 MYTIME_getname(pmytime pt);

@@ -40,6 +40,12 @@ struct _mytime {
   bool active;
 };
 
+struct _mytime_parallel {
+  pmytime parent;
+  struct timeval start;
+  struct timeval stop;
+};
+
 
 static const char* default_timer_name= "generic timer";
 
@@ -110,6 +116,23 @@ MYTIME_start(pmytime pt) {
   my_assert(pt!=NULL);
   pt->active= true;
   gettimeofday(&pt->start, NULL);
+}
+
+pmytime_parallel
+MYTIME_start_parallel(pmytime pt) {
+  my_assert(pt!=NULL);
+  pmytime_parallel ppt= PALLOC(struct _mytime_parallel);
+  ppt->parent= pt;
+  gettimeofday(&ppt->start, NULL);
+  return ppt;
+}
+
+void
+MYTIME_stop_parallel(pmytime_parallel ppt) {
+  my_assert(ppt!=NULL);
+  gettimeofday(&(ppt->stop), NULL);
+  ppt->parent->interval+= diff_usec(ppt->start, ppt->stop);
+  pfree(ppt);
 }
 
 void
