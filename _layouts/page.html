@@ -1,0 +1,19 @@
+---
+layout: default
+---
+
+<div>
+<article role="article">
+  {% if page.title %}
+  <header>
+    <h1 class="entry-title">{% if site.titlecase %}{{ page.title | titlecase }}{% else %}{{ page.title }}{% endif %}</h1>
+  </header>
+  {% endif %}
+  {{ content }}
+</article>
+</div>
+{% unless page.sidebar == false %}
+<aside class="sidebar">
+{% include custom/asides/toc.html %}
+</aside>
+{% endunless %}

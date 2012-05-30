@@ -17,19 +17,14 @@ spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic seq
   cpan JSON` on MacOS X)
 
 
-## Installation
+## Compilation and Installation
 
-`PIntron` package can be installed using the pre-built binary packages
-(available from `http://www.algolab.eu/PIntron` only for some operating
-systems and architectures) or can be built from scratch.
-
-
-### Building from scratch
+`PIntron` is only distributed as source code and must be manually built.
 
 The build process is driven by the GNU make utility and can be performed
 by the following invocation:
 
-      make dist
+    make dist
 
 For the compilation process, you will need the standard build tools such
 as the aforementioned GNU make utility and a recent C compiler (tested on

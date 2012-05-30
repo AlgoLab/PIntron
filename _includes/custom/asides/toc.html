@@ -1,0 +1,10 @@
+{% if page.nav %}
+<section>
+  <ul>
+  {% for nav in page.nav %}
+  <li><a href="{{ nav['link'] }}">{{ nav['name'] }}</a></li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+

@@ -1,42 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-"http://www.w3.org/TR/html4/strict.dtd">
-<html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width = 750">
-    <link rel="stylesheet" type="text/css" href="css/stylesheet.css" charset="utf-8">
-    <title>{{ page.title }}</title>
-  </head>
-  <body id="intro">
-    <div id="wrapper">
-      <div id="header" onclick="javascript:window.location='http://{{ site.github_user }}.github.com/{{ site.github_repository }}/'">
-        <h1>{{ page.title }}</h1>
-      </div>
-      <div id="page_body">
-      {% if site.nav %}
-      {% capture navsize %} {{ site.nav | size }} {% endcapture %}
-      {% if page.nav %}
-      {% capture pagsize %} {{ page.nav | size }} {% endcapture %}
-      {% capture navsize %} {{ navsize | plus:pagsize }} {% endcapture %}
-      {% endif %}
-        <table id="pagenav">
-          <tr>
-          {% for nav in site.nav %}
-          <td width="{{ 100 | divided_by:navsize}}%"><a href="{{ nav['link'] }}">{{ nav['name'] }}</a></td>
-          {% endfor %}
-          {% if page.nav %}
-          {% for nav in page.nav %}
-          <td><a href="{{ nav['link'] }}">{{ nav['name'] }}</a></td>
-          {% endfor %}
-          {% endif %}
-          </tr>
-        </table>
-      {% endif %}
-        <div id="content">
-          {{ content }}
-        </div>
-      </div>
+{% capture root_url %}{{ site.root | strip_slash }}{% endcapture %}
+{% include std/head.html %}
+<body {% if page.body_id %} id="{{ page.body_id }}" {% endif %} {% if page.sidebar == false %} class="no-sidebar" {% endif %} {% if page.sidebar == 'collapse' or site.sidebar == 'collapse' %} class="collapse-sidebar sidebar-footer" {% endif %}>
+  <header role="banner">{% include std/header.html %}</header>
+  <nav role="navigation">{% include std/navigation.html %}</nav>
+  <div id="main">
+    <div id="content">
+      {{ content | expand_urls: root_url }}
     </div>
-    <a href="http://github.com/{{site.github_user}}/{{site.github_repository}}"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-  </body>
+  </div>
+  <footer role="contentinfo">{% include std/footer.html %}</footer>
+  {% include std/after_footer.html %}
+</body>
 </html>
