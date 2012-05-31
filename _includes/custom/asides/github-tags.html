@@ -1,0 +1,27 @@
+{% if site.github_user %}
+<section>
+  <h1>Latest releases</h1>
+  <ul id="gh_tags">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '{{site.root}}/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showTags({
+            user: '{{site.github_user}}',
+            repository: '{{site.github_repository}}',
+{% if site.github_tags_count %}count: {{site.github_tags_count}},{% endif %}
+            target: '#gh_tags'
+        });
+    });
+  </script>
+  <script src="{{site.root}}/javascripts/github.js" type="text/javascript"> </script>
+</section>
+{% endif %}
