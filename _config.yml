@@ -9,6 +9,8 @@ author: AlgoLab
 
 github_repository: PIntron
 github_user: AlgoLab
+github_tags_count: 3
+
 nav:
   - name: Home
     link: "index.html"
