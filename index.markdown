@@ -1,11 +1,25 @@
 ---
-layout: default
-title: PIntron
+layout: page
+nav:
+  - name: Description
+    link: "#description"
+  - name: Usage
+    link: "#usage"
+  - name: Download
+    link: "#download"
+  - name: Installation
+    link: "#install"
+  - name: License
+    link: "#license"
+  - name: Authors
+    link: "#authors"
+  - name: Known Issues
+    link: "#known_issues"
 ---
 
-A novel pipeline for gene-structure prediction based on spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic sequence.
-
 ## Description
+
+**PIntron** is a novel pipeline for gene-structure prediction based on spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic sequence.
 
 **PIntron** is composed by four steps:
 Firstly, alternative alignments of expressed sequences to a reference
@@ -26,6 +40,9 @@ Pesole, Gianluca Della Vedova and Paola Bonizzoni.
 *PIntron: A fast method for gene structure prediction via maximal
 pairings of a pattern and a text,* 
 BMC Bioinformatics 2012, 13(Suppl 5):S2 [doi:10.1186/1471-2105-13-S5-S2](http://dx.doi.org/10.1186/1471-2105-13-S5-S2)
+
+
+## Usage
 
 Please refer to this [page](usage.html) or to the
 [`README`](https://github.com/AlgoLab/PIntron/blob/master/dist-docs/README.md)

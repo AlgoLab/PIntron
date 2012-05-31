@@ -1,0 +1,4 @@
+{% if site.nav %}<ul class="main-navigation">
+{% for nav in site.nav %}<li><a href="{{ nav['link'] }}">{{ nav['name'] }}</a></li>{% endfor %}
+</ul>{% endif %}
+
