@@ -31,11 +31,11 @@ alignments is determined based on a parsimony principle.
 Finally, the resulting introns are reconciliated and classified
 according to general biological criteria.
 
-Please cite the following paper when using **PIntron**:
+Please cite the following paper when using **PIntron**:  
 Yuri Pirola, Raffaella Rizzi, Ernesto Picardi, Graziano
-Pesole, Gianluca Della Vedova and Paola Bonizzoni.
+Pesole, Gianluca Della Vedova and Paola Bonizzoni.  
 *PIntron: A fast method for gene structure prediction via maximal
-pairings of a pattern and a text,*
+pairings of a pattern and a text.*  
 BMC Bioinformatics 2012, 13(Suppl 5):S2 [doi:10.1186/1471-2105-13-S5-S2](http://dx.doi.org/10.1186/1471-2105-13-S5-S2)
 
 The program is developed and heavily tested on Linux, but it should
