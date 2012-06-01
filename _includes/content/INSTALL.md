@@ -1,21 +1,18 @@
 #  PIntron
 
-A novel pipeline for gene-structure prediction based on
-spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic sequence.
-
-
 ## Requirements
 
 `PIntron` requires the following free software:
 
-- Python v3.0 or newer (available from `http://www.python.org/download/`)
+- Python v3.0 or newer. Python v3.1 or newer is
+  recommended
 - Perl (tested on Perl v5.10.1 but it should work also with older
   versions)
 - The JSON Perl module (available from CPAN). On most platforms, this
   module can be installed by using the command `cpan JSON` with
   administrator/superuser privileges (e.g., by using the command `sudo
   cpan JSON` on MacOS X)
-
+- A recent version of the standard GNU toolchain (gcc, make).
 
 ## Compilation and Installation
 
@@ -25,10 +22,6 @@ The build process is driven by the GNU make utility and can be performed
 by the following invocation:
 
     make dist
-
-For the compilation process, you will need the standard build tools such
-as the aforementioned GNU make utility and a recent C compiler (tested on
-`gcc v4.4`).
 
 The command will produce a compressed archive `dist/pintron-*.tar.gz`
 that can be used for the installation or the execution.

@@ -10,5 +10,5 @@ nav:
     link: "#usage"
 ---
 
-{% include content/README.md %}
+{% include content/USAGE.md %}
 

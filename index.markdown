@@ -4,17 +4,17 @@ nav:
   - name: Description
     link: "#description"
   - name: Usage
-    link: "#usage"
+    link: "usage.html"
   - name: Download
-    link: "#download"
+    link: "https://github.com/AlgoLab/PIntron/tarball/master"
   - name: Installation
-    link: "#install"
+    link: "install.html"
   - name: License
     link: "#license"
   - name: Authors
     link: "#authors"
   - name: Known Issues
-    link: "#known_issues"
+    link: "https://github.com/AlgoLab/PIntron/issues"
 ---
 
 ## Description
@@ -31,44 +31,29 @@ alignments is determined based on a parsimony principle.
 Finally, the resulting introns are reconciliated and classified
 according to general biological criteria.
 
-A detailed description of the pipeline is available
-[here](http://arxiv.org/abs/1005.1514).
-
-Please cite the following paper when using **PIntron**:   
+Please cite the following paper when using **PIntron**:
 Yuri Pirola, Raffaella Rizzi, Ernesto Picardi, Graziano
 Pesole, Gianluca Della Vedova and Paola Bonizzoni.
 *PIntron: A fast method for gene structure prediction via maximal
-pairings of a pattern and a text,* 
+pairings of a pattern and a text,*
 BMC Bioinformatics 2012, 13(Suppl 5):S2 [doi:10.1186/1471-2105-13-S5-S2](http://dx.doi.org/10.1186/1471-2105-13-S5-S2)
 
-
-## Usage
-
-Please refer to this [page](usage.html) or to the
-[`README`](https://github.com/AlgoLab/PIntron/blob/master/dist-docs/README.md)
-file in the source distribution for the detailed usage notes.
-
+The program is developed and heavily tested on Linux, but it should
+run also on OS X.
 
 ## Download
-
-The latest stable version of PIntron is **v1.2.17** (*Nov. 15, 2011*).
-
-PIntron is only distributed as source code.
 
 The latest source code version can be downloaded from the [GitHub page](https://github.com/AlgoLab/PIntron) as a [zip](https://github.com/AlgoLab/PIntron/zipball/master) or as [tar](https://github.com/AlgoLab/PIntron/tarball/master) archive.
 It is also possible to clone the source repository using the following command:
 
     git clone https://github.com/AlgoLab/PIntron.git
 
-Older versions are also [available](https://github.com/AlgoLab/PIntron/tags).
+PIntron is only distributed as source code.
 
+We release only stable versions, therefore you are encouraged to
+upgrade always to the latest version.
 
-## Install
-
-Please refer to this [page](install.html) or to the
-[`INSTALL`](https://github.com/AlgoLab/PIntron/blob/master/dist-docs/INSTALL.md)
-file in the source distribution for the detailed installation instructions.
-
+Anyway, older versions are also [available](https://github.com/AlgoLab/PIntron/tags).
 
 ## License
 
@@ -90,11 +75,3 @@ with PIntron and it is also available at the
 
 The joint main contributors of this project are Yuri Pirola
 (<yuri.pirola@gmail.com>) and Raffaella Rizzi (<rizzi@disco.unimib.it>).
-
-## Known Issues
-
-We use the issue tracker of
-[GitHub](https://github.com/AlgoLab/PIntron/issues) to report all
-software bugs as well as the progress on their solutions.
-
-Please report [there](https://github.com/AlgoLab/PIntron/issues) any problem you find with PIntron.
