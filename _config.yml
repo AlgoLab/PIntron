@@ -16,10 +16,12 @@ nav:
     link: "index.html"
   - name: Installation
     link: "install.html"
-  - name: Usage
-    link: "usage.html"
-  - name: Issues
-    link: "https://github.com/AlgoLab/PIntron/issues"
+  - name: Get started
+    link: "example.html"
+  - name: Documentation
+    link: "documentation.html"
+  - name: Credits
+    link: "credits.html"
 
 simple_search: http://google.com/search
 google_analytics_tracking_id: UA-32216930-1
