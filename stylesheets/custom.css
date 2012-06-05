@@ -1,3 +1,37 @@
 article>h1 {
         display: none;
 }
+
+
+div#tocBlock {
+    float: right;
+    font-size: 10pt;
+    width: 300px;
+    padding-left: 20px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+
+    background: #dfdfdf;
+    border: solid 1px #999999;
+    margin: 0 0 10px 15px;
+
+}
+
+div#tocBlock .tocHeading {
+    font-weight: bold;
+    font-size: 125%;
+}
+
+div#tocBlock #toc {
+    background: #dfdfdf;
+}
+
+div#tocBlock #toc ul {
+    list-style: disc;
+}
+
+div#tocBlock #toc ul li {
+    margin-left: 5px !important;
+    padding: 0 !important;
+}
