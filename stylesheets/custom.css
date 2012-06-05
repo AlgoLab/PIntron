@@ -1,5 +1,9 @@
 article>h1 {
-        display: none;
+    display: none;
+}
+
+.info-text {
+    font-size:0.925em;
 }
 
 
