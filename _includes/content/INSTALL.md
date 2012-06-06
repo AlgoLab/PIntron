@@ -9,12 +9,11 @@ It is also possible to clone the source repository using the following command:
 
 We release only stable versions, therefore you are encouraged to
 upgrade always to the latest version.
-
 Anyway, older versions are also [available](https://github.com/AlgoLab/PIntron/tags).
 
 ## Requirements
 
-`PIntron` requires the following free software:
+PIntron requires the following free software:
 
 - Python v3.0 or newer. Python v3.1 or newer is
   recommended
@@ -28,7 +27,7 @@ Anyway, older versions are also [available](https://github.com/AlgoLab/PIntron/t
 
 ## Compilation and Installation
 
-`PIntron` is only distributed as source code and must be manually built.
+PIntron is only distributed as source code and must be manually built.
 
 The build process is driven by the GNU make utility and can be performed
 by the following invocation:

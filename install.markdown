@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Compilation and Installation
-toc: true
+title: Install
+toc: false
 ---
 
 {% include content/INSTALL.md %}
