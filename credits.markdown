@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Credits
-toc: true
+toc: false
 ---
 
 ## Authors
@@ -18,8 +18,7 @@ Bonizzoni (<bonizzoni@disco.unimib.it>).
 We would like to thank *Marcello Varisco* for his contribution in the
 PIntron development.
 
-
-## Founding
+## Funding
 
 This research is supported in part by FAR MIUR 60% grant "Algorithmic
 methods and combinatorial structures in Bioinformatics"
@@ -37,3 +36,11 @@ License (AGPL)](https://www.gnu.org/licenses/agpl.html), either version
 PIntron is distributed in the hope that it will be useful, but without
 any warranty; without even the implied warranty of merchantability or
 fitness for a particular purpose.
+
+
+## Third-party components
+
+PIntron uses the following open source software:
+
+*  [libstree](http://www.icir.org/christian/libstree/index.html), by
+   Christian Kreibich
