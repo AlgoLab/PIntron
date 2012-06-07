@@ -6,6 +6,9 @@ article>h1 {
     font-size:0.925em;
 }
 
+article img {
+    max-width: 100%;
+}
 
 div#tocBlock {
     float: right;
