@@ -9,17 +9,19 @@ author: AlgoLab
 
 github_repository: PIntron
 github_user: AlgoLab
-github_tags_count: 3
+github_tags_count: 2
 
 nav:
   - name: Home
     link: "index.html"
   - name: Installation
     link: "install.html"
-  - name: Usage
-    link: "usage.html"
-  - name: Issues
-    link: "https://github.com/AlgoLab/PIntron/issues"
+  - name: Get started
+    link: "example.html"
+  - name: Documentation
+    link: "documentation.html"
+  - name: Credits
+    link: "credits.html"
 
 simple_search: http://google.com/search
 google_analytics_tracking_id: UA-32216930-1
