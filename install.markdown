@@ -1,12 +1,8 @@
 ---
 layout: page
-title: Compilation and Installation
-nav:
-  - name: Requirements
-    link: "#requirements"
-  - name: Compilation and Installation
-    link: "#compilation_and_installation"
+title: Install
+toc: false
 ---
 
-{% include content/INSTALL.md %}
+{% include content/INSTALL %}
 
