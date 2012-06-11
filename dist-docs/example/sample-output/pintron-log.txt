@@ -1,0 +1,620 @@
+INFO:root:20120611-164242188:PIntron v1.2.29
+INFO:root:20120611-164242188:Copyright (C) 2010,2011  Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi.
+INFO:root:20120611-164242188:This program is distributed under the terms of the GNU Affero General Public License (AGPL), either version 3 of the License, or (at your option) any later version.
+INFO:root:20120611-164242188:This program comes with ABSOLUTELY NO WARRANTY. See the GNU Affero General Public License for more details.
+INFO:root:20120611-164242188:This is free software, and you are welcome to redistribute it under the conditions specified by the license.
+INFO:root:20120611-164242189:Running: ./bin/pintron --bin-dir=bin --genomic=doc/example/genomic.txt --EST=doc/example/ests.txt --organism=human --gene=TP53 --output=pintron-full-output.json --gtf=pintron-cds-annotated-isoforms.gtf --extended-gtf=pintron-all-isoforms.gtf --logfile=pintron-pipeline-log.txt --general-logfile=pintron-log.txt
+INFO:root:20120611-164242189:STEP  1:  Checking executables and preparing input data...
+DEBUG:root:20120611-164242189:Using main program 'pintron' in dir '/home/pintron/bin/pintron' (md5: 1eaf820118b67c47b5e89104d1361a93)
+DEBUG:root:20120611-164242191:Using program 'est-fact' in dir '/home/pintron/bin/est-fact' (md5: 0f8a04b5fd9effcf355e6d765f434ddd)
+DEBUG:root:20120611-164242192:Using program 'min-factorization' in dir '/home/pintron/bin/min-factorization' (md5: 5940a5d6b4dade598be257ce49a83d6e)
+DEBUG:root:20120611-164242194:Using program 'intron-agreement' in dir '/home/pintron/bin/intron-agreement' (md5: 532f66096f8e3445e5ca8e39a238fa0c)
+DEBUG:root:20120611-164242194:Using program 'gene-structure' in dir '/home/pintron/bin/gene-structure' (md5: f478c42c052dcbe6ebfe8a2cc9151c2d)
+DEBUG:root:20120611-164242195:Using program 'compact-compositions' in dir '/home/pintron/bin/compact-compositions' (md5: dc66e8fca806ecd8cf5ef0697dae04e9)
+DEBUG:root:20120611-164242195:Using program 'maximal-transcripts' in dir '/home/pintron/bin/maximal-transcripts' (md5: 733ddde30f31b75da1b8684ce746b738)
+DEBUG:root:20120611-164242195:Using program 'cds-annotation' in dir '/home/pintron/bin/cds-annotation' (md5: 6a867ff049db9f83e8ceb44584f6b36e)
+DEBUG:root:20120611-164242196:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=42, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164242196:cp doc/example/genomic.txt genomic.txt 
+DEBUG:root:20120611-164242199:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=42, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164242199:cp doc/example/ests.txt ests.txt 
+INFO:root:20120611-164242204:STEP  2:  Pre-aligning transcript data...
+DEBUG:root:20120611-164242204:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=42, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164242204:ulimit -t 3600 && ulimit -v 3072000 && /home/pintron/bin/est-fact
+INFO:root:20120611-164244665:STEP  3:  Computing a raw consensus gene structure...
+DEBUG:root:20120611-164244665:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244665:ulimit -t 900 && /home/pintron/bin/min-factorization < raw-multifasta-out.txt >out-agree.txt
+INFO:root:20120611-164244683:STEP  4:  Predicting introns...
+DEBUG:root:20120611-164244683:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244683:ulimit -t 1800 && /home/pintron/bin/intron-agreement
+INFO:root:20120611-164244857:STEP  5:  Computing the final gene structure...
+DEBUG:root:20120611-164244857:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244857:/home/pintron/bin/gene-structure ./
+INFO:root:20120611-164244911:STEP  6:  Computing the final transcript alignments...
+DEBUG:root:20120611-164244911:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244911:/home/pintron/bin/compact-compositions < out-after-intron-agree.txt > build-ests.txt
+INFO:root:20120611-164244969:STEP  7:  Computing the final full-length isoforms...
+DEBUG:root:20120611-164244970:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244970:/home/pintron/bin/maximal-transcripts < build-ests.txt
+DEBUG:root:20120611-164244990:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244991:cp -f TRANSCRIPTS1_1.txt isoforms.txt
+INFO:root:20120611-164244994:STEP  8:  Annotating CDS...
+DEBUG:root:20120611-164244995:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=44, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164244995:/home/pintron/bin/cds-annotation ./ ./ TP53 human
+INFO:root:20120611-1642456:STEP  9:  Saving outputs...
+DEBUG:root:20120611-164245117:Reading VariantGTF: nex=>11!
+DEBUG:root:20120611-164245117:Reading VariantGTF: L=>2591!
+DEBUG:root:20120611-164245117:Reading VariantGTF: CDS=>203..1384!
+DEBUG:root:20120611-164245117:Reading VariantGTF: RefSeq=>NM_000546!
+DEBUG:root:20120611-164245118:Reading VariantGTF: ProtL=>393!
+DEBUG:root:20120611-164245118:Reading VariantGTF: Type=>Ref!
+DEBUG:root:20120611-164245118:Reading VariantGTF: nex=>12!
+DEBUG:root:20120611-164245118:Reading VariantGTF: L=>2516!
+DEBUG:root:20120611-164245118:Reading VariantGTF: CDS=>203..1309!
+DEBUG:root:20120611-164245118:Reading VariantGTF: RefSeq=>(YY)!
+DEBUG:root:20120611-164245118:Reading VariantGTF: ProtL=>368!
+DEBUG:root:20120611-164245118:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245119:Reading VariantGTF: Type=>IR-(E4),CDS;!
+DEBUG:root:20120611-164245119:Reading VariantGTF: nex=>12!
+DEBUG:root:20120611-164245119:Reading VariantGTF: L=>2724!
+DEBUG:root:20120611-164245119:Reading VariantGTF: CDS=>203..1228!
+DEBUG:root:20120611-164245119:Reading VariantGTF: RefSeq=>NM_001126114(YN)!
+DEBUG:root:20120611-164245119:Reading VariantGTF: ProtL=>341!
+DEBUG:root:20120611-164245119:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245119:Reading VariantGTF: Type=>new(E9a),CDS;!
+DEBUG:root:20120611-164245119:Reading VariantGTF: nex=>12!
+DEBUG:root:20120611-164245119:Reading VariantGTF: L=>2651!
+DEBUG:root:20120611-164245120:Reading VariantGTF: CDS=>203..1243!
+DEBUG:root:20120611-164245120:Reading VariantGTF: RefSeq=>NM_001126113(YN)!
+DEBUG:root:20120611-164245120:Reading VariantGTF: ProtL=>346!
+DEBUG:root:20120611-164245120:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245120:Reading VariantGTF: Type=>new(E9b),CDS;!
+DEBUG:root:20120611-164245120:Reading VariantGTF: nex=>11!
+DEBUG:root:20120611-164245120:Reading VariantGTF: L=>2588!
+DEBUG:root:20120611-164245120:Reading VariantGTF: CDS=>200..1381!
+DEBUG:root:20120611-164245120:Reading VariantGTF: RefSeq=>NM_001126112(YY)!
+DEBUG:root:20120611-164245120:Reading VariantGTF: ProtL=>393!
+DEBUG:root:20120611-164245120:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245120:Reading VariantGTF: Type=>A3E (I1, +3 nt), 5UTR;!
+DEBUG:root:20120611-164245121:Reading VariantGTF: nex=>11!
+DEBUG:root:20120611-164245121:Reading VariantGTF: L=>2527!
+DEBUG:root:20120611-164245121:Reading VariantGTF: CDS=>94..1320!
+DEBUG:root:20120611-164245121:Reading VariantGTF: RefSeq=>(NY)!
+DEBUG:root:20120611-164245121:Reading VariantGTF: ProtL=>408!
+DEBUG:root:20120611-164245121:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245121:Reading VariantGTF: Type=>init(E1a),5UTR;!
+DEBUG:root:20120611-164245121:Reading VariantGTF: nex=>10!
+DEBUG:root:20120611-164245121:Reading VariantGTF: L=>2312!
+DEBUG:root:20120611-164245121:Reading VariantGTF: CDS=>203..1105!
+DEBUG:root:20120611-164245121:Reading VariantGTF: RefSeq=>(YY)!
+DEBUG:root:20120611-164245121:Reading VariantGTF: ProtL=>300!
+DEBUG:root:20120611-164245121:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245121:Reading VariantGTF: Type=>skip(E4),CDS;!
+DEBUG:root:20120611-164245122:Reading VariantGTF: nex=>10!
+DEBUG:root:20120611-164245122:Reading VariantGTF: L=>2386!
+DEBUG:root:20120611-164245122:Reading VariantGTF: CDS=>29..505!
+DEBUG:root:20120611-164245122:Reading VariantGTF: RefSeq=>(YN)!
+DEBUG:root:20120611-164245122:Reading VariantGTF: ProtL=>158!
+DEBUG:root:20120611-164245122:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245122:Reading VariantGTF: Type=>A3E (I4, -11 nt), CDS; A5E (I4, +42 nt), CDS;!
+DEBUG:root:20120611-164245122:Reading VariantGTF: nex=>10!
+DEBUG:root:20120611-164245122:Reading VariantGTF: L=>2708!
+DEBUG:root:20120611-164245122:Reading VariantGTF: CDS=>268..372!
+DEBUG:root:20120611-164245122:Reading VariantGTF: RefSeq=>NM_001126118(NN)!
+DEBUG:root:20120611-164245122:Reading VariantGTF: ProtL=>34!
+DEBUG:root:20120611-164245123:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245123:Reading VariantGTF: Type=>IR+(I2),CDS;!
+DEBUG:root:20120611-164245123:Reading VariantGTF: nex=>8!
+DEBUG:root:20120611-164245123:Reading VariantGTF: L=>2404!
+DEBUG:root:20120611-164245123:Reading VariantGTF: CDS=>279..908!
+DEBUG:root:20120611-164245123:Reading VariantGTF: RefSeq=>NM_001126116(NN)!
+DEBUG:root:20120611-164245123:Reading VariantGTF: ProtL=>209!
+DEBUG:root:20120611-164245123:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245123:Reading VariantGTF: Type=>init(E1a),5UTR; new(E9a),CDS;!
+DEBUG:root:20120611-164245123:Reading VariantGTF: nex=>8!
+DEBUG:root:20120611-164245123:Reading VariantGTF: L=>2331!
+DEBUG:root:20120611-164245123:Reading VariantGTF: CDS=>279..923!
+DEBUG:root:20120611-164245123:Reading VariantGTF: RefSeq=>NM_001126117(NN)!
+DEBUG:root:20120611-164245124:Reading VariantGTF: ProtL=>214!
+DEBUG:root:20120611-164245124:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245124:Reading VariantGTF: Type=>init(E1a),5UTR; new(E9b),CDS;!
+DEBUG:root:20120611-164245124:Reading VariantGTF: nex=>8!
+DEBUG:root:20120611-164245124:Reading VariantGTF: L=>2188!
+DEBUG:root:20120611-164245124:Reading VariantGTF: CDS=>196..981!
+DEBUG:root:20120611-164245124:Reading VariantGTF: RefSeq=>(NY)!
+DEBUG:root:20120611-164245124:Reading VariantGTF: ProtL=>261!
+DEBUG:root:20120611-164245124:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245124:Reading VariantGTF: Type=>skip(E4),CDS; skip(E3),CDS; skip(E2),5UTR_CDS;!
+DEBUG:root:20120611-164245124:Reading VariantGTF: nex=>7!
+DEBUG:root:20120611-164245124:Reading VariantGTF: L=>2274!
+DEBUG:root:20120611-164245124:Reading VariantGTF: CDS=>279..1067!
+DEBUG:root:20120611-164245125:Reading VariantGTF: RefSeq=>(NY)!
+DEBUG:root:20120611-164245125:Reading VariantGTF: ProtL=>262!
+DEBUG:root:20120611-164245125:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245125:Reading VariantGTF: Type=>A3E (I7, -3 nt), CDS; init(E1a),5UTR;!
+DEBUG:root:20120611-164245125:Reading VariantGTF: nex=>7!
+DEBUG:root:20120611-164245125:Reading VariantGTF: L=>2271!
+DEBUG:root:20120611-164245125:Reading VariantGTF: CDS=>279..1064!
+DEBUG:root:20120611-164245125:Reading VariantGTF: RefSeq=>NM_001126115(NY)!
+DEBUG:root:20120611-164245125:Reading VariantGTF: ProtL=>261!
+DEBUG:root:20120611-164245125:Reading VariantGTF: Frame=>yes!
+DEBUG:root:20120611-164245125:Reading VariantGTF: Type=>init(E1a),5UTR;!
+DEBUG:root:20120611-164245125:Reading VariantGTF: nex=>5!
+DEBUG:root:20120611-164245125:Reading VariantGTF: L=>631!
+DEBUG:root:20120611-164245126:Reading VariantGTF: CDS=>384..569!
+DEBUG:root:20120611-164245126:Reading VariantGTF: RefSeq=>(NN)!
+DEBUG:root:20120611-164245126:Reading VariantGTF: ProtL=>61!
+DEBUG:root:20120611-164245126:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245126:Reading VariantGTF: Type=>A3E (I4, +21 nt), CDS; term(E11c),CDS_3UTR;!
+DEBUG:root:20120611-164245126:Reading VariantGTF: nex=>2!
+DEBUG:root:20120611-164245126:Reading VariantGTF: L=>1365!
+DEBUG:root:20120611-164245126:Reading VariantGTF: CDS=>54..158!
+DEBUG:root:20120611-164245126:Reading VariantGTF: RefSeq=>(NY)!
+DEBUG:root:20120611-164245126:Reading VariantGTF: ProtL=>34!
+DEBUG:root:20120611-164245126:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245126:Reading VariantGTF: Type=>init(E1a),5UTR; skip(E10),CDS;!
+DEBUG:root:20120611-164245127:Reading VariantGTF: nex=>2!
+DEBUG:root:20120611-164245127:Reading VariantGTF: L=>768!
+DEBUG:root:20120611-164245127:Reading VariantGTF: CDS=>162..308!
+DEBUG:root:20120611-164245127:Reading VariantGTF: RefSeq=>(NN)!
+DEBUG:root:20120611-164245127:Reading VariantGTF: ProtL=>48!
+DEBUG:root:20120611-164245127:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245127:Reading VariantGTF: Type=>term(E11d),CDS_3UTR; init(E1b),5UTR; skip(E4),CDS; skip(E3),CDS; skip(E2),5UTR_CDS;!
+DEBUG:root:20120611-164245127:Reading VariantGTF: nex=>2!
+DEBUG:root:20120611-164245127:Reading VariantGTF: L=>552!
+DEBUG:root:20120611-164245127:Reading VariantGTF: CDS=>279..452!
+DEBUG:root:20120611-164245127:Reading VariantGTF: RefSeq=>(NN)!
+DEBUG:root:20120611-164245127:Reading VariantGTF: ProtL=>57!
+DEBUG:root:20120611-164245127:Reading VariantGTF: Frame=>no!
+DEBUG:root:20120611-164245128:Reading VariantGTF: Type=>term(E11e),CDS_3UTR; init(E1c),5UTR; skip(E6),CDS;!
+DEBUG:root:20120611-164245128:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245129:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:0; 20689; 20411; 0; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245130:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579436:20565:20689:0:0:0; 20689; 20565; 0; 0 }
+DEBUG:root:20120611-164245131:Reading CCDS_transcripts: Row contains exon metadata { 7579512:7579590:20411:20489:0:0:0; 20489; 20411; 0; 0 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7576525:7576657:23344:23476:0:0:100; 23476; 23344; 0; 100 }
+DEBUG:root:20120611-164245132:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:0; 20689; 20411; 0; 0 }
+DEBUG:root:20120611-164245133:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7576525:7576584:23417:23476:0:0:12; 23476; 23417; 0; 12 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245134:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:0; 20689; 20411; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245135:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245136:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:0; 20689; 20411; 0; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579937:20064:20162:0:25:0; 20162; 20064; 25; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245137:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245138:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:0; 20689; 20411; 0; 0 }
+DEBUG:root:20120611-164245139:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245139:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:0:0; 20162; 20061; 0; 0 }
+DEBUG:root:20120611-164245139:Reading CCDS_transcripts: Row contains exon metadata { 7580643:7580752:19249:19358:0:93:0; 19358; 19249; 93; 0 }
+DEBUG:root:20120611-164245139:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245139:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:0; 21630; 21447; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245140:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:74; 23148; 23075; 0; 74 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:137; 22982; 22846; 0; 137 }
+DEBUG:root:20120611-164245141:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:110; 22502; 22393; 0; 110 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:113; 21824; 21712; 0; 113 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578565:21436:21630:0:0:51; 21630; 21436; 0; 51 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7579354:7579590:20411:20647:0:0:0; 20647; 20411; 0; 0 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:0:0; 20301; 20280; 0; 0 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:28:0; 20162; 20061; 28; 0 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245142:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:74; 23148; 23075; 0; 74 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:137; 22982; 22846; 0; 137 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:110; 22502; 22393; 0; 110 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:113; 21824; 21712; 0; 113 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:0:184; 21630; 21447; 0; 184 }
+DEBUG:root:20120611-164245143:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:0:279; 20689; 20411; 0; 279 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579940:20061:20301:0:93:43; 20301; 20061; 93; 43 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7576525:7576657:23344:23476:0:0:100; 23476; 23344; 0; 100 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245144:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578811:21190:21630:0:278:0; 21630; 21190; 278; 0 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1289; 28281; 26993; 0; 1289 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:107; 26074; 25968; 0; 107 }
+DEBUG:root:20120611-164245145:Reading CCDS_transcripts: Row contains exon metadata { 7576525:7576584:23417:23476:0:0:12; 23476; 23417; 0; 12 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578811:21190:21630:0:278:0; 21630; 21190; 278; 0 }
+DEBUG:root:20120611-164245146:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578554:21447:21630:0:21:0; 21630; 21447; 21; 0 }
+DEBUG:root:20120611-164245147:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577158:22843:22982:0:0:0; 22982; 22843; 0; 0 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245148:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245149:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578811:21190:21630:0:278:0; 21630; 21190; 278; 0 }
+DEBUG:root:20120611-164245149:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245149:Reading CCDS_transcripts: Row contains exon metadata { 7573927:7574033:25968:26074:0:0:0; 26074; 25968; 0; 0 }
+DEBUG:root:20120611-164245149:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576926:23075:23148:0:0:0; 23148; 23075; 0; 0 }
+DEBUG:root:20120611-164245149:Reading CCDS_transcripts: Row contains exon metadata { 7577019:7577155:22846:22982:0:0:0; 22982; 22846; 0; 0 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7577499:7577608:22393:22502:0:0:0; 22502; 22393; 0; 0 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7578177:7578289:21712:21824:0:0:0; 21824; 21712; 0; 0 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578811:21190:21630:0:278:0; 21630; 21190; 278; 0 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7578480:7578533:21468:21521:0:0:54; 21521; 21468; 0; 54 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7579312:7579590:20411:20689:0:85:8; 20689; 20411; 85; 8 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7579700:7579721:20280:20301:0:22:0; 20301; 20280; 22; 0 }
+DEBUG:root:20120611-164245150:Reading CCDS_transcripts: Row contains exon metadata { 7579839:7579940:20061:20162:0:102:0; 20162; 20061; 102; 0 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7590695:7590868:9133:9306:0:174:0; 9306; 9133; 174; 0 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7571720:7573008:26993:28281:1:0:1207; 28281; 26993; 0; 1207 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7576853:7576928:23073:23148:0:53:0; 23148; 23073; 53; 0 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7578712:7579269:20732:21289:0:0:460; 21289; 20732; 0; 460 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7580748:7580957:19044:19253:0:161:0; 19253; 19044; 161; 0 }
+DEBUG:root:20120611-164245151:Reading CCDS_transcripts: Row contains exon metadata { 7577498:7577608:22393:22503:0:0:100; 22503; 22393; 0; 100 }
+DEBUG:root:20120611-164245152:Reading CCDS_transcripts: Row contains exon metadata { 7578371:7578811:21190:21630:0:278:0; 21630; 21190; 278; 0 }
+DEBUG:root:20120611-164245232:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=45, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164245232:<function json2gtf at 0x112bf30>
+DEBUG:root:20120611-164245232:pintron-full-output.json:pintron-cds-annotated-isoforms.gtf:doc/example/genomic.txt
+DEBUG:root:20120611-164245246:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7576525; 7576537; 7576584; 7576584; 12; 48 }  --  { 7576584; 7576585; 7576537; 7576584; 7576525; 7576536 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245246:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7576525; 7576625; 7576657; 7576657; 100; 33 }  --  { 7576657; 7576658; 7576625; 7576657; 7576525; 7576624 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7577019; 7577019; 7577158; 7577158; 0; 140 }  --  { 7577158; 7577159; 7577019; 7577158; 7577018; 7577019 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245247:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 21; 7578371; 7578371; 7578533; 7578554; 0; 163 }  --  { 7578534; 7578554; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245248:Data for GTF file: { 102; 7579839; 7579839; 7579838; 7579940; 0; 0 }  --  { 7579839; 7579940; 7579839; 7579838; 7579838; 7579839 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 22; 7579700; 7579700; 7579699; 7579721; 0; 0 }  --  { 7579700; 7579721; 7579700; 7579699; 7579699; 7579700 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 85; 7579312; 7579320; 7579505; 7579590; 8; 186 }  --  { 7579506; 7579590; 7579320; 7579505; 7579312; 7579319 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7578480; 7578534; 7578533; 7578533; 54; 0 }  --  { 7578533; 7578534; 7578534; 7578533; 7578480; 7578533 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245249:Data for GTF file: { 161; 7580748; 7580748; 7580796; 7580957; 0; 49 }  --  { 7580797; 7580957; 7580748; 7580796; 7580747; 7580748 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7578712; 7579172; 7579269; 7579269; 460; 98 }  --  { 7579269; 7579270; 7579172; 7579269; 7578712; 7579171 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 53; 7576853; 7576853; 7576875; 7576928; 0; 23 }  --  { 7576876; 7576928; 7576853; 7576875; 7576852; 7576853 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7577498; 7577598; 7577608; 7577608; 100; 11 }  --  { 7577608; 7577609; 7577598; 7577608; 7577498; 7577597 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245250:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245251:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7576525; 7576625; 7576657; 7576657; 100; 33 }  --  { 7576657; 7576658; 7576625; 7576657; 7576525; 7576624 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7579512; 7579512; 7579590; 7579590; 0; 79 }  --  { 7579590; 7579591; 7579512; 7579590; 7579511; 7579512 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7579312; 7579312; 7579436; 7579436; 0; 125 }  --  { 7579436; 7579437; 7579312; 7579436; 7579311; 7579312 }
+DEBUG:root:20120611-164245252:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 25; 7579839; 7579839; 7579912; 7579937; 0; 74 }  --  { 7579913; 7579937; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245253:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245254:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7576525; 7576537; 7576584; 7576584; 12; 48 }  --  { 7576584; 7576585; 7576537; 7576584; 7576525; 7576536 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245255:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 93; 7580643; 7580643; 7580659; 7580752; 0; 17 }  --  { 7580660; 7580752; 7580643; 7580659; 7580642; 7580643 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7579839; 7579839; 7579940; 7579940; 0; 102 }  --  { 7579940; 7579941; 7579839; 7579940; 7579838; 7579839 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245256:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 93; 7579700; 7579743; 7579847; 7579940; 43; 105 }  --  { 7579848; 7579940; 7579743; 7579847; 7579700; 7579742 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7579312; 7579591; 7579590; 7579590; 279; 0 }  --  { 7579590; 7579591; 7579591; 7579590; 7579312; 7579590 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7578371; 7578555; 7578554; 7578554; 184; 0 }  --  { 7578554; 7578555; 7578555; 7578554; 7578371; 7578554 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7578177; 7578290; 7578289; 7578289; 113; 0 }  --  { 7578289; 7578290; 7578290; 7578289; 7578177; 7578289 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7577499; 7577609; 7577608; 7577608; 110; 0 }  --  { 7577608; 7577609; 7577609; 7577608; 7577499; 7577608 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7577019; 7577156; 7577155; 7577155; 137; 0 }  --  { 7577155; 7577156; 7577156; 7577155; 7577019; 7577155 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7576853; 7576927; 7576926; 7576926; 74; 0 }  --  { 7576926; 7576927; 7576927; 7576926; 7576853; 7576926 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245257:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7579354; 7579354; 7579590; 7579590; 0; 237 }  --  { 7579590; 7579591; 7579354; 7579590; 7579353; 7579354 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7578371; 7578422; 7578565; 7578565; 51; 144 }  --  { 7578565; 7578566; 7578422; 7578565; 7578371; 7578421 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7578177; 7578290; 7578289; 7578289; 113; 0 }  --  { 7578289; 7578290; 7578290; 7578289; 7578177; 7578289 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7577499; 7577609; 7577608; 7577608; 110; 0 }  --  { 7577608; 7577609; 7577609; 7577608; 7577499; 7577608 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7577019; 7577156; 7577155; 7577155; 137; 0 }  --  { 7577155; 7577156; 7577156; 7577155; 7577019; 7577155 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7576853; 7576927; 7576926; 7576926; 74; 0 }  --  { 7576926; 7576927; 7576927; 7576926; 7576853; 7576926 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245258:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245259:WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html
+DEBUG:root:20120611-164245259:time.struct_time(tm_year=2012, tm_mon=6, tm_mday=11, tm_hour=16, tm_min=42, tm_sec=45, tm_wday=0, tm_yday=163, tm_isdst=1)
+DEBUG:root:20120611-164245259:<function json2gtf at 0x112bf30>
+DEBUG:root:20120611-164245259:pintron-full-output.json:pintron-all-isoforms.gtf:doc/example/genomic.txt
+DEBUG:root:20120611-164245272:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7576525; 7576537; 7576584; 7576584; 12; 48 }  --  { 7576584; 7576585; 7576537; 7576584; 7576525; 7576536 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245272:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7576525; 7576625; 7576657; 7576657; 100; 33 }  --  { 7576657; 7576658; 7576625; 7576657; 7576525; 7576624 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245273:Data for GTF file: { 0; 7577019; 7577019; 7577158; 7577158; 0; 140 }  --  { 7577158; 7577159; 7577019; 7577158; 7577018; 7577019 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 21; 7578371; 7578371; 7578533; 7578554; 0; 163 }  --  { 7578534; 7578554; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245274:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 102; 7579839; 7579839; 7579838; 7579940; 0; 0 }  --  { 7579839; 7579940; 7579839; 7579838; 7579838; 7579839 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 22; 7579700; 7579700; 7579699; 7579721; 0; 0 }  --  { 7579700; 7579721; 7579700; 7579699; 7579699; 7579700 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 85; 7579312; 7579320; 7579505; 7579590; 8; 186 }  --  { 7579506; 7579590; 7579320; 7579505; 7579312; 7579319 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7578480; 7578534; 7578533; 7578533; 54; 0 }  --  { 7578533; 7578534; 7578534; 7578533; 7578480; 7578533 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245275:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 161; 7580748; 7580748; 7580796; 7580957; 0; 49 }  --  { 7580797; 7580957; 7580748; 7580796; 7580747; 7580748 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7578712; 7579172; 7579269; 7579269; 460; 98 }  --  { 7579269; 7579270; 7579172; 7579269; 7578712; 7579171 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 53; 7576853; 7576853; 7576875; 7576928; 0; 23 }  --  { 7576876; 7576928; 7576853; 7576875; 7576852; 7576853 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 278; 7578371; 7578371; 7578533; 7578811; 0; 163 }  --  { 7578534; 7578811; 7578371; 7578533; 7578370; 7578371 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7577498; 7577598; 7577608; 7577608; 100; 11 }  --  { 7577608; 7577609; 7577598; 7577608; 7577498; 7577597 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245276:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245277:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7576525; 7576625; 7576657; 7576657; 100; 33 }  --  { 7576657; 7576658; 7576625; 7576657; 7576525; 7576624 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7579512; 7579512; 7579590; 7579590; 0; 79 }  --  { 7579590; 7579591; 7579512; 7579590; 7579511; 7579512 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7579312; 7579312; 7579436; 7579436; 0; 125 }  --  { 7579436; 7579437; 7579312; 7579436; 7579311; 7579312 }
+DEBUG:root:20120611-164245278:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 25; 7579839; 7579839; 7579912; 7579937; 0; 74 }  --  { 7579913; 7579937; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245279:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245280:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7576525; 7576537; 7576584; 7576584; 12; 48 }  --  { 7576584; 7576585; 7576537; 7576584; 7576525; 7576536 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245281:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 93; 7580643; 7580643; 7580659; 7580752; 0; 17 }  --  { 7580660; 7580752; 7580643; 7580659; 7580642; 7580643 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7579839; 7579839; 7579940; 7579940; 0; 102 }  --  { 7579940; 7579941; 7579839; 7579940; 7579838; 7579839 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7579312; 7579312; 7579590; 7579590; 0; 279 }  --  { 7579590; 7579591; 7579312; 7579590; 7579311; 7579312 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7578371; 7578371; 7578554; 7578554; 0; 184 }  --  { 7578554; 7578555; 7578371; 7578554; 7578370; 7578371 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7578177; 7578177; 7578289; 7578289; 0; 113 }  --  { 7578289; 7578290; 7578177; 7578289; 7578176; 7578177 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7577499; 7577499; 7577608; 7577608; 0; 110 }  --  { 7577608; 7577609; 7577499; 7577608; 7577498; 7577499 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7577019; 7577019; 7577155; 7577155; 0; 137 }  --  { 7577155; 7577156; 7577019; 7577155; 7577018; 7577019 }
+DEBUG:root:20120611-164245282:Data for GTF file: { 0; 7576853; 7576853; 7576926; 7576926; 0; 74 }  --  { 7576926; 7576927; 7576853; 7576926; 7576852; 7576853 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7573927; 7573927; 7574033; 7574033; 0; 107 }  --  { 7574033; 7574034; 7573927; 7574033; 7573926; 7573927 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7571720; 7572927; 7573008; 7573008; 1207; 82 }  --  { 7573008; 7573009; 7572927; 7573008; 7571720; 7572926 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 174; 7590695; 7590695; 7590694; 7590868; 0; 0 }  --  { 7590695; 7590868; 7590695; 7590694; 7590694; 7590695 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 93; 7579700; 7579743; 7579847; 7579940; 43; 105 }  --  { 7579848; 7579940; 7579743; 7579847; 7579700; 7579742 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7579312; 7579591; 7579590; 7579590; 279; 0 }  --  { 7579590; 7579591; 7579591; 7579590; 7579312; 7579590 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7578371; 7578555; 7578554; 7578554; 184; 0 }  --  { 7578554; 7578555; 7578555; 7578554; 7578371; 7578554 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7578177; 7578290; 7578289; 7578289; 113; 0 }  --  { 7578289; 7578290; 7578290; 7578289; 7578177; 7578289 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7577499; 7577609; 7577608; 7577608; 110; 0 }  --  { 7577608; 7577609; 7577609; 7577608; 7577499; 7577608 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7577019; 7577156; 7577155; 7577155; 137; 0 }  --  { 7577155; 7577156; 7577156; 7577155; 7577019; 7577155 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7576853; 7576927; 7576926; 7576926; 74; 0 }  --  { 7576926; 7576927; 7576927; 7576926; 7576853; 7576926 }
+DEBUG:root:20120611-164245283:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 28; 7579839; 7579839; 7579912; 7579940; 0; 74 }  --  { 7579913; 7579940; 7579839; 7579912; 7579838; 7579839 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7579700; 7579700; 7579721; 7579721; 0; 22 }  --  { 7579721; 7579722; 7579700; 7579721; 7579699; 7579700 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7579354; 7579354; 7579590; 7579590; 0; 237 }  --  { 7579590; 7579591; 7579354; 7579590; 7579353; 7579354 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7578371; 7578422; 7578565; 7578565; 51; 144 }  --  { 7578565; 7578566; 7578422; 7578565; 7578371; 7578421 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7578177; 7578290; 7578289; 7578289; 113; 0 }  --  { 7578289; 7578290; 7578290; 7578289; 7578177; 7578289 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7577499; 7577609; 7577608; 7577608; 110; 0 }  --  { 7577608; 7577609; 7577609; 7577608; 7577499; 7577608 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7577019; 7577156; 7577155; 7577155; 137; 0 }  --  { 7577155; 7577156; 7577156; 7577155; 7577019; 7577155 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7576853; 7576927; 7576926; 7576926; 74; 0 }  --  { 7576926; 7576927; 7576927; 7576926; 7576853; 7576926 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7573927; 7574034; 7574033; 7574033; 107; 0 }  --  { 7574033; 7574034; 7574034; 7574033; 7573927; 7574033 }
+DEBUG:root:20120611-164245284:Data for GTF file: { 0; 7571720; 7573009; 7573008; 7573008; 1289; 0 }  --  { 7573008; 7573009; 7573009; 7573008; 7571720; 7573008 }
+INFO:root:20120611-164245285:STEP 10:  Finalizing...
