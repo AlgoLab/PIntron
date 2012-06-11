@@ -1,10 +1,10 @@
-Running the *pintron* program with suitable options achieves the desired
-effect. Running pintron with option *-h* gives a detailed list of all available
-options.
-The two main options *-g* and *-s* allow to specify a genomic sequence file and a file
-of transcripts (ESTs and mRNAs) respectively.
+# PIntron - Documentation
 
-### Input file formats
+This page provides a complete description of **PIntron** options.
+Please refer to [this example](example.html) for a basic introduction.
+
+
+## Input file formats
 
 The genomic sequence file is a FASTA file whose header should adhere to the
 following structure
@@ -43,7 +43,7 @@ where `XXXXXX` is the GenBank accession number (or in any case a unique identifi
   sequence, that is also a RefSeq sequence, is forced on strand +1.
 
 
-### List of command-line parameters
+## List of command-line parameters
 
 PIntron can be run with the following options:
 
@@ -74,7 +74,7 @@ or, equivalently:
 
 
 
-#### Advanced customization for experienced users
+### Advanced customization for experienced users
 
 Some parameters can determine how much time can be spent in some
 phases. Default values should be fine in almost all the cases.
@@ -116,7 +116,7 @@ Some significant parameters that the user can provide are:
 * `retain-externals` If *false*, discard the first (and the last, if a polyA chain has not been found) factors of
 a spliced alignment. (*default=*true)
 
-### Output
+## Output
 
 The output file:
 
@@ -135,27 +135,31 @@ The output file:
 * specified with the `--extended-gtf` option is a GTF file, containing all the predicted isoforms.
 
 
-### A complete example
+### JSON Output
 
-The *dist-docs/example* directory contains the input and the output of a complete execution of
-the PIntron pipeline over the human ENCODE SLC5A1 gene (chromosome 22, plus strand).
+The output file specified with the `--output` option is a JSON file, containing informations
+  on the gene structure, the isoforms and the exons. Since JSON is mainly a
+  (key, value) dictionary, we have chosen keys that are as self-explaining as
+  possible. We have exploited the nesting nature of JSON files to
+encode a set of gene where each gene has a set of isoforms and a set of
+  introns.
 
-The input files are:
+Each gene has keys  "length_genomic_sequence",
+  "version",  "number_isoforms", "isoforms" (a hash where a progressive ID is
+  the only key and each value is a single isoform), "introns" (a list).
 
-* `genomic.txt` file of the ENCODE region ENm004 (nucleotide sequence provided on plus strand)
-* `ests.txt` file of the transcript sequences (ESTs/mRNAs) related to the considered gene
+Each isoform has keys "canonical start codon?",
+  "canonical end codon?", "NMD flag", "polyA?", "annotated CDS?", "start", "PAS?"
+  "end", "number exons", "Type", "length", "coding length", "reference?", "from RefSeq?",
+  "exons" (a list of exons).
 
-The command (from `dist/pintron-latest` if PIntron has been built from
-source, or from the directory on which the binary package has been
-extracted) for obtaining the output files contained in `dist-docs/example` is:
+Each exon has keys  "sequence", "relative start", "relative end",
+  "chromosome start", "chromosome end" (absolute coordinates), "3utr length",
+  "5utr length".
 
-        ./bin/pintron \
-                --bin-dir=bin \
-                --genomic=dist-docs/example/genomic.txt \
-                --est=dist-docs/example/ests.txt \
-                --organism=human \
-                --gene=SLC5A1 \
-                --output=dist-docs/example/pintron-full-output.json \
-                --gtf=dist-docs/example/pintron-cds-annotated-isoforms.gtf \
-                --extended-gtf=dist-docs/example/pintron-all-isoforms.gtf \
-                --logfile=dist-docs/example/pintron-log.txt
+Each intron has keys "relative start", "relative end", "chromosome start",
+"chromosome end", "length", "number supporting EST", "EST_list" (a list of EST
+IDs), "donor alignment average error", "acceptor alignment average error", "donor score",
+"acceptor score", "BPS score", "BPS position", "type", "pattern",
+"repeat sequence", "donor suffix", "prefix", "suffix",
+"acceptor prefix"

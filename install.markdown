@@ -4,5 +4,5 @@ title: Install
 toc: false
 ---
 
-{% include content/INSTALL.md %}
+{% include content/INSTALL %}
 

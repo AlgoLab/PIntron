@@ -33,5 +33,5 @@ computed by **PIntron** for gene
 [TP53](http://www.ncbi.nlm.nih.gov/gene/7157) and visualized by the
 [UCSC Genome Browser](http://genome.ucsc.edu/).
 
-[![img](images/pintron-v1.2.28-TP53.png)](images/pintron-v1.2.28-TP53.png)
+[![img](images/pintron-v1.2.28-TP53-hs437460.png)](images/pintron-v1.2.28-TP53-hs437460.png)
 
