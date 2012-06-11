@@ -175,8 +175,6 @@ compute_est_fact(pEST_info gen,
 	 INFO("...the EST %s has no alignment!", est->EST_gb);
   }
 
-  EST_destroy_just_factorizations(factorized_est);
-
   log_info_extended(floginfoext, "est-factorization-end", (void*)est);
 
   DEBUG("Destroying the MEG and the occurrence set");
