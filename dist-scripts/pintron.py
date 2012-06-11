@@ -321,9 +321,11 @@ def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
                     suffix_end   = max(abs_start, abs_start + bad_suffix - 1)
                 cds_sequence += exon['sequence'][bad_prefix:bad_prefix+cds_chunk_length]
 
-                logging.debug("Data for GTF file\n")
-                logging.debug([bad_prefix, abs_start, cds_start, cds_end, abs_end, bad_suffix, cds_chunk_length])
-                logging.debug([prefix_start, prefix_end, cds_start, cds_end, suffix_start, suffix_end])
+                logging.debug("Data for GTF file: { %s }  --  { %s }",
+                              "; ".join([ str(_x) for _x in
+                                          [bad_prefix, abs_start, cds_start, cds_end, abs_end, bad_suffix, cds_chunk_length] ]),
+                              "; ".join([ str(_x) for _x in
+                                          [prefix_start, prefix_end, cds_start, cds_end, suffix_start, suffix_end] ]))
                 if whole_cds_len > 0 and not data_strand['first']['codon_ok']:
                     # We are reading the first codon
                     data_strand['first']['print'] = True
@@ -478,7 +480,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             }
             for t in row:
                 (k, v) = re.split('=', t, 2)
-                logging.debug("Reading VariantGTF: " + k + "=>" + v + "!\n")
+                logging.debug("Reading VariantGTF: " + k + "=>" + v + "!")
                 if k == "nex":
                     isoform['number exons'] = int(v)
                 elif k == "L":
@@ -559,12 +561,12 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 if (polyA == 1):
                     gene['isoforms'][index]['polyA?'] = True
                 # pprint.pprint(exon)
-                logging.debug("Reading CCDS_transcripts: Row contains exon metadata\n")
-                logging.debug(line)
-                logging.debug(max(exon["relative end"], exon["relative start"]))
-                logging.debug(min(exon["relative end"], exon["relative start"]))
-                logging.debug(exon["5utr length"])
-                logging.debug(exon["3utr length"])
+                logging.debug("Reading CCDS_transcripts: Row contains exon metadata { %s }",
+                              "; ".join([line.rstrip(),
+                                         str(max(exon["relative end"], exon["relative start"])),
+                                         str(min(exon["relative end"], exon["relative start"])),
+                                         str(exon["5utr length"]),
+                                         str(exon["3utr length"])]))
                 if gene['isoforms'][index]['annotated CDS?']:
                     gene['isoforms'][index]["CDS length"] += (max(exon["relative end"], exon["relative start"]) -
                                                              min(exon["relative end"], exon["relative start"]) + 1 -
@@ -914,8 +916,7 @@ def pintron_pipeline(options):
     if options.gtf_filename:
         json2gtf(options.output_filename, options.gtf_filename, options.genome_filename, options.gene, False)
     if options.extended_gtf_filename:
-        logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.
-        See http://mblab.wustl.edu/GTF22.html""")
+        logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html""")
         json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename, options.gene, True)
 
 
