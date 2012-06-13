@@ -24,7 +24,8 @@ executables are in a directory listed in  `$PATH`).
 
 **PIntron** requires two input files: the
 genomic sequence (in this case `genomic.txt`), and the EST/mRNA
-sequences (in this case `ests.txt`), specified respectively with the options `-g` and `-s`).
+sequences (in this case `ests.txt`), specified respectively with the
+options `-g` and `-s`.
 File `genomic.txt` is a FASTA file containing a single sequence, while
 `ests.txt` is a MultiFASTA file, where each sequence is considered as a
 single transcript (EST or mRNA).  
@@ -62,27 +63,27 @@ files may exist).
 Assuming that we want to generate all output files in the current working directory, the
 following command executes **PIntron** on the example.
 
-    /home/pintron/bin/pintron                                   \
-           --bin-dir=/home/pintron/bin                            \
-           --genomic=/home/pintron/doc/example/genomic.txt        \
-           --EST=/home/pintron/doc/example/ests.txt               \
-           --organism=human                         \
-           --gene=TP53                              \
-           --output=pintron-full-output.json        \
-           --gtf=pintron-cds-annotated-isoforms.gtf \
-           --extended-gtf=pintron-all-isoforms.gtf  \
-           --logfile=pintron-pipeline-log.txt       \
+    /home/pintron/bin/pintron                               \
+           --bin-dir=/home/pintron/bin                      \
+           --genomic=/home/pintron/doc/example/genomic.txt  \
+           --EST=/home/pintron/doc/example/ests.txt         \
+           --organism=human                                 \
+           --gene=TP53                                      \
+           --output=pintron-full-output.json                \
+           --gtf=pintron-cds-annotated-isoforms.gtf         \
+           --extended-gtf=pintron-all-isoforms.gtf          \
+           --logfile=pintron-pipeline-log.txt               \
            --general-logfile=pintron-log.txt
 
 
 Most of the options have sensible default values and a short version.
 Therefore, a shorter equivalent command line is:
 
-    /home/pintron/bin/pintron                       \
-           -b /home/pintron/bin                       \
-           -g /home/pintron/doc/example/genomic.txt   \
-           -s /home/pintron/doc/example/ests.txt      \
-           -n human                     \
+    /home/pintron/bin/pintron                        \
+           -b /home/pintron/bin                      \
+           -g /home/pintron/doc/example/genomic.txt  \
+           -s /home/pintron/doc/example/ests.txt     \
+           -n human                                  \
            -e TP53
 
 

@@ -2,14 +2,19 @@
 
 PIntron is only distributed as source code.
 
-The latest source code version can be downloaded from the [GitHub page](https://github.com/AlgoLab/PIntron) as a [zip](https://github.com/AlgoLab/PIntron/zipball/master) or as [tar](https://github.com/AlgoLab/PIntron/tarball/master) archive.
-It is also possible to clone the source repository using the following command:
+The latest source code version can be downloaded from the [GitHub
+page](https://github.com/AlgoLab/PIntron) as a
+[zip](https://github.com/AlgoLab/PIntron/zipball/master) or as
+[tar](https://github.com/AlgoLab/PIntron/tarball/master) archive.
+It is also possible to clone the source repository using the following
+command:
 
     git clone https://github.com/AlgoLab/PIntron.git
 
 We release only stable versions, therefore you are encouraged to
 always upgrade to the latest version.
-Anyway, older versions are also [available](https://github.com/AlgoLab/PIntron/tags).
+Anyway, older versions are also
+[available](https://github.com/AlgoLab/PIntron/tags).
 
 ## Requirements
 
@@ -35,16 +40,19 @@ by the following invocation:
 The command will produce a compressed archive `dist/pintron-*.tar.gz`
 that can be used for the installation or the execution.
 
-The binary package is composed by the directory `bin`, containing all the
-executables needed to run PIntron, and the directory `doc`, containing
-the documentation and a simple complete example.
+The binary package is composed by the directory `bin`, containing all
+the executables needed to run PIntron, and the directory `doc`,
+containing the documentation and a simple complete example.
 For installing PIntron, you should copy the executables of the `bin/`
 directory to a directory of the `PATH` or to a custom directory.
 If you do not want to mess with your `PATH` variable or you simply
 want to test the program, you can invoke PIntron with the complete
 path of the custom directory and use the `--bin-dir` program option to
-specify such directory   (for example
-`pintron-bin-dir=~/dev/PIntron/bin ; $pintron-bin-dir/pintron --bin-dir=$pintron-bin-dir`).
+specify such directory. For example, if PIntron executables are located
+in `~/dev/PIntron/bin`, then it can be executed with the following
+commands:
+
+    pintron_bindir=~/dev/PIntron/bin ; $pintron_bindir/pintron --bin-dir=$pintron_bindir
 
 
 
