@@ -118,21 +118,7 @@ a spliced alignment. (*default=*true)
 
 ## Output
 
-The output file:
 
-* specified with the `--output` option is a JSON file, containing informations
-  on the gene structure, the isoforms and the exons. Since JSON is mainly a
-  key, value hash, we have chosen keys that are as self-explaining as
-  possible. Each exon has keys  "sequence", "relative start", "relative end",
-  "chromosome start", "chromosome end" (absolute coordinates), "3utr length",
-  "5utr length". Each isoform has keys "canonical start codon?",
-  "canonical end codon?", "NMD flag", "polyA?", "annotated CDS?", "start",
-  "end", "number exons", "Type", "length", "coding length", "reference?", "from RefSeq?",
-  "exons" (a list of exons). Each gene has keys  "length_genomic_sequence",
-  "version",  "number_isoforms", "isoforms" (an hash of isoforms with a
-  progressive ID has the only key).
-* specified with the `--gtf` option is a standard GTF file, containing the isoforms that have a CDS annotation.
-* specified with the `--extended-gtf` option is a GTF file, containing all the predicted isoforms.
 
 
 ### JSON Output
@@ -163,3 +149,8 @@ IDs), "donor alignment average error", "acceptor alignment average error", "dono
 "acceptor score", "BPS score", "BPS position", "type", "pattern",
 "repeat sequence", "donor suffix", "prefix", "suffix",
 "acceptor prefix"
+
+### GTF Output
+
+* specified with the `--gtf` option is a standard GTF file, containing the isoforms that have a CDS annotation.
+* specified with the `--extended-gtf` option is a GTF file, containing all the predicted isoforms.

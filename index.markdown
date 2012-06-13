@@ -7,20 +7,17 @@ toc: false
 
 **PIntron** is a novel pipeline for gene-structure prediction based on spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic sequence.
 
-**PIntron** is composed by four steps:
-Firstly, alternative alignments of expressed sequences to a reference
-genomic sequence are implicitly computed and represented in a graph
-(called *embedding graph*) by a novel fast spliced alignment procedure.
-Secondly, biologically meaningful alignment are extracted.
-Then, a consensus gene structure induced by the previously computed
-alignments is determined based on a parsimony principle.
-Finally, the resulting introns are reconciliated and classified
-according to general biological criteria.
-
 The program is developed and heavily tested on Linux, but it should
 run also on OS X.
 
 ## Features
+
+Starting from a genomic sequence and the ESTs sequence, encoded as
+MultiFASTA file, we produce:
+
+*  the exons and introns
+*  the full-length isoforms
+
 
 ## Screenshots
 **PIntron** is a command-line application that can be used on local
@@ -35,3 +32,14 @@ computed by **PIntron** for gene
 
 [![img](images/pintron-v1.2.28-TP53-hs437460.png)](images/pintron-v1.2.28-TP53-hs437460.png)
 
+## Main ideas
+
+**PIntron** is composed of steps:
+1. Alternative alignments of expressed sequences to a reference
+genomic sequence are computed and represented in a graph
+(called *embedding graph*), using an ad-hoc fast spliced alignment
+procedure.
+2. Biologically meaningful alignment are filtered.
+3. A draft consensus gene structure is constructed
+4. Introns are reconciliated and classified 
+according to general biological criteria.
