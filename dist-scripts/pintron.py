@@ -101,6 +101,9 @@ def parse_command_line():
     parser.add_option("-z", "--compress", action="store_true",
                       dest="compress", default=False,
                       help="compress output (default = %default)")
+    parser.add_option("-a", "--alignments", action="store_true",
+                      dest="output_est_alignments", default=False,
+                      help="output ESTs/genome alignments (default = %default)")
     parser.add_option("-l", "--logfile",
                       dest="plogfile", default="pintron-pipeline-log.txt",
                       help="log filename of the pipeline steps (default = '%default')",
@@ -918,6 +921,13 @@ def pintron_pipeline(options):
     if options.extended_gtf_filename:
         logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html""")
         json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename, options.gene, True)
+    if options.output_est_alignments:
+        exec_system_command(
+        command="ests2bam --directory=. --genome=" + options.genome_filename,
+        error_comment="Could not create ESTs-genome alignment file",
+        logfile=options.plogfile,
+        output_file='est-alignments.sam',
+        from_scratch=options.from_scratch)
 
 
     # Clean mess
