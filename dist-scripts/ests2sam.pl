@@ -54,10 +54,8 @@ $rname=~s/^>//;
 my %ests=();
 my $current_label='';
 while (<INC>) {
-    if (/^#/) {
-	next;
-    }
-
+    next if (/^\s*#/);
+    
     if (/^>/) {
 	# Header line
 	my $current_line=$_;
@@ -66,15 +64,15 @@ while (<INC>) {
 	$current_label=$current_line;
 	die "Gene $current_label appears more then once in $!\n" if exists $ests{$current_label};
 	$ests{$current_label}=[];
-    } else {
-	# EST alignment line
-	my $factorization={};
-	($factorization->{relative_l}, $factorization->{relative_r},
-            $factorization->{absolute_l}, $factorization->{absolute_r},
-            $factorization->{est_factor}, $factorization->{genomic_factor})=
-                    split(/ /, $_, 6);
-	push $ests{$current_label}, $factorization;
-    }
+	next;
+    } 
+    # EST alignment line
+    my $factorization={};
+    ($factorization->{relative_l}, $factorization->{relative_r},
+     $factorization->{absolute_l}, $factorization->{absolute_r},
+     $factorization->{est_factor}, $factorization->{genomic_factor})=
+             split(/ /, $_, 6);
+    push @{$ests{$current_label}}, $factorization;
 }
 write_est($current_label, @{$ests{$current_label}});
 close INC;
