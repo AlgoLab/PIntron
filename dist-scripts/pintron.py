@@ -769,7 +769,7 @@ def pintron_pipeline(options):
                                              "gene-structure",
                                              "compact-compositions",
                                              "maximal-transcripts",
-                                             "ests2bam",
+                                             "ests2sam",
                                              "cds-annotation"
                                              ])
 
@@ -924,7 +924,7 @@ def pintron_pipeline(options):
         json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename, options.gene, True)
     if options.output_est_alignments:
         exec_system_command(
-        command=exes["ests2bam"] + "ests2bam --directory=. --genome=" + options.genome_filename,
+        command=exes["ests2sam"] + " --directory=. --genome=" + options.genome_filename,
         error_comment="Could not create ESTs-genome alignment file",
         logfile=options.plogfile,
         output_file='est-alignments.sam',
