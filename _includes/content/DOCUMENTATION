@@ -63,6 +63,7 @@ PIntron can be run with the following options:
 *       `--extended-gtf=pintron-all-isoforms.gtf` output extended GTF
         FILE with the all isoforms (*default=*pintron-all-isoforms.gtf)
 * `--extended-gtf=FILE`	output GTF FILE with all the predicted isoforms (*default=*pintron-all-isoforms.gtf)
+* `-a`	`--alignments`	output also the alignment of ESTs and genomic sequence. The alignments are stored in `est-alignments.sam` using a [SAM](http://samtools.sourceforge.net/) format  (*default=*no)
 
 A typical invocation of PIntron is:
 
