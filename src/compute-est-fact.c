@@ -70,6 +70,65 @@ log_meg(pext_array V) {
   DEBUG("End MEG");
 }
 
+static void
+build_meg(pEST_info est,
+			 LST_STree* tree,
+			 ppreproc_gen pg,
+			 FILE* floginfoext,
+			 pmytime pt_alg, pmytime pt_meg,
+			 pconfiguration shared_config,
+			 size_t* pt_inc_pairing_len,
+			 pext_array* pV) {
+
+// Create a local copy of configuration parameters
+  pconfiguration config= config_clone(shared_config);
+
+  MYTIME_START_PARALLEL(pt_alg);
+  DEBUG("Calculating the occurrence set");
+
+  bool too_complex= false;
+  log_info_extended(floginfoext, "meg-construction-begin", (void*)est);
+  do {
+	 DEBUG("Building the MEG vertex set");
+
+	 config->min_factor_len += *pt_inc_pairing_len;
+	 *pV= build_vertex_set(est, tree, pg, config);
+	 MYTIME_reset(pt_meg);
+	 MYTIME_start(pt_meg);
+	 DEBUG("Building the MEG edge set");
+	 build_edge_set(*pV, config);
+	 save_meg_to_filename(*pV, "meg-1-untouched.dot");
+	 simplify_meg(*pV, config);
+	 save_meg_to_filename(*pV, "meg-2-after-basic-simplification.dot");
+	 if (config->trans_red) {
+		pgraph g= meg2graph(*pV);
+		transitive_reduction(g);
+		graph_destroy(g);
+		save_meg_to_filename(*pV, "meg-3-after-transitive-reduction.dot");
+	 }
+	 too_complex= is_too_complex_for_compaction(*pV, config);
+	 if (!too_complex && config->short_edge_comp) {
+		compact_short_edges(*pV, config);
+		save_meg_to_filename(*pV, "meg-4-after-short-edge-contraction.dot");
+	 }
+	 DEBUG("Analyzing complexity of the MEG vertex set");
+	 too_complex= too_complex || is_too_complex(*pV, config);
+	 config->min_factor_len -= *pt_inc_pairing_len;
+	 if (too_complex) {
+		++(*pt_inc_pairing_len);
+		EA_destroy(*pV, (delete_function)vi_destroy);
+		INFO("MEG too much complex. Re-trying with min-factor-len= %zd.",
+			  config->min_factor_len+(*pt_inc_pairing_len));
+	 }
+	 MYTIME_stop(pt_meg);
+  } while(too_complex);
+  log_info_extended(floginfoext, "meg-construction-end", (void*)est);
+
+  MYTIME_STOP_PARALLEL(pt_alg);
+// Destroy local configuration
+  config_destroy(config);
+}
+
 
 pEST
 compute_est_fact(pEST_info gen,
@@ -83,56 +142,14 @@ compute_est_fact(pEST_info gen,
 					  pconfiguration shared_config) {
   INFO("EST: %s", est->EST_id);
 
-// Create a local copy of configuration parameters
-  pconfiguration config= config_clone(shared_config);
 // Create local timers
   pmytime pt_ccomp= MYTIME_create_with_name("Internal Comp.");
   pmytime pt_meg= MYTIME_create_with_name("MEGs");
 
-  MYTIME_START_PARALLEL(pt_alg);
-  DEBUG("Calculating the occurrence set");
-
-  pext_array V= NULL;
-  bool too_complex= false;
   size_t inc_pairing_len= 0;
-  log_info_extended(floginfoext, "meg-construction-begin", (void*)est);
-  do {
-	 DEBUG("Building the MEG vertex set");
-
-	 config->min_factor_len += inc_pairing_len;
-	 V= build_vertex_set(est, tree, pg, config);
-	 MYTIME_reset(pt_meg);
-	 MYTIME_start(pt_meg);
-	 DEBUG("Building the MEG edge set");
-	 build_edge_set(V, config);
-	 save_meg_to_filename(V, "meg-1-untouched.dot");
-	 simplify_meg(V, config);
-	 save_meg_to_filename(V, "meg-2-after-basic-simplification.dot");
-	 if (config->trans_red) {
-		pgraph g= meg2graph(V);
-		transitive_reduction(g);
-		graph_destroy(g);
-		save_meg_to_filename(V, "meg-3-after-transitive-reduction.dot");
-	 }
-	 too_complex= is_too_complex_for_compaction(V, config);
-	 if (!too_complex && config->short_edge_comp) {
-		compact_short_edges(V, config);
-		save_meg_to_filename(V, "meg-4-after-short-edge-contraction.dot");
-	 }
-	 DEBUG("Analyzing complexity of the MEG vertex set");
-	 too_complex= too_complex || is_too_complex(V, config);
-	 config->min_factor_len -= inc_pairing_len;
-	 if (too_complex) {
-		++inc_pairing_len;
-		EA_destroy(V, (delete_function)vi_destroy);
-		INFO("MEG too much complex. Re-trying with min-factor-len= %zd.",
-			  config->min_factor_len+inc_pairing_len);
-	 }
-	 MYTIME_stop(pt_meg);
-  } while(too_complex);
-  log_info_extended(floginfoext, "meg-construction-end", (void*)est);
-
-  MYTIME_STOP_PARALLEL(pt_alg);
+  pext_array V= NULL;
+  build_meg(est, tree, pg, floginfoext, pt_alg, pt_meg, shared_config,
+				&inc_pairing_len, &V);
   MYTIME_START_PARALLEL(pt_io);
   log_meg(V);
 #ifndef NDEBUG
@@ -146,16 +163,16 @@ compute_est_fact(pEST_info gen,
   fflush(fmeg);
   MYTIME_STOP_PARALLEL(pt_io);
 
-	 // EST-FACTORIZATIONS
+// EST-FACTORIZATIONS
 
   log_info_extended(floginfoext, "est-factorization-begin", (void*)est);
 
   MYTIME_START_PARALLEL(pt_comp);
   MYTIME_reset(pt_ccomp);
   MYTIME_start(pt_ccomp);
-  pEST factorized_est=get_EST_factorizations(est, V, config, gen);
+  pEST factorized_est=get_EST_factorizations(est, V, shared_config, gen);
   DEBUG("Computed %zu factorizations.", list_size(factorized_est->factorizations));
-  refine_EST_factorizations(gen, factorized_est, config);
+  refine_EST_factorizations(gen, factorized_est, shared_config);
   MYTIME_stop(pt_ccomp);
   MYTIME_STOP_PARALLEL(pt_comp);
 
@@ -178,12 +195,10 @@ compute_est_fact(pEST_info gen,
   log_info_extended(floginfoext, "est-factorization-end", (void*)est);
 
   DEBUG("Destroying the MEG and the occurrence set");
-  MYTIME_START_PARALLEL_REUSE(pt_alg);
+  MYTIME_START_PARALLEL(pt_alg);
   EA_destroy(V, (delete_function)vi_destroy);
   MYTIME_STOP_PARALLEL(pt_alg);
 
-// Destroy local configuration
-  config_destroy(config);
 // Destroy local timers
   MYTIME_destroy(pt_meg);
   MYTIME_destroy(pt_ccomp);
