@@ -175,11 +175,12 @@ struct _mytime_timeout {
 };
 
 pmytime_timeout
-MYTIME_timeout_create(MYTIME_DTYPE time_limit)
+MYTIME_timeout_create(unsigned int time_limit_SECONDS)
 {
   pmytime_timeout ptt= PALLOC(struct _mytime_timeout);
   ptt->expired= false;
-  ptt->time_limit= time_limit;
+  ptt->time_limit= time_limit_SECONDS;
+  ptt->time_limit *= (MYTIME_DTYPE)1000000;
   gettimeofday(&ptt->start, NULL);
   return ptt;
 }

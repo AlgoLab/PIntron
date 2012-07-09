@@ -156,13 +156,13 @@ internal_get_EST_factorizations(pEST_info gen,
 										  pEST * pfactorized_est,
 										  bool* is_timeout_expired) {
 
-  pmytime_timeout pt_fact_timeout= MYTIME_timeout_create(10000);
+  pmytime_timeout pt_fact_timeout= MYTIME_timeout_create(3600);
 
   log_info_extended(floginfoext, "est-factorization-begin", (void*)est);
   MYTIME_START_PARALLEL(pt_comp);
   MYTIME_reset(pt_ccomp);
   MYTIME_start(pt_ccomp);
-  *pfactorized_est= get_EST_factorizations(est, V, shared_config, gen);
+  *pfactorized_est= get_EST_factorizations(est, V, shared_config, gen, pt_fact_timeout);
   *is_timeout_expired= MYTIME_timeout_expired(pt_fact_timeout);
   if (*pfactorized_est != NULL) {
 	 DEBUG("Computed %zu factorizations.", list_size((*pfactorized_est)->factorizations));
@@ -204,9 +204,32 @@ compute_est_fact(pEST_info gen,
   bool is_timeout_expired= false;
 
   pEST factorized_est= NULL;
+  size_t prev_tot_pairings= 0, prev_tot_edges= 0;
   do {
-	 build_meg(est, tree, pg, floginfoext, pt_alg, pt_meg, shared_config,
-				  &inc_pairing_len, &V);
+	 size_t tot_pairings, tot_edges;
+	 bool same_MEG_as_before= false;
+	 do {
+		same_MEG_as_before= false;
+		build_meg(est, tree, pg, floginfoext, pt_alg, pt_meg, shared_config,
+					 &inc_pairing_len, &V);
+
+		MEG_stats(V, &tot_pairings, &tot_edges);
+		same_MEG_as_before= prev_tot_pairings > 2 &&
+		  prev_tot_edges > 0 &&
+		  (prev_tot_pairings <= tot_pairings || prev_tot_edges <= tot_edges);
+		if (same_MEG_as_before) {
+		  WARN("The computed MEG is the same computed in the previous round. "
+			  "Re-trying with longer with min-factor-len= %zd.",
+			  shared_config->min_factor_len+inc_pairing_len+1);
+		  ++inc_pairing_len;
+		  DEBUG("Destroying the MEG and the occurrence set");
+		  MYTIME_START_PARALLEL(pt_alg);
+		  EA_destroy(V, (delete_function)vi_destroy);
+		  MYTIME_STOP_PARALLEL(pt_alg);
+		}
+	 } while (same_MEG_as_before);
+	 prev_tot_pairings= tot_pairings;
+	 prev_tot_edges= tot_edges;
 
 	 DEBUG("A possible MEG has been built. Trying to get the factorizations...");
 

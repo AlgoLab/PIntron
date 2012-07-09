@@ -49,6 +49,22 @@
 #include "log.h"
 
 
+void MEG_stats(pext_array V, size_t* tot_pairings, size_t* tot_edges) {
+  *tot_pairings= 0;
+  *tot_edges= 0;
+  for (size_t i= 0; i< EA_size(V); ++i) {
+	 plist Vi= EA_get(V, i);
+	 plistit lit= list_first(Vi);
+	 while (listit_has_next(lit)) {
+		ppairing p= listit_next(lit);
+		++(*tot_pairings);
+		(*tot_edges)+= list_size(p->adjs);
+	 }
+	 listit_destroy(lit);
+  }
+}
+
+
 bool
 is_too_complex_for_compaction(pext_array V, pconfiguration config) {
   NOT_NULL(V);
@@ -56,16 +72,7 @@ is_too_complex_for_compaction(pext_array V, pconfiguration config) {
 
   size_t tot_pairings= 0;
   size_t tot_edges= 0;
-  for (size_t i= 0; i< EA_size(V); ++i) {
-	 plist Vi= EA_get(V, i);
-	 plistit lit= list_first(Vi);
-	 while (listit_has_next(lit)) {
-		ppairing p= listit_next(lit);
-		++tot_pairings;
-		tot_edges+= list_size(p->adjs);
-	 }
-	 listit_destroy(lit);
-  }
+  MEG_stats(V, &tot_pairings, &tot_edges);
   INFO("The MEG has %7zd vertices and %7zd edges.", tot_pairings, tot_edges);
 //XXX: INSERITO PARAMETRO ARBITRARIO SUL NUMERO MASSIMO DI PAIRING IN UN MEG E DI ARCHI
   if (

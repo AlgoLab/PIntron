@@ -102,7 +102,7 @@ MYTIME_getinterval(pmytime pt);
 typedef struct _mytime_timeout* pmytime_timeout;
 
 pmytime_timeout
-MYTIME_timeout_create(MYTIME_DTYPE time_limit);
+MYTIME_timeout_create(unsigned int time_limit_SECONDS);
 
 bool
 MYTIME_timeout_expired(pmytime_timeout ptt);
