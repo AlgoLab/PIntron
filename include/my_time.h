@@ -46,7 +46,7 @@
   } while (0)
 
 
-#define DTYPE unsigned long long
+#define MYTIME_DTYPE unsigned long long
 
 typedef struct _mytime* pmytime;
 typedef struct _mytime_parallel* pmytime_parallel;
