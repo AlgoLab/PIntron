@@ -121,6 +121,12 @@ struct _configuration {
 
   bool trans_red;
   bool short_edge_comp;
+
+  //The maximum time (in SECONDS) for computing factorization of a single
+  //transcript given its MEG.
+  //After the time limit expires, a new MEG is computed with increased
+  //minimum pairing length (hence the MEG should be smaller)
+  unsigned int max_single_factorization_time;
 };
 
 typedef struct _configuration* pconfiguration;

@@ -161,6 +161,11 @@ check_and_copy(struct gengetopt_args_info* args) {
   INFO("CONFIG: Perform the short-edge compaction? %s.",
 		 config->short_edge_comp?"yes":"no");
 
+  fail_if(args->max_single_factorization_time_arg<0);
+  config->max_single_factorization_time= args->max_single_factorization_time_arg;
+  INFO("CONFIG: Maximum time for computing a factorization of a single transcript: %u.",
+		 config->max_single_factorization_time);
+
   return config;
 }
 
@@ -219,6 +224,7 @@ config_clone(pconfiguration src) {
   config->suffpref_length_on_gen= src->suffpref_length_on_gen;
   config->trans_red= src->trans_red;
   config->short_edge_comp= src->short_edge_comp;
+  config->max_single_factorization_time= src->max_single_factorization_time;
 
   return config;
 }

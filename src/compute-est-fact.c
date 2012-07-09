@@ -156,7 +156,7 @@ internal_get_EST_factorizations(pEST_info gen,
 										  pEST * pfactorized_est,
 										  bool* is_timeout_expired) {
 
-  pmytime_timeout pt_fact_timeout= MYTIME_timeout_create(3600);
+  pmytime_timeout pt_fact_timeout= MYTIME_timeout_create(shared_config->max_single_factorization_time);
 
   log_info_extended(floginfoext, "est-factorization-begin", (void*)est);
   MYTIME_START_PARALLEL(pt_comp);
