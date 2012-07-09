@@ -270,13 +270,9 @@ build_vertex_set(pEST_info pattern,
 		NOT_NULL(N->dst_node);
 		TRACE("The deepest common node has string-depth %zd.",
 				N->src_node->string_depth + matched_len);
-#ifdef MUMMER_EMULATION
-		size_t min_string_depth= config->min_factor_len;
-#else
 		size_t min_string_depth= MAX((N->src_node->string_depth + matched_len)*(config->min_string_depth_rate),
 											  config->min_factor_len);
 		TRACE("The minimum string-depth that will be considered is %zd.", min_string_depth);
-#endif
 
 // Salvo il nodo trovato per seguire poi il suffix link
 		prev_N= N;
@@ -303,7 +299,6 @@ build_vertex_set(pEST_info pattern,
 		  matched_len= lst_edge_get_length(N);
 		}
 		list_sort(Vi, (comparator)pairing_compare);
-#ifndef MUMMER_EMULATION
 		plist ltoremove= list_create();
 		list_last_reuse(Vi, &Vij);
 		while (listit_has_prev(Vij)) {
@@ -337,7 +332,6 @@ build_vertex_set(pEST_info pattern,
 		  list_remove_at_iterator(Vij, (delete_function)pairing_destroy);
 		}
 		list_destroy(ltoremove, (delete_function)noop_free);
-#endif
 	 }
 	 prev_symbol= pattern->EST_seq[i];
 	 prev_symbol_key= get_key(pg, prev_symbol);
@@ -352,7 +346,6 @@ build_vertex_set(pEST_info pattern,
   list_add_to_tail(Vi, pairing);
   EA_insert(V, Vi);
 
-#ifndef MUMMER_EMULATION
   INFO("Cleaning low-complexity pairings starting at different positions on P.");
   {
 	 const size_t n= EA_size(V);
@@ -380,7 +373,6 @@ build_vertex_set(pEST_info pattern,
 		Vi1= Vi;
 	 }
   }
-#endif
 
   INFO("Build of vertex set of the MEG completed!");
 

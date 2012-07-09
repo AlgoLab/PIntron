@@ -362,6 +362,8 @@ int Check_Burset_patterns(char *genomic_sequence, int donor_left_on_gen, int acc
 
 int getBursetFrequency_adaptor(const char* const t,
 										 const size_t cut1, const size_t cut2) {
+  if (cut2<2)
+	 return 0;
   char donor[3], acceptor[3];
   donor[2]= acceptor[2]= '\0';
   donor[0]= t[cut1];
@@ -954,9 +956,13 @@ void Find_ACCEPTOR_before_on_the_left(pgap_alignment alignment, int init, int *c
 		char acceptor_pt[3];
 		acceptor_pt[1]=alignment->GEN_gap_alignment[index];
 		index--;
-		while(alignment->GEN_gap_alignment[index] == '-')
+		while(index>=0 && alignment->GEN_gap_alignment[index] == '-')
 			index--;
-		acceptor_pt[0]=alignment->GEN_gap_alignment[index];
+		if (index < 0) {
+		  acceptor_pt[0]= '\0';
+		} else {
+		  acceptor_pt[0]=alignment->GEN_gap_alignment[index];
+		}
 		acceptor_pt[2]='\0';
 		char acceptor_cmp=strcmp(acceptor_pt, acceptor_str);
 		if(acceptor_cmp == 0)

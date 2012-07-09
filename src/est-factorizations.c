@@ -28,6 +28,7 @@
  *
  **/
 #include <stdlib.h>
+#include <math.h>
 #include "est-factorizations.h"
 #include "list.h"
 #include "types.h"
@@ -46,7 +47,7 @@
 
 //Computa per un dato subtree
 //di un grafo degli embedding (GEM) gli embeddings e restituisce una lista di ppairing
-static plist get_subtree_embeddings(int, ppairing, pconfiguration);
+static plist get_subtree_embeddings(int, ppairing, pconfiguration, pmytime_timeout);
 
 //Prende in input una lista di embeddings (lista di liste di ppairing) e fornisce in output una
 //lista di fattorizzazioni (eliminando eventualmente embedding non buoni)
@@ -125,7 +126,8 @@ plist list_of_subtree_embeddings;
 
 //Computa per una data EST tutte le fattorizzazioni ammissibili a partire
 //dal grafo degli embedding massimali (pext_array)
-pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration config, pEST_info gen_info)
+pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration config,
+									 pEST_info gen_info, pmytime_timeout ptt)
 {
   unsigned int i, pext_size;
   pEST est;
@@ -184,9 +186,14 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
 		  counter=1;
 
-		  DEBUG("\t\t%d) Path rooted in pairing (%d, %d, %d)", counter, next_pairing->p, next_pairing->t, next_pairing->l);
+		  DEBUG("\t\t%d) Path rooted in pairing (%d, %d, %d)",
+				  counter, next_pairing->p, next_pairing->t, next_pairing->l);
 
-		  subtree_embedding_list=get_subtree_embeddings(counter, next_pairing, config);
+		  subtree_embedding_list= get_subtree_embeddings(counter, next_pairing, config, ptt);
+
+		  if (subtree_embedding_list == NULL) {
+			 return NULL;
+		  }
 
 		  DEBUG("\t\t...ALL THE EMBEDDINGS FOR THE PATH ARE OBTAINED!");
 		  print_embeddings(subtree_embedding_list);
@@ -571,7 +578,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 }
 
 //Computa per un dato subtree tutti gli embedding e restituisce una lista di liste di ppairing
-static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration config)
+static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration config,
+												pmytime_timeout ptt)
 {
   plist embedding_list; 	//Lista degli embedding
   plist updated_embedding_list;
@@ -603,6 +611,11 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 return computed_sub_e;
   }
   DEBUG("\t\tThe subtree embeddings are to be computed!");
+
+// Check timeout
+  if (MYTIME_timeout_expired(ptt)) {
+	 return NULL;
+  }
 
 //Recupero la lista di adiacenza del nodo in input
   adj_list=root->adjs;
@@ -640,9 +653,13 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 while(listit_has_next(adj_list_iter)){
 		next_adj_pairing=(ppairing) listit_next(adj_list_iter);
 
-		subtree_embedding_list=get_subtree_embeddings(counter+1, next_adj_pairing, config);
+		subtree_embedding_list= get_subtree_embeddings(counter+1, next_adj_pairing, config, ptt);
+		if (subtree_embedding_list == NULL) {
+		  return NULL;
+		}
 
-		DEBUG("\t\t\t%sEmbeddings of subtree rooted in (%d, %d, %d) obtained!", tab, next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
+		DEBUG("\t\t\t%sEmbeddings of subtree rooted in (%d, %d, %d) obtained!",
+				tab, next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
 
 		print_embeddings(subtree_embedding_list);
 
@@ -711,7 +728,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 }
 	 listit_destroy(adj_list_iter);
 
-	 DEBUG("\t\t\t%s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!", tab, root->p, root->t, root->l);
+	 DEBUG("\t\t\t%s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!",
+			 tab, root->p, root->t, root->l);
 	 print_embeddings(embedding_list);
   }
 

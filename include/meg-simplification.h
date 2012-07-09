@@ -55,6 +55,17 @@ typedef pext_array pgraph;
 
 /**
  *
+ * Return the number of vertexes and edges of the CMEG @p V.
+ *
+ * @param V The CMEG to analyse.
+ * @param tot_pairings (output) the number of vertexes
+ * @param tot_edges (output) the number of edges
+ *
+ **/
+void MEG_stats(pext_array V, size_t* tot_pairings, size_t* tot_edges);
+
+/**
+ *
  * Decide if the CMEG @p V is too complex to perform the compact short edges.
  *
  * @param V The CMEG to analyse.

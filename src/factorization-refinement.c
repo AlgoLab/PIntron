@@ -38,6 +38,7 @@
 
 #include "compute-alignments.h"
 #include "refine.h"
+#include "refine-intron.h"
 
 // ------------------------------------------------------------------------
 //
@@ -101,7 +102,7 @@ remove_duplicated_factorizations(plist factorizations) {
 		  if (is_equal) {
 			 DEBUG("Factorizations %zu and %zu are duplicated. Deleting factorization %zu...",
 					 fact1_id, fact2_id, fact1_id);
-			 list_remove_at_iterator(pl_f_it1, factorization_destroy);
+			 list_remove_at_iterator(pl_f_it1, (delete_function)factorization_destroy);
 			 break;
 		  }
 		}
@@ -240,8 +241,6 @@ remove_false_small_exons(pEST_info genomic,
 								 pEST factorized_est,
 								 pconfiguration config) {
   DEBUG("Removing 'false' small exons...");
-  const size_t totglen= strlen(genomic->EST_seq);
-  const size_t totelen= strlen(factorized_est->info->EST_seq);
   plistit pl_f_it= list_first(factorized_est->factorizations);
   while (listit_has_next(pl_f_it)) {
 	 DEBUG("Analyzing a factorization...");
