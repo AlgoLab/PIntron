@@ -71,6 +71,23 @@ log_meg(pext_array V) {
 }
 
 static void
+report_meg(pEST_info est, pmytime pt_io,
+			  FILE* fmeg, pext_array V) {
+  MYTIME_START_PARALLEL(pt_io);
+  log_meg(V);
+#ifndef NDEBUG
+  print_meg(V, stdout);
+  fflush(stdout);
+#endif
+  DEBUG("Appending MEG to the MEGs file..");
+  fprintf(fmeg, "\n\n***********\n\n");
+  write_single_EST_info(fmeg, est);
+  meg_write(fmeg, V);
+  fflush(fmeg);
+  MYTIME_STOP_PARALLEL(pt_io);
+}
+
+static void
 build_meg(pEST_info est,
 			 LST_STree* tree,
 			 ppreproc_gen pg,
@@ -129,6 +146,41 @@ build_meg(pEST_info est,
   config_destroy(config);
 }
 
+static void
+internal_get_EST_factorizations(pEST_info gen,
+										  pEST_info est,
+										  FILE* floginfoext,
+										  pmytime pt_comp, pmytime pt_ccomp,
+										  pconfiguration shared_config,
+										  pext_array V,
+										  pEST * pfactorized_est,
+										  bool* is_timeout_expired) {
+
+  pmytime_timeout pt_fact_timeout= MYTIME_timeout_create(10000);
+
+  log_info_extended(floginfoext, "est-factorization-begin", (void*)est);
+  MYTIME_START_PARALLEL(pt_comp);
+  MYTIME_reset(pt_ccomp);
+  MYTIME_start(pt_ccomp);
+  *pfactorized_est= get_EST_factorizations(est, V, shared_config, gen);
+  *is_timeout_expired= MYTIME_timeout_expired(pt_fact_timeout);
+  if (*pfactorized_est != NULL) {
+	 DEBUG("Computed %zu factorizations.", list_size((*pfactorized_est)->factorizations));
+	 refine_EST_factorizations(gen, *pfactorized_est, shared_config);
+	 if(!list_is_empty((*pfactorized_est)->factorizations)) {
+		remove_duplicated_factorizations((*pfactorized_est)->factorizations);
+		my_assert(!list_is_empty((*pfactorized_est)->factorizations));
+	 }
+  } else {
+	 DEBUG("Timeout expired!");
+	 my_assert(*is_timeout_expired);
+  }
+  MYTIME_stop(pt_ccomp);
+  MYTIME_STOP_PARALLEL(pt_comp);
+
+  *is_timeout_expired= (*is_timeout_expired) || MYTIME_timeout_expired(pt_fact_timeout);
+  MYTIME_timeout_destroy(pt_fact_timeout);
+}
 
 pEST
 compute_est_fact(pEST_info gen,
@@ -148,56 +200,60 @@ compute_est_fact(pEST_info gen,
 
   size_t inc_pairing_len= 0;
   pext_array V= NULL;
-  build_meg(est, tree, pg, floginfoext, pt_alg, pt_meg, shared_config,
-				&inc_pairing_len, &V);
-  MYTIME_START_PARALLEL(pt_io);
-  log_meg(V);
-#ifndef NDEBUG
-  print_meg(V, stdout);
-  fflush(stdout);
-#endif
-  DEBUG("Appending MEG to the MEGs file..");
-  fprintf(fmeg, "\n\n***********\n\n");
-  write_single_EST_info(fmeg, est);
-  meg_write(fmeg, V);
-  fflush(fmeg);
-  MYTIME_STOP_PARALLEL(pt_io);
 
-// EST-FACTORIZATIONS
+  bool is_timeout_expired= false;
 
-  log_info_extended(floginfoext, "est-factorization-begin", (void*)est);
+  pEST factorized_est= NULL;
+  do {
+	 build_meg(est, tree, pg, floginfoext, pt_alg, pt_meg, shared_config,
+				  &inc_pairing_len, &V);
 
-  MYTIME_START_PARALLEL(pt_comp);
-  MYTIME_reset(pt_ccomp);
-  MYTIME_start(pt_ccomp);
-  pEST factorized_est=get_EST_factorizations(est, V, shared_config, gen);
-  DEBUG("Computed %zu factorizations.", list_size(factorized_est->factorizations));
-  refine_EST_factorizations(gen, factorized_est, shared_config);
-  MYTIME_stop(pt_ccomp);
-  MYTIME_STOP_PARALLEL(pt_comp);
+	 DEBUG("A possible MEG has been built. Trying to get the factorizations...");
 
-  if(!list_is_empty(factorized_est->factorizations)) {
-	 INFO("...EST aligned!");
-	 remove_duplicated_factorizations(factorized_est->factorizations);
-	 my_assert(!list_is_empty(factorized_est->factorizations));
-	 fprintf(fintronic, ">%s\n", est->EST_id);
-	 add_intronic_edges_to_file(fintronic, V);
-	 write_single_EST_info(fpmeg, est);
-	 meg_write(fpmeg, V);
-	 fprintf(ftmeg, "%llu %llu %zu\n",
-				MYTIME_getinterval(pt_meg),
-				MYTIME_getinterval(pt_ccomp),
-				list_size(factorized_est->factorizations));
-  } else {
-	 INFO("...the EST %s has no alignment!", est->EST_gb);
-  }
+	 is_timeout_expired= false;
+	 internal_get_EST_factorizations(gen, est, floginfoext, pt_comp, pt_ccomp, shared_config,
+												V, &factorized_est, &is_timeout_expired);
 
-  log_info_extended(floginfoext, "est-factorization-end", (void*)est);
+	 DEBUG("Timeout expired?        %s", (is_timeout_expired)?"YES":"no");
+	 DEBUG("Factorization returned? %s", (factorized_est!=NULL &&
+													  !list_is_empty(factorized_est->factorizations))?"YES":"no");
+	 if (!is_timeout_expired ||
+		  (factorized_est!=NULL && !list_is_empty(factorized_est->factorizations))) {
+		DEBUG("EST factorization procedure correctly terminated "
+				"(possibly without factorizations).");
+		report_meg(est, pt_io, fmeg, V);
+	 }
 
-  DEBUG("Destroying the MEG and the occurrence set");
-  MYTIME_START_PARALLEL(pt_alg);
-  EA_destroy(V, (delete_function)vi_destroy);
-  MYTIME_STOP_PARALLEL(pt_alg);
+	 if (factorized_est!=NULL && !list_is_empty(factorized_est->factorizations)) {
+		INFO("...EST aligned!");
+		is_timeout_expired= false; // Reset timeout expiration
+											// since we computed some factorizations
+		fprintf(fintronic, ">%s\n", est->EST_id);
+		add_intronic_edges_to_file(fintronic, V);
+		write_single_EST_info(fpmeg, est);
+		meg_write(fpmeg, V);
+		fprintf(ftmeg, "%llu %llu %zu\n",
+				  MYTIME_getinterval(pt_meg),
+				  MYTIME_getinterval(pt_ccomp),
+				  list_size(factorized_est->factorizations));
+	 } else if (!is_timeout_expired) {
+		INFO("...the EST %s has no alignment!", est->EST_gb);
+	 } else {
+		my_assert(is_timeout_expired);
+		WARN("The timeout has expired while computing the EST factorizations. "
+			  "Re-trying with longer with min-factor-len= %zd.",
+			  shared_config->min_factor_len+inc_pairing_len+1);
+		++inc_pairing_len;
+	 }
+
+	 log_info_extended(floginfoext, "est-factorization-end", (void*)est);
+
+	 DEBUG("Destroying the MEG and the occurrence set");
+	 MYTIME_START_PARALLEL(pt_alg);
+	 EA_destroy(V, (delete_function)vi_destroy);
+	 MYTIME_STOP_PARALLEL(pt_alg);
+
+  } while (is_timeout_expired);
 
 // Destroy local timers
   MYTIME_destroy(pt_meg);

@@ -167,4 +167,39 @@ MYTIME_getinterval(pmytime pt)
 }
 
 
+struct _mytime_timeout {
+  struct timeval start;
+  struct timeval current;
+  MYTIME_DTYPE time_limit;
+  bool expired;
+};
+
+pmytime_timeout
+MYTIME_timeout_create(MYTIME_DTYPE time_limit)
+{
+  pmytime_timeout ptt= PALLOC(struct _mytime_timeout);
+  ptt->expired= false;
+  ptt->time_limit= time_limit;
+  gettimeofday(&ptt->start, NULL);
+  return ptt;
+}
+
+
+bool
+MYTIME_timeout_expired(pmytime_timeout ptt)
+{
+  my_assert(ptt!=NULL);
+  if (ptt->expired)
+	 return true;
+  gettimeofday(&ptt->current, NULL);
+  ptt->expired= diff_usec(ptt->start, ptt->current) > ptt->time_limit;
+  return ptt->expired;
+}
+
+void
+MYTIME_timeout_destroy(pmytime_timeout ptt)
+{
+  my_assert(ptt!=NULL);
+  pfree(ptt);
+}
 

@@ -93,8 +93,22 @@ MYTIME_stop_parallel(pmytime_parallel ppt);
 const char*
 MYTIME_getname(pmytime pt);
 
-unsigned long long
+MYTIME_DTYPE
 MYTIME_getinterval(pmytime pt);
+
+
+// Data structures and methods for managing time limits
+
+typedef struct _mytime_timeout* pmytime_timeout;
+
+pmytime_timeout
+MYTIME_timeout_create(MYTIME_DTYPE time_limit);
+
+bool
+MYTIME_timeout_expired(pmytime_timeout ptt);
+
+void
+MYTIME_timeout_destroy(pmytime_timeout ptt);
 
 
 #endif
