@@ -147,6 +147,7 @@ FILE* open_statm_file(void);
 
 void log_info(FILE* const logfile, char* description);
 
+void log_info_extended(FILE* const logfile, char* description, void* additional_info);
 
 #define NOT_NULL( v ) my_assert( v != NULL )
 

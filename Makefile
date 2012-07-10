@@ -371,6 +371,7 @@ est_fact_SOURCE= \
 	$(SRC_DIR)/max-emb-graph.c \
 	$(SRC_DIR)/aug_suffix_tree.c \
 	$(SRC_DIR)/meg-simplification.c \
+	$(SRC_DIR)/compute-est-fact.c \
 	$(SRC_DIR)/main-est-fact.c
 
 est_fact_OBJ= \
@@ -378,6 +379,7 @@ est_fact_OBJ= \
 	$(OBJ_DIR)/max-emb-graph.o \
 	$(OBJ_DIR)/aug_suffix_tree.o \
 	$(OBJ_DIR)/meg-simplification.o \
+	$(OBJ_DIR)/compute-est-fact.o \
 	$(OBJ_DIR)/main-est-fact.o
 
 est_fact_PROG=$(BIN_DIR)/est-fact

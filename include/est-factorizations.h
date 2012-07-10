@@ -42,13 +42,15 @@
 #include "ext_array.h"
 #include "int_list.h"
 #include "configuration.h"
+#include "my_time.h"
 
 //Include
 
 //Computa per data una EST tutte le fattorizzazioni ammissibili a partire
 //dal grafo degli embedding massimali (pext_array)
 //pEST get_EST_factorizations(pconfiguration, pEST_info, pext_array);
-pEST get_EST_factorizations(pEST_info, pext_array, pconfiguration, pEST_info);
+pEST get_EST_factorizations(pEST_info, pext_array, pconfiguration, pEST_info,
+									 pmytime_timeout);
 
 char* real_substring(const int, const int, char*);
 
