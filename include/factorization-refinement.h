@@ -43,6 +43,9 @@ void
 remove_duplicated_factorizations(plist factorizations);
 
 void
+remove_factorizations_with_very_small_exons(plist factorizations);
+
+void
 refine_EST_factorizations(pEST_info genomic,
 								  pEST factorized_est,
 								  pconfiguration config);

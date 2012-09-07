@@ -167,6 +167,8 @@ internal_get_EST_factorizations(pEST_info gen,
   if (*pfactorized_est != NULL) {
 	 DEBUG("Computed %zu factorizations.", list_size((*pfactorized_est)->factorizations));
 	 refine_EST_factorizations(gen, *pfactorized_est, shared_config);
+	 remove_factorizations_with_very_small_exons((*pfactorized_est)->factorizations);
+	 DEBUG("Remained %zu factorizations.", list_size((*pfactorized_est)->factorizations));
 	 if(!list_is_empty((*pfactorized_est)->factorizations)) {
 		remove_duplicated_factorizations((*pfactorized_est)->factorizations);
 		my_assert(!list_is_empty((*pfactorized_est)->factorizations));

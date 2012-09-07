@@ -493,7 +493,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	  if(!list_is_empty(fact_to_be_corrected))
 		  is_ok=check_exon_start_end(fact_to_be_corrected);*/
 	  //if(is_ok == false || (list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected)))
-	  if(list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected))
+	  if(list_is_empty(fact_to_be_corrected))// || !check_small_exons(fact_to_be_corrected))
 			list_remove_at_iterator(plist_fact_to_be_corrected, (delete_function)factorization_destroy);
 	  else{
 			bool check_adding;
