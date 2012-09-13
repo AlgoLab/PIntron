@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2011  Yuri Pirola
+ * Copyright (C) 2011,2012  Yuri Pirola
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -39,6 +39,45 @@
 #include "compute-alignments.h"
 #include "refine.h"
 #include "refine-intron.h"
+
+// ------------------------------------------------------------------------
+//
+// Removing factorizations with very small exons
+// Issue #22: Wrong call of procedure check_small_exons
+//
+#define _UB_VERY_SMALL_EXON_LENGTH_ 5
+
+void
+remove_factorizations_with_very_small_exons(plist factorizations) {
+  DEBUG("Removing factorizations with very small exons...");
+  plistit pl_f_it= list_first(factorizations);
+  size_t fact_id= 0;
+  while (listit_has_next(pl_f_it)) {
+	 ++fact_id;
+	 DEBUG("Analyzing factorization %zu...", fact_id);
+	 pfactorization pfact= listit_next(pl_f_it);
+	 plistit pl_factor_it= list_first(pfact);
+	 bool has_very_small_exons= false;
+	 while (!has_very_small_exons && listit_has_next(pl_factor_it)) {
+		pfactor pcurr= listit_next(pl_factor_it);
+		has_very_small_exons= (pcurr->EST_end + 1 - pcurr->EST_start) < _UB_VERY_SMALL_EXON_LENGTH_;
+		if (has_very_small_exons) {
+		  DEBUG("Exon (%d-%d) -- (%d-%d) is very small (less than %dbp). Factorization discarded.",
+				  pcurr->EST_start, pcurr->EST_end, pcurr->GEN_start, pcurr->GEN_end,
+				  _UB_VERY_SMALL_EXON_LENGTH_);
+		}
+	 }
+	 listit_destroy(pl_factor_it);
+	 if (has_very_small_exons) {
+		INFO("Factorization %zu has very small exons. Deleting...", fact_id);
+		list_remove_at_iterator(pl_f_it, (delete_function)factorization_destroy);
+		break;
+	 }
+  }
+  listit_destroy(pl_f_it);
+}
+
+
 
 // ------------------------------------------------------------------------
 //

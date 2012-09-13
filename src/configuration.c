@@ -290,6 +290,7 @@ pconfiguration config_create(int argc, char** argv) {
   COPY_int_VALUE(suff_pref_length_genomic);
   COPY_int_VALUE(suff_pref_length_est);
   COPY_int_VALUE(suff_pref_length_intron);
+  COPY_int_VALUE(max_single_factorization_time);
 //  COPY_int_VALUE(max_seq_in_gst);
 
   args_info.retain_externals_orig=

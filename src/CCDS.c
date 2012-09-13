@@ -225,6 +225,22 @@ char *in_path;
 
 char *gene;
 
+static void exit_with_problem(const char* problem) {
+  fprintf(stderr, "%s\n", problem);
+#ifdef HALT_EXIT_MODE
+  exit(1);
+#else
+  exit(EXIT_FAILURE);
+#endif
+}
+
+static void exit_with_problem_if(const bool condition,
+											const char* problem) {
+  if (condition) {
+	 exit_with_problem(problem);
+  }
+}
+
 static int GetCDSStart(struct cds cds_inst);
 static int GetCDSEnd(struct cds cds_inst);
 static void MarkExonEndpoints(struct cds cds_to_be_mapped);
@@ -254,7 +270,7 @@ static void GetCDSAnnotations(char *fileName);
 static char GetCDSAnnotationForRefSeq_2(int i);
 static void CheckStartEndWRTref(int ref, int i);
 
-static char Check_start_codon(int pos, char *tr_seq);
+static bool Check_start_codon(int pos, char *tr_seq);
 static char Check_stop_codon(int pos, char *tr_seq);
 static void Get_Transcripts_from_File_FASTA_format(char *fileName);
 static struct exon *Insert_exon_into_a_exon_list(struct exon *arg_exon_list, int left, int right, int rel_left, int rel_right, char polyA, char *sequence, int *incr);
@@ -526,71 +542,56 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
   }
 
   trs=(struct transcript *)malloc(number_of_transcripts*sizeof(struct transcript));
-  if(trs == NULL){
-         fprintf(stderr, "Error4!\n");
-         exit(0);
-  }
+  exit_with_problem_if(trs == NULL, "Error4!");
 
   for(i=0; i<number_of_transcripts; i++){
-         fscanf(in, "%s\n", temp_string);
+	 fscanf(in, "%s\n", temp_string);
 
-         if(temp_string[0] != '>'){
-                fprintf(stderr, "Invalid format!\n");
-#ifdef HALT_EXIT_MODE
-                exit(1);
-#else
-                exit(EXIT_FAILURE);
-#endif
-         }
+	 exit_with_problem_if(temp_string[0] != '>', "Invalid format!");
 
-         j=1;
-         while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
-                temp_tr_ID[j-1]=temp_string[j];
-                j++;
-         }
-         temp_tr_ID[j-1]='\0';
-         tr_ID=atoi(temp_tr_ID);
+	 j=1;
+	 while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
+		temp_tr_ID[j-1]=temp_string[j];
+		j++;
+	 }
+	 temp_tr_ID[j-1]='\0';
+	 tr_ID=atoi(temp_tr_ID);
 
-         if(j < (int)strlen(temp_string))
-                j++;
-         while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
-                temp_exons1[j-strlen(temp_tr_ID)-2]=temp_string[j];
-                j++;
-         }
-         temp_exons1[j-strlen(temp_tr_ID)-2]='\0';
-         exons1=atoi(temp_exons1);
-         if(j < (int)strlen(temp_string))
-                j++;
-         while(j < (int)strlen(temp_string)){
-                temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]=temp_string[j];
-                j++;
-         }
-         if(j > (int)strlen(temp_tr_ID)+(int)strlen(temp_exons1)+3){
-                temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]='\0';
-         }
-         else{
-                strcpy(temp_refseq, "");
-         }
+	 if(j < (int)strlen(temp_string))
+		j++;
+	 while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
+		temp_exons1[j-strlen(temp_tr_ID)-2]=temp_string[j];
+		j++;
+	 }
+	 temp_exons1[j-strlen(temp_tr_ID)-2]='\0';
+	 exons1=atoi(temp_exons1);
+	 if(j < (int)strlen(temp_string))
+		j++;
+	 while(j < (int)strlen(temp_string)){
+		temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]=temp_string[j];
+		j++;
+	 }
+	 if(j > (int)strlen(temp_tr_ID)+(int)strlen(temp_exons1)+3){
+		temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]='\0';
+	 }
+	 else{
+		strcpy(temp_refseq, "");
+	 }
 
-         exons1=atoi(temp_exons1);
+	 exons1=atoi(temp_exons1);
 
-         trs[i].exons=exons1;
+	 trs[i].exons=exons1;
 
-         if(strcmp(temp_refseq, "")){
-                trs[i].type=0;
-                trs[i].RefSeq=(char *)malloc((strlen(temp_refseq)+1)*sizeof(char));
-                if(trs[i].RefSeq == NULL){
-                  fprintf(stderr, "Problem10 of memory allocation in Get_Transcripts_from_File_FASTA_format!\n");
-#ifdef HALT_EXIT_MODE
-                  exit(1);
-#else
-                  exit(EXIT_FAILURE);
-#endif
-                }
-                strcpy(trs[i].RefSeq, temp_refseq);
-         }
-         else
-                trs[i].type=-1;
+	 if(strcmp(temp_refseq, "")){
+		trs[i].type=0;
+		trs[i].RefSeq=(char *)malloc((strlen(temp_refseq)+1)*sizeof(char));
+		exit_with_problem_if(trs[i].RefSeq == NULL,
+									"Problem10 of memory allocation in Get_Transcripts_from_File_FASTA_format!");
+		strcpy(trs[i].RefSeq, temp_refseq);
+	 } else {
+		trs[i].type= -1;
+		trs[i].RefSeq= NULL;
+	 }
 
          trs[i].exon_index=(int *)malloc(exons1*sizeof(int));
          if(trs[i].exon_index == NULL){
@@ -925,27 +926,31 @@ void GetCDSAnnotations(char *fileName){
   }
 
   while(!feof(in)){
-         fscanf(in, "%d\n", &length);
+	 fscanf(in, "%d\n", &length);
 
-         if(length > 0){
+	 if(length > 0){
 		a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
-		if(a_cds == NULL){
-			fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
-			exit(0);
+		if (a_cds == NULL) {
+		  fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
+		  exit(0);
 		}
 
-		fscanf(in, "%s\t%d\t%d\t%d\t%s\n", temp_ID, &rel_start, &rel_end, &exons, a_cds[counter].RefSeq_sequence);
+		DEBUG("Reading RefSeq no. %d...", counter+1);
+		int fscanf_res= fscanf(in, "%s\t%d\t%d\t%d\t%s\n",
+									  temp_ID, &rel_start, &rel_end, &exons,
+									  a_cds[counter].RefSeq_sequence);
+		my_assert(fscanf_res == 5);
 		strcpy(a_cds[counter].RefSeq, temp_ID);
 		a_cds[counter].rel_start=rel_start;
 		a_cds[counter].rel_end=rel_end;
 		a_cds[counter].exons=exons;
 
 		counter++;
-         } else {
+	 } else {
 		fprintf(stderr, "WARNING: CDS annotation %s file not correct!\n", fileName);
 		fscanf(in, "%s\t%d\t%d\t%d\n", temp_ID, &rel_start, &rel_end, &exons);
 		fprintf(stderr, "\tRefSeq %s has null length!\n", temp_ID);
-         }
+	 }
   }
 
   fclose(in);
@@ -1469,18 +1474,16 @@ void PrintTABOutput(int ref, struct cds cds_for_gene){
                 if(print_counter < number_of_transcripts)
                   fprintf(gtf, "\n");
 #endif
-         }
-         else{
-                getCompetingLabels(i, ref, comp_label);
+         } else {
+			  getCompetingLabels(i, ref, comp_label);
+			  getnewIRLabels(i, ref, ir_label);
 
-                getnewIRLabels(i, ref, ir_label);
+			  getEXInitTermSkipNewLabels(i, ref, new_label);
 
-                getEXInitTermSkipNewLabels(i, ref, new_label);
-
-                if(trs[i].RefSeq == NULL)
-                  fprintf(stderr, "\t%s%s%s", comp_label, ir_label, new_label);
-                else
-                  fprintf(stderr, "\t%s (%s%s%s)", trs[i].RefSeq, comp_label, ir_label, new_label);
+			  if (trs[i].RefSeq == NULL)
+				 fprintf(stderr, "\t%s%s%s", comp_label, ir_label, new_label);
+			  else
+				 fprintf(stderr, "\t%s (%s%s%s)", trs[i].RefSeq, comp_label, ir_label, new_label);
 
 #ifdef PRINT_GTF_VARIANT
                 fprintf(gtf, " /Type=%s%s%s", comp_label, ir_label, new_label);
@@ -2107,84 +2110,91 @@ void GetLocalization(char *local, int index, int exon){
 }
 
 void GetLongestORF(int ref, int i, int min_length){
-  char *tr_seq=NULL;
-  int j=0, z=0, p=0, k=0;
-  int orf_length=0;
+  char *tr_seq= NULL;
+  int j=0, p=0, k=0;
   int tmp_ORF_start=0, tmp_ORF_end=0;
   int length=0;
   char stop=0;
-  int ccds_end=0;
   int start_align_index=0, end_align_index=0;
-
-  char ORF_found=0, first_ORF_found=0;
 
   char *EST_temp, *GEN_temp;
   int cfr_length=0;
 
+  DEBUG("Looking for an ORF for transcript %d (%dbp long)", i, trs[i].length);
+
   tr_seq=(char *)malloc((trs[i].length+1)*sizeof(char));
-
-  if(tr_seq == NULL){
-         fprintf(stderr, "Memory problem\n");
-#ifdef HALT_EXIT_MODE
-         exit(1);
-#else
-         exit(EXIT_FAILURE);
-#endif
+  exit_with_problem_if(tr_seq == NULL, "Memory problem");
+  tr_seq[0]= '\0';
+  if (strand == 1) {
+	 for (j=0; j<trs[i].exons; j++) {
+		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
+	 }
+  } else {
+	 for (j=trs[i].exons-1; j>=0; j--) {
+		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
+	 }
   }
 
-  strcpy(tr_seq, "");
+  DEBUG("Transcript sequence: %s", tr_seq);
 
-  if(strand == 1){
-         for(j=0; j<trs[i].exons; j++){
-                strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
-         }
-  }
-  else{
-         for(j=trs[i].exons-1; j>=0; j--){
-                strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
-         }
-  }
+  trs[i].has_stop= 0;
+  trs[i].no_ATG= 0;
+  trs[i].ORF_start= -1;
+  trs[i].ORF_end= -1;
 
-  ORF_found=0;
-  first_ORF_found=0;
+  int z= 0;
+  const int ccds_end= strlen(tr_seq)-3;
+  bool ORF_found= false;
+  int ORF_length= 0;
 
-  trs[i].has_stop=0;
-  trs[i].no_ATG=0;
-  trs[i].ORF_start=-1;
-  trs[i].ORF_end=-1;
+  for (int frame= 0; frame<3; ++frame) {
+	 DEBUG("Considering frame %d...", frame);
+	 z= frame;
 
-  z=0;
-  ccds_end=strlen(tr_seq)-3;
+	 while (z <= ccds_end) {
 
-  while(z <= ccds_end && !ORF_found){
-         if(Check_start_codon(z, tr_seq)){
-                j=z+3;
-                while(j <= ccds_end && !Check_stop_codon(j, tr_seq))
-                  j+=3;
+		if (Check_start_codon(z, tr_seq)) {
+		  DEBUG("  Found a start codon at position %d.", z);
+		  j= z+3;
+		  while (j <= ccds_end && !Check_stop_codon(j, tr_seq)) {
+			 j+=3;
+		  }
 
-//Ha trovato lo stop
-                if(j <= ccds_end){
-                  if(j-z+3 >= min_length){
-                         if(first_ORF_found == 0){
-                                first_ORF_found=1;
-                                orf_length=j-z+3;
-                                trs[i].ORF_start=z+1;
-                                trs[i].ORF_end=j+3;
-                                if(getContext(z, tr_seq) > 0)
-                                  ORF_found=1;
-                         }
-                         else{
-                                if(getContext(z, tr_seq) > 0){
-                                  orf_length=j-z+3;
-                                  trs[i].ORF_start=z+1;
-                                  trs[i].ORF_end=j+3;
-                                  ORF_found=1;
-                                }
-                         }
-                  }
-                }
-         }
-         z++;
+		  if (j <= ccds_end) {
+			 const int this_ORF_length= j-z+3;
+			 DEBUG("  Found a in-frame stop codon at position %d (ORF length=%d)",
+					 j, this_ORF_length);
+			 if (this_ORF_length >= min_length) {
+// An ORF is annotated if (see issue #20):
+// - it has a context and the previous one has not
+// OR
+// - ( * it is longer than the previous AND
+//     * it has a context if the previous one has it )
+				const bool has_context= getContext(z, tr_seq)>0;
+				DEBUG("    New ORF found (start=%d, end=%d, length=%d, ORF_found=%s).",
+						z+1, j+3, this_ORF_length, has_context?"YES":"NO");
+				if ( (!ORF_found && has_context) ||
+					  ( (this_ORF_length > ORF_length) &&
+						 (!ORF_found || has_context) ) ) {
+				  DEBUG("    The new ORF is better than the previous one. Saved.");
+				  ORF_length= this_ORF_length;
+				  trs[i].ORF_start= z+1;
+				  trs[i].ORF_end= j+3;
+				  ORF_found= has_context;
+				} else {
+				  DEBUG("    The new ORF is NOT better than the previous one. Discarded.");
+				}
+			 } else {
+				DEBUG("    The ORF is shorter than the minimum allowed length. Discarded.");
+			 }
+		  } else {
+			 DEBUG("  No in-frame stop codon found.");
+		  }
+		  z= j+3;
+		} else {
+		  z+= 3;
+		}
+	 }
   }
 
   if(trs[i].ORF_start != -1 && trs[i].ORF_end != -1){
@@ -2365,54 +2375,40 @@ void GetLongestORF(int ref, int i, int min_length){
 }
 
 char getContext(int ATG_start, char *tr_seq){
-  int i;
-  char check[4];
+
+  if (!Check_start_codon(ATG_start, tr_seq)) {
+	 exit_with_problem("ATG problem");
+  }
+
   char context=2; //0=weak, 1=medium, 2=strong
 
-
-  for(i=ATG_start; i<ATG_start+3; i++){
-         check[i-ATG_start]=tr_seq[i];
-  }
-  check[i-ATG_start]='\0';
-
-  if(strcmp(check, "atg") && strcmp(check, "ATG")){
-         fprintf(stderr, "ATG problem\n");
-#ifdef HALT_EXIT_MODE
-         exit(1);
-#else
-         exit(EXIT_FAILURE);
-#endif
+  if ( (ATG_start-3 < 0) ||
+		 ( (tr_seq[ATG_start-3] != 'a' && tr_seq[ATG_start-3] != 'A') &&
+			(tr_seq[ATG_start-3] != 'g' && tr_seq[ATG_start-3] != 'G') ) ) {
+	 context--;
   }
 
-  if(ATG_start-3 < 0 || ((tr_seq[ATG_start-3] != 'a' && tr_seq[ATG_start-3] != 'A') && (tr_seq[ATG_start-3] != 'g' && tr_seq[ATG_start-3] != 'G'))){
-         context--;
-  }
-
-  if(ATG_start+3 >= (int)strlen(tr_seq) || ((tr_seq[ATG_start+3] != 'a' && tr_seq[ATG_start+3] != 'A') && (tr_seq[ATG_start+3] != 'g' && tr_seq[ATG_start+3] != 'G'))){
-         context--;
+  if ( (ATG_start+3 >= (int)strlen(tr_seq)) ||
+		 ( (tr_seq[ATG_start+3] != 'a' && tr_seq[ATG_start+3] != 'A') &&
+			(tr_seq[ATG_start+3] != 'g' && tr_seq[ATG_start+3] != 'G') ) ) {
+	 context--;
   }
 
   return context;
 }
 
-char Check_start_codon(int pos, char *tr_seq){
-  if((tr_seq[pos] == 'a' && tr_seq[pos+1] == 't' && tr_seq[pos+2] == 'g') || (tr_seq[pos] == 'A' && tr_seq[pos+1] == 'T' && tr_seq[pos+2] == 'G'))
-         return 1;
-  else
-         return 0;
+bool Check_start_codon(int pos, char *tr_seq){
+  return ((tr_seq[pos] == 'a' && tr_seq[pos+1] == 't' && tr_seq[pos+2] == 'g') ||
+			 (tr_seq[pos] == 'A' && tr_seq[pos+1] == 'T' && tr_seq[pos+2] == 'G'));
 }
 
 char Check_stop_codon(int pos, char *tr_seq){
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'a') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'A'))
-         return 1;
-
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'g') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'G'))
-         return 1;
-
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'g' && tr_seq[pos+2] == 'a') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'G' && tr_seq[pos+2] == 'A'))
-         return 1;
-
-  return 0;
+  return ( ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'a') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'A') ) ||
+			  ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'g') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'G') ) ||
+			  ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'g' && tr_seq[pos+2] == 'a') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'G' && tr_seq[pos+2] == 'A') ) );
 }
 
 struct exon *Insert_exon_into_a_exon_list(struct exon *arg_exon_list, int left, int right, int rel_left, int rel_right, char polyA, char *sequence, int *incr){

@@ -493,7 +493,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	  if(!list_is_empty(fact_to_be_corrected))
 		  is_ok=check_exon_start_end(fact_to_be_corrected);*/
 	  //if(is_ok == false || (list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected)))
-	  if(list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected))
+	  if(list_is_empty(fact_to_be_corrected))// || !check_small_exons(fact_to_be_corrected))
 			list_remove_at_iterator(plist_fact_to_be_corrected, (delete_function)factorization_destroy);
 	  else{
 			bool check_adding;
@@ -670,7 +670,9 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 		int count_f=1;
 
+		unsigned int time_limit_check= 0;
 		while(listit_has_next(subtree_embedding_iter)){
+
 		  next_embedding=(plist)listit_next(subtree_embedding_iter);
 
 		  DEBUG("\t\t\t\t%s...adding the node to the embedding %d...", tab, count_f);
@@ -685,6 +687,14 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 		  if(!list_is_empty(updated_embedding_list)){
 			 plistit add_it=list_first(updated_embedding_list);
 			 while(listit_has_next(add_it)){
+
+// Check timeout (but not often)
+				if (!time_limit_check && MYTIME_timeout_expired(ptt)) {
+				  return NULL;
+				}
+				time_limit_check += 1;
+				time_limit_check &= 1023u;
+
 				plist add_emb=(plist)listit_next(add_it);
 
 				plistit cmp_it=list_first(embedding_list);
