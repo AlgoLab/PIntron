@@ -304,6 +304,7 @@ ALL_DIR= $(BIN_DIR) $(SRC_DIR) $(OBJ_DIR)
 ##
 base_SOURCE= \
 	$(SRC_DIR)/options.c \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/double_list.c \
 	$(SRC_DIR)/int_list.c \
 	$(SRC_DIR)/bool_list.c \
@@ -333,6 +334,7 @@ base_SOURCE= \
 ##
 base_OBJ= \
 	$(OBJ_DIR)/options.o \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/double_list.o \
 	$(OBJ_DIR)/int_list.o \
 	$(OBJ_DIR)/bool_list.o \
@@ -425,11 +427,13 @@ intron_agreement_PROG=\
 	$(BIN_DIR)/intron-agreement
 
 max_transcr_SOURCE= \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/util.c \
 	$(SRC_DIR)/my_time.c \
 	$(SRC_DIR)/MaximalTranscripts.c
 
 max_transcr_OBJ= \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/util.o \
 	$(OBJ_DIR)/my_time.o \
 	$(OBJ_DIR)/MaximalTranscripts.o
@@ -452,11 +456,13 @@ max_transcr_PROG= \
 
 
 cds_annotation_SOURCE= \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/util.c \
 	$(SRC_DIR)/my_time.c \
 	$(SRC_DIR)/CCDS.c
 
 cds_annotation_OBJ= \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/util.o \
 	$(OBJ_DIR)/my_time.o \
 	$(OBJ_DIR)/CCDS.o
