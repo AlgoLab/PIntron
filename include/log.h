@@ -80,7 +80,7 @@
 
 extern const char* const __LOG_PREFIXES__[];
 
-#define LOG(level, ...) __INTERNAL_LOG(level, __LOG_PREFIXES__[level], ## __VA_ARGS__, "")
+#define LOG(level, ...) __INTERNAL_LOG(level, __LOG_PREFIXES__[level], __VA_ARGS__, "")
 
 #define __INTERNAL_LOG(level, prefix, format, ...) do {						\
 	 if (level<=LOG_THRESHOLD) {														\
@@ -104,7 +104,7 @@ extern const char* const __LOG_PREFIXES__[];
 					prefix, __my_internal_funz__,										\
 					MAX_LEN_FILE_NAME, MAX_LEN_FILE_NAME,							\
 					__my_internal_file__, __LINE__,									\
-					## __VA_ARGS__);														\
+					__VA_ARGS__);														\
 	 }																							\
   } while (0)
 
@@ -114,13 +114,13 @@ extern const char* const __LOG_PREFIXES__[];
 
 #endif
 
-#define FATAL(...) LOG(LOG_LEVEL_FATAL, ## __VA_ARGS__)
-#define ERROR(...) LOG(LOG_LEVEL_ERROR, ## __VA_ARGS__)
-#define WARN(...) LOG(LOG_LEVEL_WARN, ## __VA_ARGS__)
-#define INFO(...) LOG(LOG_LEVEL_INFO, ## __VA_ARGS__)
-#define DEBUG(...) LOG(LOG_LEVEL_DEBUG, ## __VA_ARGS__)
-#define TRACE(...) LOG(LOG_LEVEL_TRACE, ## __VA_ARGS__)
-#define FINETRACE(...) LOG(LOG_LEVEL_FINETRACE, ## __VA_ARGS__)
+#define FATAL(...) LOG(LOG_LEVEL_FATAL, __VA_ARGS__)
+#define ERROR(...) LOG(LOG_LEVEL_ERROR, __VA_ARGS__)
+#define WARN(...) LOG(LOG_LEVEL_WARN, __VA_ARGS__)
+#define INFO(...) LOG(LOG_LEVEL_INFO, __VA_ARGS__)
+#define DEBUG(...) LOG(LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define TRACE(...) LOG(LOG_LEVEL_TRACE, __VA_ARGS__)
+#define FINETRACE(...) LOG(LOG_LEVEL_FINETRACE, __VA_ARGS__)
 
 #if (LOG_LEVEL_FATAL <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_FATAL_ENABLED
