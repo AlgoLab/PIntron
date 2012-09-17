@@ -185,6 +185,14 @@ check_and_copy(struct gengetopt_args_info* args) {
 	 FIELD(opt,given)= 1;									\
   }
 
+#define COPY_long_VALUE(opt)								\
+  {																\
+	 char buff[50];											\
+	 snprintf(buff, 49, "%ld", FIELD(opt,arg));		\
+	 FIELD(opt,orig)= alloc_and_copy(buff);			\
+	 FIELD(opt,given)= 1;									\
+  }
+
 #define COPY_double_VALUE(opt)								\
   {																	\
 	 char buff[15];												\
@@ -290,7 +298,7 @@ pconfiguration config_create(int argc, char** argv) {
   COPY_int_VALUE(suff_pref_length_genomic);
   COPY_int_VALUE(suff_pref_length_est);
   COPY_int_VALUE(suff_pref_length_intron);
-  COPY_int_VALUE(max_single_factorization_time);
+  COPY_long_VALUE(max_single_factorization_time);
 //  COPY_int_VALUE(max_seq_in_gst);
 
   args_info.retain_externals_orig=

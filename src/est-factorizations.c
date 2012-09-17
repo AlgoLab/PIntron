@@ -63,7 +63,7 @@ static psubtree_embeddings create_and_set_subtree_embeddings(ppairing, plist);
 static plist get_computed_subtree_embeddings(ppairing);
 
 //Funzione per copiare liste di pfactor
-static pfactor copy_pfactor(pfactor);
+//static pfactor copy_pfactor(pfactor);
 
 //Funzione per copiare liste di pfactor
 static ppairing copy_ppairing(ppairing);
@@ -85,24 +85,24 @@ static void print_embedding(plist);
 static void embedding_list_destroy(plist);
 
 //Funzione di stampa di una lista di fattorizzazioni
-static void print_factorizations_for_info(plist);
+static void print_factorizations_on_log(const int log_level, plist, const char* const);
 //Funzione di stampa di una fattorizzazione (lista di fattori pfactor)
-static void print_factorization_for_info(plist);
+static void print_factorization_on_log(const int log_level, plist, const char* const);
 
 //Funzione di stampa di una lista di embeddings
-static void print_embeddings_for_info(plist);
+//static void print_embeddings_for_info(plist);
 //Funzione di stampa di una fattorizzazione (lista di fattori ppairing)
-static void print_embedding_for_info(plist);
+//static void print_embedding_for_info(plist);
 
 //Controlla che la fattorizzazione passata come input non tagli un suffisso/prefisso eccessivo
 //factorization deve essere una lista di pfactor
-static bool test_prefix_suffix(plist, int, pconfiguration, pEST_info);
+//static bool test_prefix_suffix(plist, int, pconfiguration, pEST_info);
 
 //Comparator per confrontare due fattori (pfactor)
-static int factor_compare(const pfactor*, const pfactor*);
+//static int factor_compare(const pfactor*, const pfactor*);
 
 //Comparator per confrontare due pairing (ppairing)
-static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2);
+//static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2);
 
 //Comparator per confrontare liste di fattori (pfactor)
 //Due fattori sono uguali se hanno gli estremi (su EST e GEN) che differiscono di pochi nt)
@@ -433,7 +433,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
     listit_destroy(plist_add_factorization);
 
   INFO("Factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
-  print_factorizations_for_info(factorization_list);
+  print_factorizations_on_log(LOG_LEVEL_INFO, factorization_list, gen_info->EST_seq);
 
   if(config->max_number_of_factorizations != 0 && ((int) list_size(factorization_list)) > config->max_number_of_factorizations){
 	 INFO("\tbut it is an artifact! There are too many factorizations!");
@@ -442,24 +442,32 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
   }
 
   //Refine factorizations
+  DEBUG("Refine factorizations...");
   plistit plist_fact_to_be_refined=list_first(factorization_list);
   while(listit_has_next(plist_fact_to_be_refined)){
 	 plist fact_to_be_refined=(plist)listit_next(plist_fact_to_be_refined);
 	 if(!list_is_empty(fact_to_be_refined)){
+		 DEBUG("New factorization to be refined:");
+		 print_factorization_on_log(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 		 plistit plist_f_t_r=list_first(fact_to_be_refined);
 		 pfactor donor=(pfactor)listit_next(plist_f_t_r);
 		 bool first_intron=true;
 		 while(listit_has_next(plist_f_t_r)){
 			 pfactor acceptor=(pfactor)listit_next(plist_f_t_r);
 
-			 DEBUG("Refining intron %d-%d (%c%c-%c%c) (EST cut %d)", donor->GEN_end+1, acceptor->GEN_start-1, gen_info->EST_seq[donor->GEN_end+1], gen_info->EST_seq[donor->GEN_end+2], gen_info->EST_seq[acceptor->GEN_start-2], gen_info->EST_seq[acceptor->GEN_start-1], acceptor->EST_start);
+			 DEBUG(" - Refining intron:  gen. coord.=[%7d-%7d],  pattern=[ %.2s - %.2s],  EST cut=%6d",
+					 donor->GEN_end+1, acceptor->GEN_start-1,
+					 gen_info->EST_seq+donor->GEN_end+1, gen_info->EST_seq+acceptor->GEN_start-2,
+					 acceptor->EST_start);
 
 			 refine_intron(config, gen_info, pest_info, donor, acceptor, first_intron);
 
 			 first_intron=false;
 
-			 DEBUG("\tRefined intron: %d-%d", donor->GEN_end+1, acceptor->GEN_start-1);
-			 DEBUG("\tRefined intron pattern ==> %c%c-%c%c", gen_info->EST_seq[donor->GEN_end+1], gen_info->EST_seq[donor->GEN_end+2], gen_info->EST_seq[acceptor->GEN_start-2], gen_info->EST_seq[acceptor->GEN_start-1]);
+			 DEBUG("   Resulting intron: gen. coord.=[%7d-%7d],  pattern=[ %.2s - %.2s],  EST cut=%6d",
+					 donor->GEN_end+1, acceptor->GEN_start-1,
+					 gen_info->EST_seq+donor->GEN_end+1, gen_info->EST_seq+acceptor->GEN_start-2,
+					 acceptor->EST_start);
 
 			 donor=acceptor;
 		 }
@@ -476,6 +484,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			 }
 		 }
 		 listit_destroy(plist_f_t_r);
+		 DEBUG("Refined factorization:");
+		 print_factorization_on_log(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 	 }
   }
 
@@ -573,6 +583,10 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
   listit_destroy(plist_fact_to_be_corrected);
 
   est->factorizations=final_factorization_list;
+
+  DEBUG("Refined factorizations of EST %s => %zd",
+		  est->info->EST_id, list_size(final_factorization_list));
+  print_factorizations_on_log(LOG_LEVEL_DEBUG, final_factorization_list, gen_info->EST_seq);
 
   return est;
 }
@@ -898,6 +912,8 @@ static plist get_computed_subtree_embeddings(ppairing root)
 	 return NULL;
 }
 
+//UNUSED
+/*
 //Funzione per copiare liste di pfactor
 static pfactor copy_pfactor(pfactor arg)
 {
@@ -908,6 +924,7 @@ static pfactor copy_pfactor(pfactor arg)
   return copy;
 
 }
+*/
 
 //Funzione per copiare liste di ppairing
 static ppairing copy_ppairing(ppairing arg)
@@ -972,32 +989,43 @@ static void print_embedding(plist embedding){
   listit_destroy(plist_it_e);
 }
 
-static void print_factorizations_for_info(plist factorization_list){
-  plistit plist_it_id;
-
-  INFO("\t\tFactorizations->");
-
-  plist_it_id=list_first(factorization_list);
-  while(listit_has_next(plist_it_id)){
-	 plist factorization=(plist)listit_next(plist_it_id);
-	 print_factorization_for_info(factorization);
-  }
-  listit_destroy(plist_it_id);
-}
-
-static void print_factorization_for_info(plist factorization){
+static void
+print_factorization_on_log(const int log_level,
+									plist factorization, const char* const gen_seq){
   plistit plist_it_f;
 
-  INFO("\t\tFactorization-> %zd exon(s)", list_size(factorization));
-
   plist_it_f=list_first(factorization);
+  size_t exon_n= 0;
   while(listit_has_next(plist_it_f)){
 	 pfactor pfact=(pfactor)listit_next(plist_it_f);
-	 INFO("\t\t\tE_START=%d E_END=%d G_START=%d G_END=%d", pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end);
+	 ++exon_n;
+	 LOG(log_level, "   %3zu) E_START=%8d  E_END=%8d  --  G_START=%10d  G_END=%10d  "
+		  "%.2s...%.2s",
+		  exon_n, pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end,
+		  (exon_n==1)?"  ":gen_seq+pfact->GEN_start-2,
+			!listit_has_next(plist_it_f)?"  ":gen_seq+pfact->GEN_end+1);
   }
   listit_destroy(plist_it_f);
 }
 
+static void
+print_factorizations_on_log(const int log_level,
+									 plist factorization_list, const char* const gen_seq){
+  plistit plist_it_id= list_first(factorization_list);
+  size_t factorization_no= 1;
+  while(listit_has_next(plist_it_id)){
+	 plist factorization=(plist)listit_next(plist_it_id);
+	 LOG(log_level, "  Factorization %-3zu [%2zu exon(s)]",
+		  factorization_no, list_size(factorization));
+	 print_factorization_on_log(log_level, factorization, gen_seq);
+	 ++factorization_no;
+  }
+  listit_destroy(plist_it_id);
+}
+
+
+/*
+//UNUSED
 static void print_embeddings_for_info(plist embedding_list){
   plistit plist_it_id;
 
@@ -1023,6 +1051,7 @@ static void print_embedding_for_info(plist embedding){
   }
   listit_destroy(plist_it_e);
 }
+*/
 
 //L'argomento deve essere una lista di fattorizzazioni (lista di liste di fattori)
 /*static void factorization_list_destroy(plist factorization_list){
@@ -1036,6 +1065,8 @@ static void embedding_list_destroy(plist embedding_list){
 	 list_destroy(embedding_list,(delete_function)embedding_destroy);
 }
 
+//UNUSED
+/*
 //Controlla che la fattorizzazione passata come input non tagli un suffisso/prefisso eccessivo
 //factorization deve essere una lista di pfactor
 static bool test_prefix_suffix(plist factorization, int est_length, pconfiguration config, pEST_info info){
@@ -1065,7 +1096,10 @@ static bool test_prefix_suffix(plist factorization, int est_length, pconfigurati
 
   return true;
 }
+*/
 
+//UNUSED
+/*
 //Comparator per confrontare due fattori (pfactor)
 static int factor_compare(const pfactor* pf1, const pfactor* pf2) {
   my_assert(pf1!=NULL);
@@ -1101,6 +1135,7 @@ static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2) {
 
   return 1;
 }
+*/
 
 //Comparator per confrontare liste di fattori (pfactor)
 //Due fattori sono uguali se la differenza tra gli ss (solo sulla genomica) e' contenuta in allowed_diff
@@ -2146,7 +2181,7 @@ plist handle_endpoints(plist factorization, char *genomic_sequence, char *est_se
 	int cut_factor=head->EST_start;
 	int cut_exon=head->GEN_start;
 	bool stop=false;
-	while(j < alignment->alignment_dim && stop == false){
+	while(j < alignment->alignment_dim && !stop){
 		//Il primo esone deve iniziare con 5 match almeno.
 		//XXX
 		if(matches > 5){

@@ -126,23 +126,23 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	alignment->new_acceptor_left_on_gen=donor_suffix_left_on_gen+alignment->intron_end+deleted_intron_dim+1;
 
 	if(alignment->new_acceptor_factor_left == donor->EST_start){
-		DEBUG("\tThe donor exon should be attached to the acceptor exon in the gap alignment!");
-		if(first_intron == true){
-			DEBUG("\t...and the donor exon has been attached to the acceptor exon in the gap alignment, since it is not the first one!");
+		DEBUG("     The donor exon should be attached to the acceptor exon in the gap alignment!");
+		if(first_intron){
+			DEBUG("     ...and the donor exon has been attached to the acceptor exon in the gap alignment, since it is not the first one!");
 			acceptor->EST_start=alignment->new_acceptor_factor_left;
 			acceptor->GEN_start=alignment->new_acceptor_left_on_gen;
 			gap_alignments_destroy(alignments);
 			return true;
 		}
 		else{
-			DEBUG("\t...but the intron is not the first one. The intron will not be refined!");
+			DEBUG("     ...but the intron is not the first one. The intron will not be refined!");
 			gap_alignments_destroy(alignments);
 			return false;
 		}
 	}
 
 	if(alignment->new_acceptor_left_on_gen-alignment->new_donor_right_on_gen < config->min_intron_length){
-		DEBUG("\tThe intron may be too small and the intron will not be refined!");
+		DEBUG("     The intron may be too small and the intron will not be refined!");
 		gap_alignments_destroy(alignments);
 		return false;
 	}
@@ -150,7 +150,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	int donor_right_shift=(alignment->new_donor_right_on_gen > donor->GEN_end)?(alignment->new_donor_right_on_gen-donor->GEN_end):(donor->GEN_end-alignment->new_donor_right_on_gen);
 	int acceptor_left_shift=(alignment->new_acceptor_left_on_gen > acceptor->GEN_start)?(alignment->new_acceptor_left_on_gen-acceptor->GEN_start):(acceptor->GEN_start-alignment->new_acceptor_left_on_gen);
 	if(donor_right_shift > 20 || acceptor_left_shift > 20){
-		DEBUG("\tThe donor/acceptor shift may be too big and the intron will not be refined!");
+		DEBUG("     The donor/acceptor shift may be too big and the intron will not be refined!");
 		gap_alignments_destroy(alignments);
 		return false;
 	}
@@ -188,7 +188,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	int shiftedlr_donor_right_on_gen_gc=0, shiftedlr_acceptor_left_on_gen_gc=0, shiftedlr_acceptor_factor_left_gc=0;
 
 	if(left_genomic_cut_dim == 0 && right_genomic_cut_dim == 0){
-		DEBUG("\tThe intron is already canonical");
+		DEBUG("     The intron is already canonical");
 		//Il taglio e' rimasto invariato perche' e' gia' gt-ag
 		final_new_donor_right_on_gen=alignment->new_donor_right_on_gen;
 		final_new_acceptor_left_on_gen=alignment->new_acceptor_left_on_gen;
@@ -197,7 +197,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	else{
 		bool error_shift_gt=Shift_right_to_left_1(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shifted_donor_right_on_gen_gt, &shifted_acceptor_left_on_gen_gt, &shifted_acceptor_factor_left_gt, "GT");
 		if(error_shift_gt){
-			DEBUG("\t...successfull 3' to 5' shifting for GT-AG!");
+			DEBUG("     ...successful 3' to 5' shifting for GT-AG!");
 			shifted_donor_right_on_gen=shifted_donor_right_on_gen_gt;
 			shifted_acceptor_left_on_gen=shifted_acceptor_left_on_gen_gt;
 			shifted_acceptor_factor_left=shifted_acceptor_factor_left_gt;
@@ -205,7 +205,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 		else{
 			error_shift_gt=Shift_left_to_right_1(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shiftedlr_donor_right_on_gen_gt, &shiftedlr_acceptor_left_on_gen_gt, &shiftedlr_acceptor_factor_left_gt, "GT");
 			if(error_shift_gt){
-				DEBUG("\t...successfull 5' to 3' shifting for GT-AG!");
+				DEBUG("     ...successful 5' to 3' shifting for GT-AG!");
 				shifted_donor_right_on_gen=shiftedlr_donor_right_on_gen_gt;
 				shifted_acceptor_left_on_gen=shiftedlr_acceptor_left_on_gen_gt;
 				shifted_acceptor_factor_left=shiftedlr_acceptor_factor_left_gt;
@@ -213,7 +213,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 			else{
 				bool error_shift_gc=Shift_right_to_left_2(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shifted_donor_right_on_gen_gc, &shifted_acceptor_left_on_gen_gc, &shifted_acceptor_factor_left_gc, "GC");
 				if(error_shift_gc){
-					DEBUG("\t...successfull 3' to 5' shifting for GC-AG!");
+					DEBUG("     ...successfull 3' to 5' shifting for GC-AG!");
 					shifted_donor_right_on_gen=shifted_donor_right_on_gen_gc;
 					shifted_acceptor_left_on_gen=shifted_acceptor_left_on_gen_gc;
 					shifted_acceptor_factor_left=shifted_acceptor_factor_left_gc;
@@ -221,7 +221,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 				else{
 					error_shift_gc=Shift_left_to_right_2(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shiftedlr_donor_right_on_gen_gc, &shiftedlr_acceptor_left_on_gen_gc, &shiftedlr_acceptor_factor_left_gc, "GC");
 					if(error_shift_gc){
-						DEBUG("\t...successfull 5' to 3' shifting for GC-AG!");
+						DEBUG("     ...successfull 5' to 3' shifting for GC-AG!");
 						shifted_donor_right_on_gen=shiftedlr_donor_right_on_gen_gc;
 						shifted_acceptor_left_on_gen=shiftedlr_acceptor_left_on_gen_gc;
 						shifted_acceptor_factor_left=shiftedlr_acceptor_factor_left_gc;
@@ -244,7 +244,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 		final_new_acceptor_factor_left=shifted_acceptor_factor_left;
 
 		if(final_new_acceptor_left_on_gen > acceptor->GEN_end || final_new_donor_right_on_gen < donor->GEN_start){
-			DEBUG("\tCan't refine intron!");
+			DEBUG("     Cannot refine intron!");
 			pfree(sequence_on_est);
 			pfree(sequence_on_gen);
 			gap_alignments_destroy(alignments);
@@ -1016,7 +1016,7 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	prev_match_str=NPALLOC(char*, cycle);
 	my_assert(prev_match_str != NULL);
 
-	DEBUG("\tTry shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
 
 	int i;
 	for(i=0; i < cycle; i++){
@@ -1124,7 +1124,7 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	match_str=NPALLOC(char*, cycle);
 	my_assert(cut_factor != NULL && match_str != NULL);
 
-	DEBUG("\tTry shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
 
 	int i;
 	for(i=0; i < cycle; i++){
@@ -1230,7 +1230,7 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	prev_match_str=NPALLOC(char*, cycle);
 	my_assert(prev_match_str != NULL);
 
-	DEBUG("\tTry shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
 
 	int i;
 	for(i=0; i < cycle; i++){
@@ -1337,7 +1337,7 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	match_str=NPALLOC(char*, cycle);
 	my_assert(cut_factor != NULL && match_str != NULL);
 
-	DEBUG("\tTry shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
 
 	int i;
 	for(i=0; i < cycle; i++){

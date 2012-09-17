@@ -399,15 +399,15 @@ test_data_create_PROG= \
 min_factorization_SOURCE= \
 	$(SRC_DIR)/min_factorization.c\
 	$(SRC_DIR)/color_matrix.c\
-	$(SRC_DIR)/semplify_matrix.c\
-	$(SRC_DIR)/sempl_info.c \
+	$(SRC_DIR)/simplify_matrix.c\
+	$(SRC_DIR)/simpl_info.c \
 	$(SRC_DIR)/main-min-factorization.c
 
 min_factorization_OBJ= \
 	$(OBJ_DIR)/min_factorization.o\
 	$(OBJ_DIR)/color_matrix.o\
-	$(OBJ_DIR)/semplify_matrix.o\
-	$(OBJ_DIR)/sempl_info.o \
+	$(OBJ_DIR)/simplify_matrix.o\
+	$(OBJ_DIR)/simpl_info.o \
 	$(OBJ_DIR)/main-min-factorization.o
 
 min_factorization_PROG=\

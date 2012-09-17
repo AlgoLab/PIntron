@@ -622,8 +622,10 @@ unsigned int get_agreement_error_start_end(char *genomic_sequence, pintron intro
 
 		int i=0, j=0, k=1;
 
-		my_assert(alignment->alignment_dim<=strlen(alignment->EST_alignment));
-		my_assert(alignment->alignment_dim<=strlen(alignment->GEN_alignment));
+		my_assert((alignment->alignment_dim<0) ||
+					 ((size_t)alignment->alignment_dim<=strlen(alignment->EST_alignment)));
+		my_assert((alignment->alignment_dim<0) ||
+					 ((size_t)alignment->alignment_dim<=strlen(alignment->GEN_alignment)));
 		while ((i < alignment->alignment_dim) &&
 				 (k <= diff)) {
 		  if (alignment->EST_alignment[alignment->alignment_dim-i-1] != '-') {
@@ -686,8 +688,10 @@ unsigned int get_agreement_error_start_end(char *genomic_sequence, pintron intro
 
 		int i=0, j=0, k=1;
 
-		my_assert(alignment->alignment_dim<=strlen(alignment->EST_alignment));
-		my_assert(alignment->alignment_dim<=strlen(alignment->GEN_alignment));
+		my_assert((alignment->alignment_dim<0) ||
+					 ((size_t)alignment->alignment_dim<=strlen(alignment->EST_alignment)));
+		my_assert((alignment->alignment_dim<0) ||
+					 ((size_t)alignment->alignment_dim<=strlen(alignment->GEN_alignment)));
 		while ((i < alignment->alignment_dim) &&
 				 (k <= diff)) {
 		  if (alignment->EST_alignment[i] != '-') {

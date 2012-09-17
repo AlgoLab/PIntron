@@ -47,13 +47,15 @@ plist correct_composition_tail(plist factorization, char *genomic_sequence, char
 
 	pfactor tail=list_tail(factorization);
 
-	int i=tail->EST_end+1;
-	int j=tail->GEN_end+1;
+	size_t i=tail->EST_end+1;
+	size_t j=tail->GEN_end+1;
 
-	size_t est_length=strlen(est_sequence);
-	size_t gen_length=strlen(genomic_sequence);
+	const size_t est_length=strlen(est_sequence);
+	const size_t gen_length=strlen(genomic_sequence);
 
-	while((i < est_length && j < gen_length) && genomic_sequence[j] == est_sequence[i]){
+	while((i < est_length) &&
+			(j < gen_length) &&
+			(genomic_sequence[j] == est_sequence[i])) {
 		DEBUG("Tail correction: added one base");
 		i++;
 		j++;
@@ -79,7 +81,7 @@ bool detect_polyA_signal(plist factorization, char *genomic_sequence, char *est_
 	DEBUG("Correct factor %d-%d (%d-%d on EST)", tail->GEN_start, tail->GEN_end, tail->EST_start, tail->EST_end);
 
 	size_t est_length=strlen(est_sequence);
-	DEBUG("EST length %d", est_length);
+	DEBUG("EST length %zu", est_length);
 	char *est_cleavage_seq=real_substring(tail->EST_end+1, est_length-tail->EST_end-1, est_sequence);
 
 

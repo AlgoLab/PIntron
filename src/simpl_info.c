@@ -27,38 +27,46 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#ifndef _SEMPL_INFO_H_
-#define _SEMPL_INFO_H_
-
-#include "list.h"
-#include "types.h"
+#include "simpl_info.h"
+#include "util.h"
+#include "log.h"
 #include "bit_vector.h"
 #include <stdio.h>
-#include "log.h"
 
-typedef struct _sempl_info* psempl;
-
-struct _sempl_info
+void psimpl_destroy(psimpl p)
 {
-  pbit_vect factors_used;
-  pbit_vect ests_ok;
-  pbit_vect factors_not_used;
-};
+  if(p!=NULL){
+	 BV_destroy(p->factors_used);
+	 BV_destroy(p->factors_not_used);
+	 BV_destroy(p->ests_ok);
+	 pfree(p);
+  }
+}
 
-psempl psempl_create(void);
+psimpl psimpl_create(void)
+{
+  psimpl p=(psimpl)palloc(sizeof(struct _simpl_info));
+  return p;
+}
 
-void psempl_destroy(psempl);
+int countTrue(pbit_vect bv)
+{
+  int cont=0;
+  for(unsigned int i=0;i<bv->n;i++){
+	 if(BV_get(bv,i)==true){
+		cont=cont+1;
+	 }
+  }
+  return cont;
+}
 
-int countTrue(pbit_vect);
+#if defined (LOG_MSG) && (LOG_LEVEL_INFO <= LOG_THRESHOLD)
 
-
-#if defined (LOG_MSG) && (LOG_LEVEL_DEBUG <= LOG_THRESHOLD)
-void psempl_print(psempl);
-#else
-#define psempl_print( ps ) \
-  do {							\
-  } while(0)
-
-#endif
+void psimpl_print(psimpl p)
+{
+  INFO("Simplified factors: %d", countTrue(p->factors_used));
+  INFO("Remaining factors:  %d", countTrue(p->factors_not_used));
+  INFO("No. of sequences factorized during simplification: %d", countTrue(p->ests_ok));
+}
 
 #endif
