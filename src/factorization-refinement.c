@@ -71,7 +71,6 @@ remove_factorizations_with_very_small_exons(plist factorizations) {
 	 if (has_very_small_exons) {
 		INFO("Factorization %zu has very small exons. Deleting...", fact_id);
 		list_remove_at_iterator(pl_f_it, (delete_function)factorization_destroy);
-		break;
 	 }
   }
   listit_destroy(pl_f_it);
