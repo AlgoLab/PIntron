@@ -432,8 +432,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
     }
     listit_destroy(plist_add_factorization);
 
-  INFO("Factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
-  print_factorizations_on_log(LOG_LEVEL_INFO, factorization_list, gen_info->EST_seq);
+  DEBUG("Preliminary factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
+  print_factorizations_on_log(LOG_LEVEL_DEBUG, factorization_list, gen_info->EST_seq);
 
   if(config->max_number_of_factorizations != 0 && ((int) list_size(factorization_list)) > config->max_number_of_factorizations){
 	 INFO("\tbut it is an artifact! There are too many factorizations!");
@@ -584,9 +584,9 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
   est->factorizations=final_factorization_list;
 
-  DEBUG("Refined factorizations of EST %s => %zd",
-		  est->info->EST_id, list_size(final_factorization_list));
-  print_factorizations_on_log(LOG_LEVEL_DEBUG, final_factorization_list, gen_info->EST_seq);
+  INFO("Refined factorizations of EST %s => %zd",
+		 est->info->EST_id, list_size(final_factorization_list));
+  print_factorizations_on_log(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
 
   return est;
 }
@@ -1315,7 +1315,7 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 	 actual_cut_suffix=actual_cut_suffix-suff_poly_red;
 	 factorization=list_create();
 	 plistit plist_it_e=list_first(embedding);
-	 pfactor last_factor;
+	 pfactor last_factor= NULL;
 	 bool stop=false;
 	 while(listit_has_next(plist_it_e) && stop == false){
 		ppairing pair=(ppairing)listit_next(plist_it_e);

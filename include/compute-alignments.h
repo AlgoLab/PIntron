@@ -55,7 +55,7 @@ ComputeAlignMatrix(const char * const EST_seq,
 						 const size_t genomic_len,
 						 char * const Mdir);
 
-void TracebackAlignment(size_t, palignment, char *, char *, char *, int, int);
+void TracebackAlignment(const size_t m, palignment alignment, const char * const EST_seq, const char * const genomic_seq, const char * const Mdir, int i, int j);
 
 size_t*
 edit_distance_matrix(const char* const s1, const size_t l1,

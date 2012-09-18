@@ -33,6 +33,8 @@
 
 #include "factorization-refinement.h"
 
+//#define LOG_THRESHOLD LOG_LEVEL_TRACE
+
 #include "list.h"
 #include "log.h"
 
@@ -138,8 +140,8 @@ remove_duplicated_factorizations(plist factorizations) {
 		  listit_destroy(pl_factor_it1);
 		  listit_destroy(pl_factor_it2);
 		  if (is_equal) {
-			 DEBUG("Factorizations %zu and %zu are duplicated. Deleting factorization %zu...",
-					 fact1_id, fact2_id, fact1_id);
+			 INFO("Factorizations %zu and %zu are duplicated. Deleting factorization %zu...",
+					fact1_id, fact2_id, fact1_id);
 			 list_remove_at_iterator(pl_f_it1, (delete_function)factorization_destroy);
 			 break;
 		  }
@@ -162,6 +164,8 @@ remove_duplicated_factorizations(plist factorizations) {
 
 // Exons longer than this are always considered NOT SMALL
 #define _UB_SMALL_EXON_LENGTH_ 15
+// Lenght of prefixes/suffixes considered during alignment
+#define _AFFIXES_LENGTH_ 5
 
 static
 void
@@ -191,28 +195,49 @@ analyze_possibly_small_exon(pfactor * ppprev,
   if ((elen <= config->min_factor_len) &&
 		(elen <= _UB_SMALL_EXON_LENGTH_)) {
 	 DEBUG("     it is a small exon! Trying to remove it...");
-	 char* efact= c_palloc(elen+1);
-	 strncpy(efact, factorized_est->info->EST_seq + pcurr->EST_start, elen);
-	 efact[elen]= '\0';
-	 char* gfact= c_palloc(glen+1);
-	 strncpy(gfact, genomic->EST_seq + pcurr->GEN_start, glen);
-	 gfact[glen]= '\0';
+	 const char* const efact= factorized_est->info->EST_seq + pcurr->EST_start;
+	 const char* const gfact= genomic->EST_seq + pcurr->GEN_start;
 
 	 const size_t orig_ed= compute_edit_distance(efact, elen, gfact, glen);
 	 DEBUG("        original edit distance: %zu", orig_ed);
 
-	 const size_t allglen= pnext->GEN_start - pprev->GEN_end - 1;
-	 char* allgfact= c_palloc(allglen+1);
-	 strncpy(allgfact, genomic->EST_seq + pprev->GEN_end + 1, allglen);
-	 allgfact[allglen]= '\0';
+// Take a short suffix of the previous exon and a short prefix of the following exon
+	 const size_t estart= MAX(pprev->EST_start, pprev->EST_end + 1 - _AFFIXES_LENGTH_);
+	 const size_t eend= MIN(pnext->EST_end + 1, pnext->EST_start + _AFFIXES_LENGTH_);
+	 const size_t epreflen= pprev->EST_end + 1 - estart;
+	 const size_t esufflen= eend - pnext->EST_start;
+	 const size_t allelen= eend - estart;
+	 const char* const allefact= factorized_est->info->EST_seq + estart;
+	 my_assert(epreflen + esufflen + elen == allelen);
+	 const size_t gstart= MAX(pprev->GEN_start, pprev->GEN_end + 1 - _AFFIXES_LENGTH_);
+	 const size_t gend= MIN(pnext->GEN_end + 1, pnext->GEN_start + _AFFIXES_LENGTH_);
+	 const size_t gpreflen= pprev->GEN_end + 1 - gstart;
+	 const size_t gsufflen= gend - pnext->GEN_start;
+	 const size_t allglen= gend - gstart;
+	 const char* const allgfact= genomic->EST_seq + gstart;
+	 my_assert(gpreflen + gsufflen + glen + pcurr->GEN_start - pprev->GEN_end - 1 +
+				  pnext->GEN_start - pcurr->GEN_end - 1 == allglen);
+
+	 TRACE("  Considered EST prefix:     %.*s", (int)epreflen, allefact);
+	 TRACE("  Considered genomic prefix: %.*s", (int)gpreflen, allgfact);
+	 const size_t orig_ed_pref= compute_edit_distance(allefact, epreflen, allgfact, gpreflen);
+	 DEBUG("  pref. original edit distance: %zu", orig_ed_pref);
+
+	 TRACE("  Considered EST suffix:     %.*s", (int)esufflen, allefact - esufflen);
+	 TRACE("  Considered genomic suffix: %.*s", (int)gsufflen, allgfact - gsufflen);
+	 const size_t orig_ed_suff= compute_edit_distance(allefact - esufflen, esufflen,
+																				allgfact - gsufflen, gsufflen);
+	 DEBUG("  suff. original edit distance: %zu", orig_ed_suff);
 
 	 size_t offset_p, offset_t1, offset_t2;
 	 unsigned int new_ed= allglen;
-	 TRACE("Factor of the EST sequence: %s", efact);
-	 TRACE("Factor of the genomic seq:  %s", allgfact);
-	 const bool ref_res= refine_borders(efact, elen,
+	 TRACE("Factor of the EST sequence [%9zu-%9zu]: %.*s",
+			 estart, eend, (int)allelen, allefact);
+	 TRACE("Factor of the genomic seq  [%9zu-%9zu]: %.*s",
+			 gstart, gend, (int)allglen, allgfact);
+	 const bool ref_res= refine_borders(allefact, allelen,
 													allgfact, allglen,
-													orig_ed,
+													orig_ed + orig_ed_pref + orig_ed_suff,
 													&offset_p, &offset_t1, &offset_t2,
 													&new_ed);
 	 TRACE("Border refinement gave: "
@@ -220,16 +245,13 @@ analyze_possibly_small_exon(pfactor * ppprev,
 			 "offset_p: %zu  offset_t1: %zu  offset_t2: %zu  "
 			 "new_edit_distance: %u",
 			 ref_res?"OK":"NO", offset_p, offset_t1, offset_t2, new_ed);
-	 pfree(efact);
-	 pfree(gfact);
-	 pfree(allgfact);
 
 	 if (ref_res) {
 		INFO("Found a possibly better placement for exon %d-%d %d-%d.",
 			  pcurr->EST_start, pcurr->EST_end,
 			  pcurr->GEN_start, pcurr->GEN_end);
-		my_assert(new_ed <= orig_ed);
-		my_assert(offset_p <= elen);
+		my_assert(new_ed <= orig_ed + orig_ed_pref + orig_ed_suff);
+		my_assert(offset_p <= allelen);
 		my_assert(offset_t1 <= offset_t2);
 		my_assert(offset_t2 <= allglen);
 		INFO("Checking if the new intron would be not worse than the previous two introns...");
@@ -238,8 +260,8 @@ analyze_possibly_small_exon(pfactor * ppprev,
 			getBursetFrequency_adaptor(genomic->EST_seq, pcurr->GEN_end+1, pnext->GEN_start))/2.0;
 		const double new_burset_freq=
 		  getBursetFrequency_adaptor(genomic->EST_seq,
-											  pprev->GEN_end + offset_t1 + 1,
-											  pnext->GEN_start - allglen + offset_t2);
+											  gstart + offset_t1,
+											  gend - allglen + offset_t2);
 		DEBUG("Previous average 'Burset score': %.1f", prev_avg_burset_freq);
 		DEBUG("New 'Burset score': %.1f", new_burset_freq);
 		if (new_burset_freq >= prev_avg_burset_freq) {
@@ -253,10 +275,10 @@ analyze_possibly_small_exon(pfactor * ppprev,
 				 pprev->GEN_start, pprev->GEN_end,
 				 pcurr->GEN_start, pcurr->GEN_end,
 				 pnext->GEN_start, pnext->GEN_end);
-		  pprev->EST_end  += offset_p;
-		  pnext->EST_start-= (elen - offset_p);
-		  pprev->GEN_end  += offset_t1;
-		  pnext->GEN_start-= (allglen - offset_t2);
+		  pprev->EST_end= estart + offset_p - 1;
+		  pnext->EST_start= eend + offset_p - allelen;
+		  pprev->GEN_end= gstart + offset_t1 - 1;
+		  pnext->GEN_start= gend + offset_t2 - allglen;
 		  INFO("Modified 'local' factorization on EST:     (%8d -%8d)   ... skipped ...    (%8d -%8d).",
 				 pprev->EST_start, pprev->EST_end,
 				 pnext->EST_start, pnext->EST_end);

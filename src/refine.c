@@ -100,8 +100,7 @@ refine_borders(const char* const p,
 					size_t* out_offset_t1,
 					size_t* out_offset_t2,
 					unsigned int* out_edit_distance) {
-  const size_t t_win= (len_p+max_errs>len_t)?
-	 len_t:(len_p+max_errs);
+  const size_t t_win= MIN(len_p+max_errs, len_t);
   const unsigned int* Mp= edit_distance(t, t_win, p, len_p);
   const char* const rt= reverse(t, len_t);
   const char* const rp= reverse(p, len_p);
