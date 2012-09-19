@@ -237,167 +237,49 @@ def parse_command_line():
 
 
 # Transform a JSON file into a GTF
-def json2gtf(infile, outfile, genomic_seq, gene_name, all_isoforms):
+def json2gtf(infile, outfile, gene_name, all_isoforms):
     def write_gtf_line(file, seqname, feature, start, end, score, strand, frame, gene, transcript):
         if end >= start:
-            f.write("\t".join([seqname, "PIntron", feature, str(start), str(end), score, strand, str(frame),
+            start, end = end, start
+        f.write("\t".join([seqname, "PIntron", feature, str(start), str(end), score, strand, str(frame),
                            "gene_id \"{0}\"; transcript_id \"{0}.{1}\";\n".format(gene, str(transcript))]))
 
     logging.debug(str(time.localtime()))
     logging.debug(json2gtf)
-    logging.debug(infile + ':' + outfile + ':' + genomic_seq)
     with open(infile, 'r', encoding='utf-8') as f:
         entry = json.load(f)
 
-    strand = entry['genome']['strand']
-    strand_signum = 1 if strand == '+' else -1
-    sequence_id = re.sub(':.*', '', entry['genome']['sequence_id'])
-    # The genomic sequence length stored in the JSON file
-    # cannot be trusted.
-    # seq_record=next(SeqIO.parse(genomic_seq, "fasta"))
-    # entry['length_genomic_sequence']=len(seq_record)
-    # print(entry['length_genomic_sequence'])
-
     with open(outfile, 'w', encoding='utf-8') as f:
-        data_strand = {'first': {"label": "5UTR",
-                                 "codons": ["ATG"],
-                             },
-                       'last' : {"label" : "3UTR",
-                                 "codons"        : ["TGA", "TAG", "TAA"],
-                             }
-                   }
-        # if strand == '-':
-        #     temp=data_strand['first']['label']
-        #     data_strand['first']['label']=data_strand['last']['label']
-        #     data_strand['last']['label']=temp
+        for isoform_id, isoform in entry["isoforms"].items():
+            for exon in isoform["exons"]:
 
         #pprint.pprint(data_strand)
-        for isoform_id, isoform in entry["isoforms"].items():
-            if not all_isoforms and not isoform["annotated CDS?"]:
-                continue
-            whole_cds_len = 0
-            cds_sequence = ''
-            if isoform["annotated CDS?"]:
-                total_cds_length = isoform['CDS length'] -3 # Because the stop codon is outside the CDS
-            else:
-                # In this case we have to compute the CDS length from the list of exons
-                total_cds_length = sum([exon['relative end'] - exon.get("3utr length", 0) -
-                                        (exon['relative start'] + exon.get("5utr length", 0)) + 1
-                                        for exon in isoform["exons"]])
-            for p in ['first', 'last']:
-                data_strand[p]['codon']    = ''
-                data_strand[p]['codon_old']    = ''
-                data_strand[p]['codon_new']    = ''
-                data_strand[p]['codon_ok'] = False
-            # if strand == '-':
-            #     isoform["exons"].reverse()
-
-            for exon in isoform["exons"]:
-                # if the transcript is taken with a direction opposite to
-                # that of the genome, then chromosome end < chromosome start
-                rel_start   = exon['relative start']
-                rel_end     = exon['relative end']
-                exon_length = len(exon['sequence'])
-                bad_prefix  = exon.get("5utr length", 0)
-                bad_suffix  = exon.get("3utr length", 0)
-                abs_start   = min(exon['chromosome start'], exon['chromosome end'])
-                abs_end     = max(exon['chromosome start'], exon['chromosome end'])
-                cds_chunk_length = exon_length - bad_suffix - bad_prefix
-                frame       = (3-(whole_cds_len % 3)) % 3 #http://mblab.wustl.edu/GTF22.html
-                whole_cds_len += cds_chunk_length
-                excess      = max(0, whole_cds_len - total_cds_length)
-                net_cds_chunk_length = max(0, cds_chunk_length - excess)
-
-                if strand == '+':
-                    cds_start   = abs_start + bad_prefix
-                    cds_end     = abs_end - bad_suffix
-                    prefix_start = abs_start
-                    prefix_end   = abs_start + bad_prefix -1
-                    suffix_start = abs_end - bad_suffix +1
-                    suffix_end   = abs_end
-                else:
-                    cds_start   = abs_start + bad_suffix
-                    cds_end     = abs_end - bad_prefix
-                    prefix_start = min(abs_end, abs_end - bad_prefix + 1)
-                    prefix_end   = max(abs_end, abs_end - bad_prefix + 1)
-                    suffix_start = min(abs_start, abs_start + bad_suffix - 1)
-                    suffix_end   = max(abs_start, abs_start + bad_suffix - 1)
-                cds_sequence += exon['sequence'][bad_prefix:bad_prefix+cds_chunk_length]
-
-                logging.debug("Data for GTF file: { %s }  --  { %s }",
-                              "; ".join([ str(_x) for _x in
-                                          [bad_prefix, abs_start, cds_start, cds_end, abs_end, bad_suffix, cds_chunk_length] ]),
-                              "; ".join([ str(_x) for _x in
-                                          [prefix_start, prefix_end, cds_start, cds_end, suffix_start, suffix_end] ]))
-                if whole_cds_len > 0 and not data_strand['first']['codon_ok']:
-                    # We are reading the first codon
-                    data_strand['first']['print'] = True
-                    data_strand['first']['new_len'] = min(cds_chunk_length, 3-len(data_strand['first']['codon_old']))
-                    data_strand['first']['new'] = exon['sequence'][bad_prefix:bad_prefix+data_strand['first']['new_len']]
-                    data_strand['first']['codon'] = data_strand['first']['codon_old'] + data_strand['first']['new']
-                    data_strand['first']['codon_old'] = data_strand['first']['codon']
-                    data_strand['first']['start'] = min(prefix_end + strand_signum, prefix_end + strand_signum * data_strand['first']['new_len'])
-                    data_strand['first']['end']   = max(prefix_end + strand_signum, prefix_end + strand_signum * data_strand['first']['new_len'])
-                    if len(data_strand['first']['codon']) >= 3:
-                        data_strand['first']['codon_ok'] = True
-                else:
-                    data_strand['first']['print'] = False
-
-                if whole_cds_len >= total_cds_length+3 and not data_strand['last']['codon_ok']:
-                    # We are reading the last codon
-                    data_strand['last']['print']  = True
-                    data_strand['last']['new_len'] = min(whole_cds_len - total_cds_length, 3-len(data_strand['last']['codon_old']))
-                    data_strand['last']['new'] = exon['sequence'][-bad_suffix-data_strand['last']['new_len']:-bad_suffix]
-                    data_strand['last']['codon'] = data_strand['last']['codon_old'] + data_strand['last']['new']
-                    data_strand['last']['codon_old'] = data_strand['last']['codon']
-                    data_strand['last']['start'] = min(suffix_start - strand_signum, suffix_start - strand_signum  * data_strand['last']['new_len'])
-                    data_strand['last']['end']   = max(suffix_start - strand_signum, suffix_start - strand_signum  * data_strand['last']['new_len'])
-                    if len(data_strand['last']['codon']) >= 3:
-                        data_strand['last']['codon_ok'] = True
-                else:
-                    data_strand['last']['print']  = False
-
-
-                write_gtf_line(f, sequence_id, "exon", abs_start, abs_end, "0", strand, ".", gene_name, isoform_id)
+#                logging.debug("Data Strand: { %s } ", data_strand)
+                write_gtf_line(f, entry['genome']['sequence_id'], "exon",
+                               exon['chromosome start'], exon['chromosome end'],
+                               "0", entry['genome']['strand'], ".", gene_name, isoform_id)
 #                import pdb; pdb.set_trace()
-                if isoform["annotated CDS?"]:
-                    if bad_prefix > 0:
-                        write_gtf_line(f, sequence_id, data_strand['first']['label'], prefix_start, prefix_end, "0", strand,  ".", gene_name, isoform_id)
-
-                    if data_strand['first']['print']:
-                        write_gtf_line(f, sequence_id, "start_codon", data_strand['first']['start'], data_strand['first']['end'],
-                                       "0", strand, len(data_strand['first']['codon']) % 3, gene_name, isoform_id)
-
-                    if net_cds_chunk_length > 0:
-                        write_gtf_line(f, sequence_id, "CDS", cds_start, cds_end, "0", strand, frame, gene_name, isoform_id)
-
-                    if data_strand['last']['print']:
-                        write_gtf_line(f, sequence_id, "stop_codon", data_strand['last']['start'], data_strand['last']['end'],
-                                       "0", strand, (whole_cds_len + len(data_strand['last']['codon'])) % 3, gene_name, isoform_id)
-                        data_strand['last']['codon_ok'] = True
-
-                    if bad_suffix > 0:
-                        write_gtf_line(f, sequence_id, data_strand['last']['label'], suffix_start, suffix_end, "0", strand, ".", gene_name, isoform_id)
-
-                for p in ['first', 'last']:
-                    if data_strand[p]['print'] and len(data_strand[p]['codon']) >= 3:
-                        data_strand[p]['codon_ok'] = True
-
-                        if isoform["annotated CDS?"] and not (data_strand[p]['codon'].upper() in data_strand[p]['codons']):
-                            print("Warning: wrong delimiter" +
-                                  ". Found " + data_strand[p]['codon'] + " instead of " +
-                                  "/".join(data_strand[p]['codons']))
-                            print("whole_cds_len:" + str(whole_cds_len))
-                            print("Exon =>")
-                            pprint.pprint(exon)
-                            print("CDS =>")
-                            pprint.pprint(cds_sequence)
-                            print("Data read =>")
-                            pprint.pprint(data_strand)
-                            print("Isoform (ID " + isoform_id + ")=>")
-                            pprint.pprint(isoform)
-                            print ("Exon length: " + str(exon_length))
-
+                if not all_isoforms and not isoform["annotated CDS?"]:
+                    if exon['5UTR?']:
+                        write_gtf_line(f, entry['genome']['sequence_id'], "5UTR",
+                                       exon['genome 5UTR start'], exon['genome 5UTR end'],
+                                       "0", entry['genome']['strand'], ".", gene_name, isoform_id)
+                    if exon['start codon?']:
+                        write_gtf_line(f, entry['genome']['sequence_id'], "start_codon",
+                                       exon['genome start codon start'], exon['genome start codon end'],
+                                       "0", entry['genome']['strand'], exon['frame start codon'], gene_name, isoform_id)
+                    if exon['CDS?']:
+                        write_gtf_line(f, entry['genome']['sequence_id'], "CDS",
+                                       exon['genome CDS start'], exon['genome CDS end'],
+                                       "0", entry['genome']['strand'], frame, gene_name, isoform_id)
+                    if exon['stop codon?']:
+                        write_gtf_line(f, entry['genome']['sequence_id'], "stop_codon",
+                                       exon['genome stop codon start'], exon['genome stop codon end'],
+                                       "0", entry['genome']['strand'], exon['frame stop codon'], gene_name, isoform_id)
+                    if exon['5UTR?']:
+                        write_gtf_line(f, entry['genome']['sequence_id'], data_strand['last']['label'],
+                                       exon['genome 3UTR start'], exon['genome 3UTR end'],
+                                       "0", entry['genome']['strand'], ".", gene_name, isoform_id)
 
 def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
     # Find the sequence ID
@@ -491,10 +373,10 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 elif k == "CDS":
                     if v != '..':
                         isoform["annotated CDS?"] = True
-                        isoform['CDS length'] = 0
                         m = re.match('^(<?)(\d+)\.\.(\d+)(>?)$', v)
                         (a, isoform["CDS start"], isoform["CDS end"], b) = (m.group(1), int(m.group(2)),
                                                                             int(m.group(3)), m.group(4))
+                        isoform['CDS length'] = isoform["CDS end"] - isoform["CDS start"] + 1
                         isoform['canonical start codon?'] = False if a == '<' else True
                         isoform['canonical end codon?']   = False if b == '>' else True
                 elif k == "RefSeq":
@@ -530,6 +412,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
         gene['number_isoforms'] = int(fd.readline().rstrip())
         gene['length_genomic_sequence'] = int(fd.readline().rstrip())
+        isoform_5utr_length = 0
+        isoform_3utr_length = 0
         for line in fd:
             l = line.rstrip()
             l = re.sub('\s+', '', l)
@@ -548,17 +432,20 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 if fields[1] > gene['isoforms'][index]['number exons']:
 #                    import pdb; pdb.set_trace()
                     raise ValueError("Wrong number of exons: " + str(index) + "\n " + str(fields[1]) + "!= " +
-                                     str(isoform['number exons']) +"\n")
+                                     str(isoform['number exons']) + "\n")
 
                 gene['isoforms'][index]['reference?'] = False if fields[2] == 0 else True
                 gene['isoforms'][index]['from RefSeq?'] = False if fields[3] == 0 else True
                 gene['isoforms'][index]['NMD flag'] = fields[4]
-
+                if gene['isoforms'][index]['annotated CDS?']:
+                    isoform_5utr_length = gene['isoforms'][index]['CDS start']
+                    isoform_3utr_length = gene['isoforms'][index]['CDS end']
             elif re.match('^(\d+:){5}(-?\d+:)(-?\d+)$', l):
                 # Row contains exon metadata
                 exon = {}
                 (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
                  polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
+                exon['genome length'] = abs(exon["chromosome end"] - exon["chromosome start"]) + 1
                 # if gene['genome']['strand'] == '-':
                 #     (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"]) = (exon["chromosome end"], exon["chromosome start"], exon["relative end"], exon["relative end"])
                 if (polyA == 1):
@@ -569,12 +456,9 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                                          str(max(exon["relative end"], exon["relative start"])),
                                          str(min(exon["relative end"], exon["relative start"])),
                                          str(exon["5utr length"]),
-                                         str(exon["3utr length"])]))
-                if gene['isoforms'][index]['annotated CDS?']:
-                    gene['isoforms'][index]["CDS length"] += (max(exon["relative end"], exon["relative start"]) -
-                                                             min(exon["relative end"], exon["relative start"]) + 1 -
-                                                             exon["5utr length"] - exon["3utr length"])
-
+                                         str(exon["3utr length"]),
+                                         str(abs(exon["relative end"] - exon["relative start"]) + 1 - exon["5utr length"] - exon["3utr length"])
+                                     ]))
                 if int(re.split(':', l)[4]) < 0:
                     del(exon["5utr length"])
                 if int(re.split(':', l)[5]) < 0:
@@ -583,6 +467,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
 
             elif re.match('^[acgtACGT]+$', l):
                 last_exon = gene['isoforms'][index]['exons'][-1]['sequence'] = l
+                gene['isoforms'][index]['exons'][-1]['transcript length'] = len(l)
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
@@ -616,7 +501,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             if intron['BPS position'] < 0:
                 del intron['BPS position']
 
-            gene['introns'][index]=intron
+            gene['introns'][index] = intron
             index += 1
 
     # add introns to each isoform
@@ -678,14 +563,29 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             # 'EST suffix start' : donor_exon['EST start'],
             }
 
-
     def same_coordinates(a, b):
         return True if (a['relative start'] == b['relative start'] and
-                        30 >=  a['relative end'] - b['relative end'] >= -30) else False
-
+                        30 >= a['relative end'] - b['relative end'] >= -30) else False
 
     # pprint.pprint(gene)
     for isoform in gene['isoforms'].keys():
+        gene['isoforms'][isoform]['transcript sequence'] = ''.join([s['sequence'] for s in gene['isoforms'][isoform]['exons']])
+        if gene['isoforms'][isoform]['annotated CDS?']:
+            # Check start/stop codon
+            allowed_codons = {'first': ["ATG"],
+                              'last': ["TGA", "TAG", "TAA"]
+                          }
+            codon = {
+                'first' : gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS start'] - 1 : gene['isoforms'][isoform]['CDS start'] + 2],
+                'last' : gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS end']-3:gene['isoforms'][isoform]['CDS end']]
+            }
+            for p in ['first', 'last']:
+                logging.debug("Codon  %s in  [%s]", codon[p].upper(), "/".join(allowed_codons[p]))
+                if not (codon[p].upper() in allowed_codons[p]):
+                    print("Warning JSON: wrong delimiter. Found " + codon[p].upper() + " instead of " +
+                          "/".join(allowed_codons[p]) + " as " + p + " codon")
+                    print("Isoform:")
+                    pprint.pprint(isoform)
         # Check if we have to add PAS
         if not gene['isoforms'][isoform]['polyA?']:
             continue
@@ -694,6 +594,206 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         # we have a PAS
         if any(x for x in gene['factorizations'].values() if x['PAS'] and same_coordinates(x['exon'], exon)):
             gene['isoforms'][isoform]['PAS?']=True
+
+    # Enrich the JSON file with information that can be used to compute the GTF file
+    strand = gene['genome']['strand']
+    strand_signum = 1 if strand == '+' else -1
+    sequence_id = re.sub(':.*', '', gene['genome']['sequence_id'])
+    # The genomic sequence length stored in the JSON file
+    # cannot be trusted.
+    # seq_record=next(SeqIO.parse(genomic_seq, "fasta"))
+    # gene['length_genomic_sequence']=len(seq_record)
+    # print(gene['length_genomic_sequence'])
+
+    data_strand = {'first': {"label": "5UTR",
+                             "codons": ["ATG"],
+                         },
+                   'last': {"label": "3UTR",
+                            "codons": ["TGA", "TAG", "TAA"],
+                        }
+               }
+    for isoform_id, isoform in gene["isoforms"].items():
+        if not isoform["annotated CDS?"]:
+            continue
+        cumulative_genome_length = 0
+        cumulative_transcript_length = 0
+        read_codon1_seq = ''
+        read_codon2_seq = ''
+        for exon in isoform["exons"]:
+            cumulative_genome_length_old = cumulative_genome_length
+            cumulative_transcript_length_old = cumulative_transcript_length
+            cumulative_genome_length += exon['genome length']
+            exon['cumulative genome length'] = cumulative_genome_length
+            cumulative_transcript_length += exon['transcript length']
+            exon['cumulative transcript length'] = cumulative_transcript_length
+            if cumulative_transcript_length < isoform['CDS start']:
+                # exon is contained in 5UTR
+                if strand == '+':
+                    exon['genome 5UTR start'], exon['genome 5UTR end'] = exon['chromosome start'], exon['chromosome end']
+                else:
+                    exon['genome 5UTR start'], exon['genome 5UTR end'] = exon['chromosome end'], exon['chromosome start']
+                continue
+            if cumulative_transcript_length_old > isoform['CDS end']:
+                # exon is contained in 3UTR
+                if strand == '+':
+                    exon['genome 3UTR start'], exon['genome 3UTR end'] = exon['chromosome start'], exon['chromosome end']
+                else:
+                    exon['genome 3UTR start'], exon['genome 3UTR end'] = exon['chromosome end'], exon['chromosome start']
+                continue
+            if cumulative_transcript_length_old + 1 < isoform['CDS start'] <= cumulative_transcript_length:
+                # exon contains a 5UTR portion 
+                portion = cumulative_transcript_length_old - isoform['CDS start']
+                if strand == '+':
+                    exon['genome 5UTR start'] = exon['chromosome start']
+                    exon['genome 5UTR end'] = exon['chromosome start'] + (portion - 1)
+                else:
+                    exon['genome 5UTR start'] = exon['chromosome end']
+                    exon['genome 5UTR end'] = exon['chromosome end'] - (portion - 1)
+            if cumulative_transcript_length_old < isoform['CDS end'] < cumulative_transcript_length:
+                # exon contains a 3UTR portion 
+                portion = cumulative_transcript_length - isoform['CDS start']
+                if strand == '+':
+                    exon['genome 5UTR start'] = exon['chromosome end'] - (portion - 1)
+                    exon['genome 5UTR end'] = exon['chromosome end']
+                else:
+                    exon['genome 5UTR start'] = exon['chromosome end']
+                    exon['genome 5UTR end'] = exon['chromosome start'] - (portion - 1)
+
+            read_codon1_len = 0
+            if cumulative_transcript_length_old < isoform['CDS start'] <= cumulative_transcript_length:
+                # exon contains at least part of the first codon, including the first character
+                read_codon1_len = min (3, cumulative_transcript_length - isoform['CDS start'] + 1)
+                read_codon1_seq += exon['sequence'][exon['bad prefix'] : exon['bad prefix'] + read_codon1_len]
+            elif cumulative_transcript_length_old < isoform['CDS start'] + 2 <= cumulative_transcript_length:
+                # exon contains at least part of the first codon, but not the first character
+                # Note: the first character of the exon is in the first codon => bad_prefix=0
+                read_codon1_len = min (isoform['CDS start'] + 2 - cumulative_transcript_length_old,
+                                       cumulative_transcript_length - cumulative_transcript_length_old)
+                read_codon1_seq += exon['sequence'][0: read_codon1_len]
+            if read_codon1_len > 0:
+                if strand == '+':
+                    exon['genome start codon start'] = exon['chromosome start'] + exon['bad prefix']
+                    exon['genome start codon end'] = exon['chromosome start'] + exon['bad prefix'] + read_codon1_len
+                else:
+                    exon['genome stop codon start'] = exon['chromosome start'] - exon['bad prefix'] - read_codon1_len
+                    exon['genome stop codon end'] = exon['chromosome start'] - exon['bad prefix']
+            read_codon2_len = 0
+            if cumulative_transcript_length_old < isoform['CDS end'] <= cumulative_transcript_length:
+                # exon contains at least part of the last codon, including the last character
+                read_codon2_len = min (3, cumulative_transcript_length - isoform['CDS start'] + 1)
+                read_codon2_seq += exon['sequence'][exon['bad prefix'] : exon['bad prefix'] + read_codon1_len]
+            elif cumulative_transcript_length_old < isoform['CDS end'] + 2 <= cumulative_transcript_length:
+                # exon contains at least part of the last codon, but not the last character
+                read_codon2_len = min (isoform['CDS start'] + 2 - cumulative_transcript_length_old,
+                                       cumulative_transcript_length - cumulative_transcript_length_old)
+                read_codon2_seq += exon['sequence'][0: read_codon1_len]
+            if read_codon2_len > 0:
+                if strand == '+':
+                    exon['genome stop codon start'] = exon['chromosome start'] - exon['bad prefix'] - read_codon1_len
+                    exon['genome stop codon end'] = exon['chromosome start'] - exon['bad prefix']
+                else:
+                    exon['genome start codon start'] = exon['chromosome start'] + exon['bad prefix']
+                    exon['genome start codon end'] = exon['chromosome start'] + exon['bad prefix'] + read_codon1_len
+
+
+                # TODO: identify CDSs
+                # TODO: mark start and stop codon
+                # TODO: remove stop codon from CDS
+                
+    for isoform_id, isoform in gene["isoforms"].items():
+        whole_cds_len_genome = 0
+        total_cds_length_genome = sum([exon['relative end'] - exon.get("3utr length", 0) -
+                                       (exon['relative start'] + exon.get("5utr length", 0)) + 1
+                                       for exon in isoform["exons"]])
+        if isoform["annotated CDS?"]:
+            total_cds_length_isoform = isoform['CDS length'] - 3  # Because the stop codon is outside the CDS
+            total_bad_prefix_isoform = isoform["CDS start"] - 1
+            real_cds_len_isoform = total_cds_length_isoform
+            remaining_cds_len_isoform = real_cds_len_isoform
+            total_bad_suffix_isoform = len(isoform["transcript sequence"]) - isoform["CDS end"]
+        else:
+            # In this case we have to compute the CDS length from the list of exons
+            total_cds_length_isoform = total_cds_length_genome
+            total_bad_prefix_isoform = 0
+            real_cds_len_isoform = 0
+            remaining_cds_len_isoform = 0
+            total_bad_suffix_isoform = 0
+        for p in ['first', 'last']:
+            data_strand[p]['codon']    = ''
+            data_strand[p]['codon_old']    = ''
+            data_strand[p]['codon_new']    = ''
+            data_strand[p]['codon_ok'] = False
+        # if strand == '-':
+        #     isoform["exons"].reverse()
+
+        for exon in isoform["exons"]:
+            # if the transcript is taken with a direction opposite to
+            # that of the genome, then chromosome end < chromosome start
+            bad_prefix_genome  = exon.get("5utr length", 0)
+            bad_suffix_genome  = exon.get("3utr length", 0)
+            bad_prefix_isoform  = min(total_bad_prefix_isoform, exon['transcript length']) if isoform["annotated CDS?"] else bad_prefix_genome
+            bad_suffix_isoform  = max(0, exon['transcript length'] - bad_prefix_isoform - remaining_cds_len_isoform) if isoform["annotated CDS?"] else bad_suffix_genome
+            abs_start   = min(exon['chromosome start'], exon['chromosome end'])
+            abs_end     = max(exon['chromosome start'], exon['chromosome end'])
+            cds_chunk_length_isoform = min(exon['transcript length'] - bad_prefix_isoform - bad_suffix_isoform, remaining_cds_len_isoform)
+            remaining_cds_len_isoform -= cds_chunk_length_isoform
+            total_bad_prefix_isoform -= cds_chunk_length_isoform
+            if strand == '+':
+                cds_start_genome   = abs_start + bad_prefix_genome
+                cds_end_genome     = abs_end - bad_suffix_genome
+                prefix_start_genome = abs_start
+                prefix_end_genome   = abs_start + bad_prefix_genome - 1
+                suffix_start_genome = abs_end - bad_suffix_genome + 1
+                suffix_end_genome   = abs_end
+            else:
+                cds_start_genome   = abs_start + bad_suffix_genome
+                cds_end_genome     = abs_end - bad_prefix_genome
+                prefix_start_genome = min(abs_end, abs_end - bad_prefix_genome + 1)
+                prefix_end_genome   = max(abs_end, abs_end - bad_prefix_genome + 1)
+                suffix_start_genome = min(abs_start, abs_start + bad_suffix_genome - 1)
+                suffix_end_genome   = max(abs_start, abs_start + bad_suffix_genome - 1)
+            cds_chunk_length_genome = cds_end_genome - cds_start_genome + 1
+            frame       = (3 - (whole_cds_len_genome % 3)) % 3  # http://mblab.wustl.edu/GTF22.html
+            whole_cds_len_genome += cds_chunk_length_genome
+            excess      = max(0, whole_cds_len_genome - total_cds_length_genome)
+            net_cds_chunk_length_genome = max(0, cds_chunk_length_genome - excess)
+
+            logging.debug("Data for GTF file: { %s }  --  { %s }  --  { %s }",
+                          "; ".join([str(_x) for _x in
+                                     [bad_prefix_genome, abs_start, cds_start_genome, cds_end_genome, abs_end, bad_suffix_genome,
+                                      cds_chunk_length_genome]]),
+                          "; ".join([str(_x) for _x in
+                                     [prefix_start_genome, prefix_end_genome, cds_start_genome, cds_end_genome, suffix_start_genome,
+                                      frame, whole_cds_len_genome, excess, net_cds_chunk_length_genome, suffix_end_genome]]),
+                          "; ".join([str(_x) for _x in
+                                     [exon, remaining_cds_len_isoform, bad_prefix_isoform, bad_suffix_isoform]]))
+            if whole_cds_len_genome > 0 and not data_strand['first']['codon_ok']:
+                # We are reading the first codon
+                data_strand['first']['print'] = True
+                data_strand['first']['new_len'] = min(cds_chunk_length_genome, 3 - len(data_strand['first']['codon_old']))
+                data_strand['first']['new'] = exon['sequence'][bad_prefix_isoform:bad_prefix_isoform + data_strand['first']['new_len']]
+                data_strand['first']['codon'] = data_strand['first']['codon_old'] + data_strand['first']['new']
+                data_strand['first']['codon_old'] = data_strand['first']['codon']
+                data_strand['first']['start'] = min(prefix_end_genome + strand_signum, prefix_end_genome + strand_signum * data_strand['first']['new_len'])
+                data_strand['first']['end']   = data_strand['first']['start'] + strand_signum * data_strand['first']['new_len'] - 1
+                if len(data_strand['first']['codon']) >= 3:
+                    data_strand['first']['codon_ok'] = True
+            else:
+                data_strand['first']['print'] = False
+
+            if whole_cds_len_genome >= real_cds_len_isoform and not data_strand['last']['codon_ok']:
+                # We are reading the last codon
+                data_strand['last']['print']  = True
+                data_strand['last']['new_len'] = min(whole_cds_len_genome - total_cds_length_genome, 3 - len(data_strand['last']['codon_old']))
+                data_strand['last']['new'] = exon['sequence'][-bad_suffix_isoform - data_strand['last']['new_len']:-bad_suffix_isoform]
+                data_strand['last']['codon'] = data_strand['last']['codon_old'] + data_strand['last']['new']
+                data_strand['last']['codon_old'] = data_strand['last']['codon']
+                data_strand['last']['start'] = min(suffix_start_genome, suffix_start_genome - strand_signum * (data_strand['last']['new_len'] - 1))
+                data_strand['last']['end']   = data_strand['last']['start'] + data_strand['last']['new_len'] - 1
+                if len(data_strand['last']['codon']) >= 3:
+                    data_strand['last']['codon_ok'] = True
+            else:
+                data_strand['last']['print']  = False
 
     # Clean up
     del gene['factorizations']
@@ -918,10 +1018,10 @@ def pintron_pipeline(options):
                              genomic_seq=options.genome_filename)
 
     if options.gtf_filename:
-        json2gtf(options.output_filename, options.gtf_filename, options.genome_filename, options.gene, False)
+        json2gtf(options.output_filename, options.gtf_filename, options.gene, False)
     if options.extended_gtf_filename:
         logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html""")
-        json2gtf(options.output_filename, options.extended_gtf_filename, options.genome_filename, options.gene, True)
+        json2gtf(options.output_filename, options.extended_gtf_filename, options.gene, True)
     if options.output_est_alignments:
         exec_system_command(
         command=exes["ests2sam"] + " --directory=. --genome=" + options.genome_filename,
