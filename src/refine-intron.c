@@ -230,7 +230,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 						int burset_acceptor_factor_left=alignment->new_acceptor_factor_left;
 						int burset_donor_right_on_gen=alignment->new_donor_right_on_gen;
 						int burset_acceptor_left_on_gen=alignment->new_acceptor_left_on_gen;
-						Try_Burset_after_match(est_info->EST_seq, gen_info->EST_seq, &burset_acceptor_factor_left, &burset_donor_right_on_gen, &burset_acceptor_left_on_gen);
+						Try_Burset_after_match(est_info->EST_seq, gen_info->EST_seq, &burset_acceptor_factor_left, &burset_donor_right_on_gen, &burset_acceptor_left_on_gen, donor->EST_start, acceptor->EST_end);
 						shifted_donor_right_on_gen=burset_donor_right_on_gen;
 						shifted_acceptor_left_on_gen=burset_acceptor_left_on_gen;
 						shifted_acceptor_factor_left=burset_acceptor_factor_left;
@@ -265,7 +265,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	return true;
 }
 
-int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acceptor_factor_left, int *donor_right_on_gen, int *acceptor_left_on_gen){
+int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acceptor_factor_left, int *donor_right_on_gen, int *acceptor_left_on_gen, int shifting_donor_factor_left, int shifting_acceptor_factor_right){
 	int shifting_acceptor_factor_left=*acceptor_factor_left;
 	int shifting_acceptor_left_on_gen=*acceptor_left_on_gen;
 	int shifting_donor_right_on_gen=*donor_right_on_gen;
@@ -283,8 +283,8 @@ int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acce
 
 	bool stop=false;
 	//Provo da sinistra a destra
-	while(stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_acceptor_left_on_gen]){
-		TRACE("\t...character %c (%d) of est in 5' matches to character %c (%d) of genomic in 3'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_donor_right_on_gen], shifting_acceptor_left_on_gen);
+	while((stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_acceptor_left_on_gen]) && shifting_acceptor_factor_left > shifting_donor_factor_left+1){
+		TRACE("\t...character %c (%d) of est in 5' matches to character %c (%d) of genomic in 3'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_acceptor_left_on_gen], shifting_acceptor_left_on_gen);
 		if(shifting_acceptor_factor_left == 0 || shifting_donor_right_on_gen == -1){
 			TRACE("\t...the first est/genomic character is reached!");
 			stop=true;
@@ -310,7 +310,7 @@ int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acce
 
 	stop=false;
 	//Provo da destra a sinistra
-	while(stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_donor_right_on_gen]){
+	while((stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_donor_right_on_gen]) && shifting_acceptor_factor_left < shifting_acceptor_factor_right){
 		TRACE("\t...character %c of est in 3' (%d) matches to character %c (%d) of genomic in 5'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_donor_right_on_gen], shifting_donor_right_on_gen);
 		if((unsigned int)shifting_acceptor_factor_left == strlen(est_sequence) || (unsigned int)shifting_acceptor_left_on_gen == strlen(genomic_sequence)){
 			TRACE("\t...the last est/genomic character is reached!");
