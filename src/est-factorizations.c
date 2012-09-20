@@ -42,19 +42,24 @@
 #include "detect-polya.h"
 
 #include "log.h"
-
+#include "max-emb-graph.h"
 //#define LOG_THRESHOLD LOG_LEVEL_TRACE
+
+// Define a long string composed only by spaces (1024, in particular) to be used to align the recursive calls of getsubtreeembeddings
+#define _A_LOT_OF_SPACES_ "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "
 
 //Computa per un dato subtree
 //di un grafo degli embedding (GEM) gli embeddings e restituisce una lista di ppairing
-static plist get_subtree_embeddings(int, ppairing, pconfiguration, pmytime_timeout);
+static plist get_subtree_embeddings(const int counter, ppairing root, pconfiguration config,
+												pmytime_timeout ptt, const char* const GEN_seq);
 
 //Prende in input una lista di embeddings (lista di liste di ppairing) e fornisce in output una
 //lista di fattorizzazioni (eliminando eventualmente embedding non buoni)
 static plist get_factorizations_from_embeddings(plist, pconfiguration, pEST_info, int);
 
 //Aggiorna l'embedding con il nuovo nodo (solo se e' compatibile)
-static plist update_embedding(plist, ppairing, pconfiguration);
+static plist update_embedding(plist embedding, ppairing node,
+										const char* const GEN_seq, pconfiguration config);
 
 static pfactor create_and_set_factor(int donor_EST_start, int donor_EST_end, int donor_GEN_start, int donor_GEN_end);
 
@@ -189,7 +194,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 		  DEBUG("\t\t%d) Path rooted in pairing (%d, %d, %d)",
 				  counter, next_pairing->p, next_pairing->t, next_pairing->l);
 
-		  subtree_embedding_list= get_subtree_embeddings(counter, next_pairing, config, ptt);
+		  subtree_embedding_list= get_subtree_embeddings(counter, next_pairing, config, ptt, gen_info->EST_seq);
 
 		  if (subtree_embedding_list == NULL) {
 			 return NULL;
@@ -592,8 +597,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 }
 
 //Computa per un dato subtree tutti gli embedding e restituisce una lista di liste di ppairing
-static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration config,
-												pmytime_timeout ptt)
+static plist get_subtree_embeddings(const int counter, ppairing root, pconfiguration config,
+												pmytime_timeout ptt, const char* const GEN_seq)
 {
   plist embedding_list; 	//Lista degli embedding
   plist updated_embedding_list;
@@ -607,14 +612,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
   my_assert(root != NULL);
 
-  int i;
-  char tab[10000];
-  for(i=0; i<counter; i++){
-	 tab[i]=' ';
-  }
-  tab[i]='\0';
-
-  DEBUG("\t\t%s->%d) Pairing node (%d, %d, %d)", tab, counter, root->p, root->t, root->l);
+  DEBUG("\t\t%.*s->%d) Pairing node (%d, %d, %d)", counter, _A_LOT_OF_SPACES_, counter,
+		  root->p, root->t, root->l);
 
   plist computed_sub_e=get_computed_subtree_embeddings(root);
   if(computed_sub_e != NULL){
@@ -624,7 +623,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 	 return computed_sub_e;
   }
-  DEBUG("\t\tThe subtree embeddings are to be computed!");
+  DEBUG("\t\t  %.*sThe subtree embeddings are to be computed!",
+		  counter, _A_LOT_OF_SPACES_);
 
 // Check timeout
   if (MYTIME_timeout_expired(ptt)) {
@@ -642,7 +642,7 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 //Se il nodo root e' una foglia
   if(list_is_empty(adj_list)){
-	 DEBUG("\t\t\t%s...IS A LEAF!", tab);
+	 DEBUG("\t\t\t%.*s...IS A LEAF!", counter, _A_LOT_OF_SPACES_);
 
 //Creazione dell'embedding (lista di ppairing vuota)
 	 embedding=list_create();
@@ -667,20 +667,22 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 while(listit_has_next(adj_list_iter)){
 		next_adj_pairing=(ppairing) listit_next(adj_list_iter);
 
-		subtree_embedding_list= get_subtree_embeddings(counter+1, next_adj_pairing, config, ptt);
+		subtree_embedding_list= get_subtree_embeddings(counter+1, next_adj_pairing, config, ptt, GEN_seq);
 		if (subtree_embedding_list == NULL) {
 		  return NULL;
 		}
 
-		DEBUG("\t\t\t%sEmbeddings of subtree rooted in (%d, %d, %d) obtained!",
-				tab, next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
+		DEBUG("\t\t\t%.*sEmbeddings of subtree rooted in (%d, %d, %d) obtained!",
+				counter, _A_LOT_OF_SPACES_,
+				next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
 
 		print_embeddings(subtree_embedding_list);
 
 		//Aggiungo (se compatibile) il root node ad ogni embedding in subtree_embedding_list
 		subtree_embedding_iter=list_first(subtree_embedding_list);
 
-		DEBUG("\t\t\t%sAdding the node (%d, %d, %d) to the embeddings above...", tab, root->p, root->t, root->l);
+		DEBUG("\t\t\t%.*sAdding the node (%d, %d, %d) to the embeddings above...",
+				counter, _A_LOT_OF_SPACES_, root->p, root->t, root->l);
 
 		int count_f=1;
 
@@ -689,13 +691,14 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 		  next_embedding=(plist)listit_next(subtree_embedding_iter);
 
-		  DEBUG("\t\t\t\t%s...adding the node to the embedding %d...", tab, count_f);
+		  DEBUG("\t\t\t\t%.*s...adding the node to the embedding %d...",
+				  counter, _A_LOT_OF_SPACES_, count_f);
 		  print_embedding(next_embedding);
 
 //Adds the root node; ritorna una lista di embedding (attualmente uno solo)
-		  updated_embedding_list=update_embedding(next_embedding, root, config);
+		  updated_embedding_list=update_embedding(next_embedding, root, GEN_seq, config);
 
-		  DEBUG("\t\t\t\t%s...node added!", tab);
+		  DEBUG("\t\t\t\t%.*s...node added!", counter, _A_LOT_OF_SPACES_);
 		  print_embeddings(updated_embedding_list);
 
 		  if(!list_is_empty(updated_embedding_list)){
@@ -752,8 +755,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 }
 	 listit_destroy(adj_list_iter);
 
-	 DEBUG("\t\t\t%s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!",
-			 tab, root->p, root->t, root->l);
+	 DEBUG("\t\t\t%.*s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!",
+			 counter, _A_LOT_OF_SPACES_, root->p, root->t, root->l);
 	 print_embeddings(embedding_list);
   }
 
@@ -763,7 +766,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 }
 
 //Aggiorna l'embedding con il nuovo nodo (solo se e' compatibile)
-static plist update_embedding(plist embedding, ppairing node, pconfiguration config){
+static plist update_embedding(plist embedding, ppairing node,
+										const char* const GEN_seq, pconfiguration config){
   plist copy_embedding;
   plist sink_embedding;
   int node_copy_l;
@@ -791,14 +795,18 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 	 return return_embedding_list;
   }
 
+  TRACE("Adding node (%d, %d, %d) to the embeddings starting with head (%d, %d, %d)",
+		  PAIRING(node), PAIRING(head));
 //Verifico la compatibilita' di node con embedding, cioe' node e' il primo pairing (head) di embedding
 //devono soddisfare gli stessi criteri di linking (node->head) con cui il MEG e' stato costruito
-  int small_delta=(head->p+head->l)-node->p;
-  int big_delta=(head->t+head->l)-node->t;
+  const int small_delta=(head->p+head->l)-node->p;
+  const int big_delta=(head->t+head->l)-node->t;
+  TRACE("Deltas: small=%d, big=%d", small_delta, big_delta);
 
 //L'embedding dei due nodi deve dare fattori di una certa lunghezza minima
-  if(small_delta >= (int)(2*config->min_factor_len) && big_delta >= (int)(2*config->min_factor_len)){
-	 int fl=2*(config->min_factor_len);
+  const int min_fl= (int)config->min_factor_len;
+  const int fl=2*min_fl;
+  if(small_delta >= fl && big_delta >= fl){
 //L'eventuale gap su P tra node e head deve essere limitato
 	 if(small_delta-(node->l+head->l) <= fl){
 //L'embedding dei due nodi non deve aprire un gap su P maggiore di una certa soglia (su T e' libero)
@@ -814,11 +822,8 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 		  }
 //Esiste un overlap o su P o su T o su entrambi
 		  else{
-			 int ref_delta;
-			 if(small_delta >= big_delta)
-				ref_delta=big_delta;
-			 else
-				ref_delta=small_delta;
+			 TRACE("There is an overlap on P and/or T.");
+			 const int ref_delta= MIN(small_delta, big_delta);
 
 			 int temp_length_node=ref_delta/2;
 			 int temp_length_head=ref_delta-temp_length_node;
@@ -838,8 +843,64 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 			 node_copy_l=temp_length_node;
 		  }
 
-//Controllo del gap (introne minimo) sulla genomica
-		  if((head_copy_t-node->t-node_copy_l-1) <= fl || (config->min_intron_length == 0 || (head_copy_t-node->t-node_copy_l-1) >= config->min_intron_length)){
+		  const bool is_overlap_on_p= ( small_delta < (node->l + head->l) );
+
+		  const int gap_length_on_p= head_copy_p - node->p - node_copy_l - 1;
+		  const int gap_length_on_t= head_copy_t - node->t - node_copy_l - 1;
+		  const int possible_intron_length= gap_length_on_t - MAX(0, gap_length_on_p);
+		  const bool is_intron_on_t= ( (possible_intron_length >= 0) &&
+												 (config->min_intron_length == 0 ||
+												  possible_intron_length >= config->min_intron_length) );
+
+// Ho un introne e avevo un overlap su P, cerco il miglior introne secondo Burset
+		  if (is_overlap_on_p && is_intron_on_t) {
+			 DEBUG("There is an overlap on P and an intron on T. "
+					 "Searching the best cut according Burset...");
+			 int best_burset_freq= -1;
+			 int best_P_cut= 0;
+			 const int min_P_cut= MAX(node->p + min_fl, head->p);
+			 const int max_P_cut= MIN(head->p + head->l - min_fl, node->p + node->l);
+			 TRACE("Trying to cut between %d and %d (inclusive)...", min_P_cut, max_P_cut);
+			 for (int current_P_cut= min_P_cut;
+					current_P_cut <= max_P_cut;
+					++current_P_cut) {
+				TRACE("Trying P cut %d...", current_P_cut);
+				const int current_burset_freq=
+				  getBursetFrequency_adaptor(GEN_seq,
+													  current_P_cut - node->p + node->t,
+													  current_P_cut - head->p + head->t);
+				if (current_burset_freq >= best_burset_freq) {
+				  best_burset_freq= current_burset_freq;
+				  best_P_cut= current_P_cut;
+				}
+			 }
+			 DEBUG("Best intron placement (according to Burset frequency): "
+					 "P cut=%d, Burset frequency=%d.",
+					 best_P_cut, best_burset_freq);
+			 DEBUG("Original pairings on P: [%9d --%10d)   -->   [%9d --%10d)",
+					 node->p, node->p + node->l,
+					 head->p, head->p + head->l);
+			 DEBUG("Original pairings on T: [%9d --%10d)   -->   [%9d --%10d)",
+					 node->t, node->t + node->l,
+					 head->t, head->t + head->l);
+			 const int tmpdeltaH= best_P_cut - head->p;
+			 head_copy_l= head->l - tmpdeltaH;
+			 head_copy_p= head->p + tmpdeltaH;
+			 head_copy_t= head->t + tmpdeltaH;
+			 const int tmpdeltaN= node->p + node->l - best_P_cut;
+			 node_copy_l= node->l - tmpdeltaN;
+			 DEBUG("Refined pairings on P:  [%9d --%10d)   -->   [%9d --%10d)",
+					 node->p, node->p + node_copy_l,
+					 head_copy_p, head_copy_p + head_copy_l);
+			 DEBUG("Refined pairings on T:  [%9d --%10d) %.2s...%.2s [%9d --%10d)",
+					 node->t, node->t + node_copy_l,
+					 GEN_seq+node->t + node_copy_l, GEN_seq+head_copy_t-2,
+					 head_copy_t, head_copy_t + head_copy_l);
+		  }
+
+// Se ( ho un piccolo gap "netto" su T  OR ho un introne di lunghezza >= al minimo )
+//  --> aggiungo
+		  if((gap_length_on_t <= fl) || is_intron_on_t ) {
 			 copy_embedding=list_copy(embedding, (copy_item) copy_ppairing);
 			 ppairing head_copy=(ppairing)list_head(copy_embedding);
 			 head_copy->p=head_copy_p;
@@ -1323,28 +1384,28 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 		  last_factor=create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
 		  list_add_to_tail(factorization, last_factor);
 		  DEBUG("\t...first factor %d-%d (%d-%d) added!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
-		}
-		else{
+		} else {
 //Si genera un introne su T
-		  if((pair->t-last_factor->GEN_end-1) > fl){
+		  if ((pair->t-last_factor->GEN_end-1) > fl) {
 			 pfactor tail_factor=(pfactor)list_tail(factorization);
-			 last_factor=create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
+			 last_factor= create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
 //L'eventuale gap su P viene lasciato e poi risolto in fase di post-processing
-			 if(0 && (last_factor->EST_start-tail_factor->EST_end-1) > 0){
+			 if (0 && (last_factor->EST_start-tail_factor->EST_end-1) > 0){
 				tail_factor->EST_end=tail_factor->EST_end+((last_factor->EST_start-tail_factor->EST_end-1)/2);
 				last_factor->EST_start=tail_factor->EST_end+1;
 				DEBUG("\t...right end of the last factor, updated on P to %d!", tail_factor->EST_end);
 			 }
 			 list_add_to_tail(factorization, last_factor);
 			 DEBUG("\t...new factor %d-%d (%d-%d) added!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
-		  }
+		  } else {
 //I due esoni vengono fusi (e quindi l'eventuale gap su P scompare)
-		  else{
 			 last_factor=(pfactor)list_tail(factorization);
 			 last_factor->EST_end=pair->p+pair->l-1;
 			 last_factor->GEN_end=pair->t+pair->l-1;
 
-			 DEBUG("\t...updating last factor to %d-%d (%d-%d)!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
+			 DEBUG("\t...updating last factor to %d-%d (%d-%d)!",
+					 last_factor->EST_start, last_factor->EST_end,
+					 last_factor->GEN_start, last_factor->GEN_end);
 		  }
 		}
 	 }
