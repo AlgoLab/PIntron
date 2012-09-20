@@ -163,7 +163,7 @@ remove_duplicated_factorizations(plist factorizations) {
 //
 
 // Exons longer than this are always considered NOT SMALL
-#define _UB_SMALL_EXON_LENGTH_ 15
+#define _UB_SMALL_EXON_LENGTH_ 100
 // Lenght of prefixes/suffixes considered during alignment
 #define _AFFIXES_LENGTH_ 5
 
@@ -192,7 +192,7 @@ analyze_possibly_small_exon(pfactor * ppprev,
   my_assert(pcurr->GEN_start <= pcurr->GEN_end);
   const size_t elen= pcurr->EST_end + 1 - pcurr->EST_start;
   const size_t glen= pcurr->GEN_end + 1 - pcurr->GEN_start;
-  if ((elen <= config->min_factor_len) &&
+  if (//(elen <= config->min_factor_len) &&
 		(elen <= _UB_SMALL_EXON_LENGTH_)) {
 	 DEBUG("     it is a small exon! Trying to remove it...");
 	 const char* const efact= factorized_est->info->EST_seq + pcurr->EST_start;
