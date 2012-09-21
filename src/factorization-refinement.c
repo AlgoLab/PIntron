@@ -51,9 +51,10 @@
 // Exons shorter than that cause the factorization to be discarded
 #define _UB_VERY_SMALL_EXON_LENGTH_ 2
 // Perfect matches shorter than this are never considered as exons
-#define _LB_SMALL_EXON_LENGTH_ 8
+#define _LB_SMALL_EXON_LENGTH_ 3
 // Exons longer than this are always considered NOT SMALL
-#define _UB_SMALL_EXON_LENGTH_ 100
+#define _UB_SMALL_EXON_LENGTH_ 15
+#define _UB_MED_EXON_LENGTH_ 100
 // Lenght of prefixes/suffixes considered during alignment
 #define _AFFIXES_LENGTH_ 5
 // Maximum error rate allowed in factors (i.e. "lost" prefixes/suffixes) to be added
@@ -195,8 +196,8 @@ typedef struct struct_lcs_visit_node {
 
 static
 void
-find_longest_common_factor(char* const s1, const size_t l1,
-									char* const s2, const size_t l2,
+find_longest_common_factor(const char* const s1, const size_t l1,
+									const char* const s2, const size_t l2,
 									size_t* const pocc1, size_t* const pocc2,
 									size_t* const plen) {
   DEBUG("Searching for the longest common factor...");
@@ -270,7 +271,7 @@ find_longest_common_factor(char* const s1, const size_t l1,
 	 common[max_comm_substr_len]= '\0';
 	 LST_Node* nt= max_comm_substr;
 	 size_t cursor= max_comm_substr_len;
-	 while (nt->up_edge != NULL) {
+	 while (nt != NULL && nt->up_edge != NULL) {
 		cursor -= lst_edge_get_length(nt->up_edge);
 		strncpy(common + cursor,
 				  (char*)(nt->up_edge->range.string->data) + nt->up_edge->range.start_index,
@@ -320,6 +321,131 @@ find_longest_common_factor(char* const s1, const size_t l1,
   *pocc2= pos[1];
   *plen= max_comm_substr_len;
   lst_stree_free(tree);
+  pfree(set);
+}
+
+static
+bool
+is_canonical_intron(const char* const GEN_seq,
+						  int intron_start, int intron_end) {
+  return ( (GEN_seq[intron_start  ]=='G' &&
+				GEN_seq[intron_start+1]=='T' &&
+				GEN_seq[intron_end-1]=='A' &&
+				GEN_seq[intron_end  ]=='G') ||
+			  (GEN_seq[intron_start  ]=='g' &&
+				GEN_seq[intron_start+1]=='t' &&
+				GEN_seq[intron_end-1]=='a' &&
+				GEN_seq[intron_end  ]=='g') );
+}
+
+static
+void
+search_small_exon_at_prefix(pfactor * pp1,
+									 plistit pfactit,
+									 pfactorization pfact,
+									 pEST_info genomic,
+									 pEST factorized_est,
+									 pconfiguration config) {
+  NOT_NULL(pp1);
+  NOT_NULL(*pp1);
+  pfactor p1= *pp1;
+  DEBUG("  ...analyzing the prefix before [%d-%d, %d-%d]...",
+		  p1->EST_start, p1->EST_end,
+		  p1->GEN_start, p1->GEN_end);
+  my_assert(p1->EST_start <= p1->EST_end);
+  my_assert(p1->GEN_start <= p1->GEN_end);
+  const size_t e1len= p1->EST_end + 1 - p1->EST_start;
+  const size_t g1len= p1->GEN_end + 1 - p1->GEN_start;
+// Check if it is possible to decompose the three exons into one small exon and two normal exons
+  if ((e1len + p1->EST_start) >= (_LB_SMALL_EXON_LENGTH_ + _UB_SMALL_EXON_LENGTH_)) {
+	 const size_t eplen= MIN(MIN(p1->EST_start, p1->GEN_start), 2*_UB_SMALL_EXON_LENGTH_);
+	 const char* const epfact= factorized_est->info->EST_seq + p1->EST_start - eplen;
+
+	 const char* const EST_seq= factorized_est->info->EST_seq;
+	 const char* const GEN_seq= genomic->EST_seq;
+
+	 const size_t e1plen= MIN(MIN(e1len, g1len), _UB_SMALL_EXON_LENGTH_);
+	 const char* const e1pfact= EST_seq + p1->EST_start;
+	 const size_t g1plen= MIN(MIN(e1len, g1len), _UB_SMALL_EXON_LENGTH_);
+	 const char* const g1pfact= GEN_seq + p1->GEN_start;
+	 TRACE("EST discarded prefix: %.*s", (int)eplen, epfact);
+
+// Search the longest common factor of epfact and g1sfact
+	 size_t pg, pe, cflen;
+	 find_longest_common_factor(GEN_seq, p1->GEN_start,
+										 epfact, eplen,
+										 &pg, &pe, &cflen);
+	 if (cflen >= _LB_SMALL_EXON_LENGTH_) {
+		DEBUG("Found a possible small exon of length (at most) %zu.", cflen);
+		TRACE("First border refinement.");
+		TRACE("Factor of the EST sequence     [pos=%7zu]: %.*s %.*s",
+				pe, (pg<=3)?(int)pg:3, "   ", (int)cflen, epfact+pe);
+		TRACE("Factor of the genomic sequence [pos=%7zu]: %.*s>%.*s<%.3s",
+				pg, (pg<=3)?(int)pg:3, GEN_seq+pg-((pg<=3)?pg:3),
+				(int)cflen, GEN_seq+pg,
+				GEN_seq+pg+cflen);
+		TRACE("EST 1st exon prefix:  %.*s", (int)e1plen, e1pfact);
+		TRACE("GEN 1st exon prefix:  %.*s", (int)g1plen, g1pfact);
+		const unsigned int edp= compute_edit_distance(e1pfact, e1plen,
+																	 g1pfact, g1plen);
+		TRACE("Edit distance= %u", edp);
+		const size_t allelen= MIN(p1->EST_end+1,
+										  p1->EST_start+_UB_SMALL_EXON_LENGTH_)-pe;
+		const size_t allglen= MIN(p1->GEN_end+1,
+										  p1->GEN_start+_UB_SMALL_EXON_LENGTH_)-pg;
+		size_t offset_p, offset_t1, offset_t2;
+		unsigned int new_ed;
+		const bool ref_res=
+		  general_refine_borders(EST_seq+pe, allelen,
+										 _LB_SMALL_EXON_LENGTH_, allelen-_LB_SMALL_EXON_LENGTH_,
+										 GEN_seq+pg, allglen,
+										 edp,
+										 &offset_p, &offset_t1, &offset_t2,
+										 &new_ed);
+		TRACE("Border refinement gave: "
+				"Success? %s  "
+				"offset_p: %zu  offset_t1: %zu  offset_t2: %zu  "
+				"new_edit_distance: %u",
+				ref_res?"OK":"NO", offset_p, offset_t1, offset_t2, new_ed);
+
+		if (!ref_res) {
+		  DEBUG("The border alignments of the new intron is not good enough. Small exon discarded.");
+		} else if ((int)offset_t2 - (int)offset_t1 < config->min_intron_length) {
+		  DEBUG("The new intron induced by the small exon is too short (%zunt). "
+				  "Small exon discarded.", offset_t2 - offset_t1);
+		} else if ((int)offset_t2 - (int)offset_t1 < config->min_intron_length) {
+		  DEBUG("The new intron induced by the small exon is too short (%zunt). "
+				  "Small exon discarded.", offset_t2 - offset_t1);
+		} else if (!is_canonical_intron(GEN_seq, pg + offset_t1, pg + offset_t2 - 1)) {
+		  DEBUG("The new intron induced by the small exon is not canonical (%.2s..%.2s). "
+				  "Small exon discarded.",
+				  GEN_seq + pg + offset_t1, GEN_seq + pg + offset_t2 - 2);
+		} else if (offset_p - pe < _LB_SMALL_EXON_LENGTH_) {
+		  DEBUG("The new small exon is too short (%zunt). "
+				  "Small exon discarded.", offset_p);
+		} else {
+		  INFO("A new external small exon has been found.");
+		  DEBUG("Previous 'local' factorization on EST:                           [%8d-%8d]",
+				  p1->EST_start, p1->EST_end);
+		  DEBUG("Previous 'local' factorization on genomic:                       [%8d-%8d]",
+				  p1->GEN_start, p1->GEN_end);
+		  pfactor pnew= factor_create();
+		  pnew->EST_start= pe;
+		  pnew->EST_end  = pe + offset_p - 1;
+		  pnew->GEN_start= pg;
+		  pnew->GEN_end  = pg + offset_t1 - 1;
+		  p1->EST_start= pe + offset_p;
+		  p1->GEN_start= pg + offset_t2;
+		  INFO("New 'local' factorization on EST:     [%8d-%8d]   --   [%8d-%8d]",
+				 pnew->EST_start, pnew->EST_end, p1->EST_start, p1->EST_end);
+		  INFO("New 'local' factorization on genomic: [%8d-%8d] %.2s..%.2s [%8d-%8d]",
+				 pnew->GEN_start, pnew->GEN_end,
+				 GEN_seq + pnew->GEN_end + 1, GEN_seq + p1->GEN_start - 2,
+				 p1->GEN_start, p1->GEN_end);
+		  list_add_before_iterator(pfactit, pfact, pnew);
+		}
+	 }
+  }
 }
 
 static
@@ -521,8 +647,15 @@ search_for_new_small_exons(pEST_info genomic,
 	 pfactor p1= NULL, p2= NULL;
 	 plistit pl_factor_it= list_first(pfact);
 	 plistit pl_factor_it_prev= list_first(pfact);
-	 if (listit_has_next(pl_factor_it))
+	 if (listit_has_next(pl_factor_it)) {
 		p1= listit_next(pl_factor_it);
+		if (p1->EST_start > _LB_SMALL_EXON_LENGTH_) {
+		  DEBUG("A prefix of %dbp is not aligned. Check if a small exon is present...",
+				  p1->EST_start);
+		  search_small_exon_at_prefix(&p1, pl_factor_it, pfact,
+												genomic, factorized_est, config);
+		}
+	 }
 	 if (listit_has_next(pl_factor_it)) {
 		p2= listit_next(pl_factor_it);
 		listit_next(pl_factor_it_prev);
@@ -538,6 +671,7 @@ search_for_new_small_exons(pEST_info genomic,
 		}
 	 }
 	 listit_destroy(pl_factor_it);
+	 listit_destroy(pl_factor_it_prev);
   }
   listit_destroy(pl_f_it);
 }
@@ -576,7 +710,7 @@ analyze_possibly_small_exon(pfactor * ppprev,
   const size_t elen= pcurr->EST_end + 1 - pcurr->EST_start;
   const size_t glen= pcurr->GEN_end + 1 - pcurr->GEN_start;
   if (//(elen <= config->min_factor_len) &&
-		(elen <= _UB_SMALL_EXON_LENGTH_)) {
+		(elen <= _UB_MED_EXON_LENGTH_)) {
 	 DEBUG("     it is a small exon! Trying to remove it...");
 	 const char* const efact= factorized_est->info->EST_seq + pcurr->EST_start;
 	 const char* const gfact= genomic->EST_seq + pcurr->GEN_start;
