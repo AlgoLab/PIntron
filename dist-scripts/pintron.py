@@ -604,8 +604,10 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     def check_codon(codon_type, codon_string):
         possible_values = ["ATG"] if codon_type == 'start' else ["TGA", "TAG", "TAA"]
         if not codon_string.upper() in possible_values:
-            print("Warning: wrong " + codon_type + " delimiter. Found " + codon_string + " instead of " + "/".join(possible_values))
-            return 1
+            logging.debug("Warning: wrong " + codon_type + " delimiter. Found " + codon_string + " instead of " + "/".join(possible_values))
+            return True
+        else:
+            return False
     strand = gene['genome']['strand']
     sequence_id = re.sub(':.*', '', gene['genome']['sequence_id'])
     # The genomic sequence length stored in the JSON file
@@ -626,8 +628,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             continue
         cumulative_genome_length = 0
         cumulative_transcript_length = 0
-        read_codon1_seq = ''
-        read_codon2_seq = ''
+        read_start_codon_seq = ''
+        read_stop_codon_seq = ''
         ordered_codons = ["start", "stop"] if strand == '+' else  ["stop", "start"]
         for exon in isoform["exons"]:
             cumulative_genome_length_old = cumulative_genome_length
@@ -669,54 +671,55 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                     exon['genome 3UTR start'] = exon['chromosome end']
                     exon['genome 3UTR end'] = exon['chromosome start'] - (portion - 1)
 
-            read_codon1_len = 0
+            read_codon_len = 0
             if cumulative_transcript_length_old < isoform['CDS start'] <= cumulative_transcript_length:
                 # exon contains at least part of the first codon, including the first character
-                read_codon1_len = min(3, cumulative_transcript_length - isoform['CDS start'] + 1)
-                pos = isoform['CDS start'] - cumulative_genome_length_old - 1
-                read_codon1_seq += exon['sequence'][pos:pos + read_codon1_len]
-                if len(read_codon1_seq) == 3 and check_codon(ordered_codons[0], read_codon1_seq):
+                read_codon_len = min(3, cumulative_transcript_length - isoform['CDS start'] + 1)
+                pos = isoform['CDS start'] - cumulative_transcript_length_old - 1
+                read_start_codon_seq += exon['sequence'][pos:pos + read_codon_len]
+                if len(read_start_codon_seq) == 3 and check_codon("start", read_start_codon_seq):
                     logging.debug("pos = " + str(pos))
-                    logging.debug("read_codon1_len = " + str(read_codon1_len))
+                    logging.debug(read_start_codon_seq)
+                    logging.debug("read_codon_len = " + str(read_codon_len))
                     logging.debug("type = " + ordered_codons[0])
                     dump_and_exit(exon, isoform, isoform_id)
             elif cumulative_transcript_length_old < isoform['CDS start'] + 2 <= cumulative_transcript_length:
                 # exon contains at least part of the first codon, but not the first character
                 # Note: the first character of the exon is in the first codon, hence 5utr length=0
-                read_codon1_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
+                read_codon_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
                                        cumulative_transcript_length - cumulative_transcript_length_old)
-                read_codon1_seq += exon['sequence'][:read_codon1_len]
-                if len(read_codon1_seq) == 3 and check_codon(ordered_codons[0], read_codon1_seq):
+                read_start_codon_seq += exon['sequence'][:read_codon_len]
+                if len(read_start_codon_seq) == 3 and check_codon("start", read_start_codon_seq):
                     dump_and_exit(exon, isoform, isoform_id)
-            if read_codon1_len > 0:
+            if read_codon_len > 0:
                 if strand == '+':
                     exon['genome start codon start'] = exon['chromosome start'] + exon['5utr length']
-                    exon['genome start codon end'] = exon['chromosome start'] + exon['5utr length'] + read_codon1_len - 1
+                    exon['genome start codon end'] = exon['chromosome start'] + exon['5utr length'] + read_codon_len - 1
                 else:
-                    exon['genome stop codon start'] = exon['chromosome start'] - exon['5utr length'] - read_codon1_len + 1
-                    exon['genome stop codon end'] = exon['chromosome start'] - exon['5utr length']
+                    exon['genome start codon start'] = exon['chromosome end'] - exon['5utr length'] - read_codon_len + 1
+                    exon['genome start codon end'] = exon['chromosome end'] - exon['5utr length']
 
-            read_codon2_len = 0
+            read_codon_len = 0
             if cumulative_transcript_length_old < isoform['CDS end'] <= cumulative_transcript_length:
                 # exon contains at least part of the last codon, including the last character
-                read_codon2_len = min(3, cumulative_transcript_length - isoform['CDS end'] + 1)
-                read_codon2_seq += exon['sequence'][exon['3utr length']:exon['3utr length'] + read_codon1_len]
-                pos = isoform['CDS end'] - cumulative_transcript_length - 3
-                read_codon2_seq += exon['sequence'][pos:pos + read_codon2_len]
-                if check_codon(ordered_codons[1], read_codon2_seq):
+                read_codon_len = min(3, cumulative_transcript_length - isoform['CDS end'] + 1)
+                final_pos = isoform['CDS end'] - cumulative_transcript_length_old
+                read_stop_codon_seq += exon['sequence'][final_pos - read_codon_len:final_pos]
+                #                import pdb; pdb.set_trace()
+                if check_codon("stop", read_stop_codon_seq):
                     dump_and_exit(exon, isoform, isoform_id)
             elif cumulative_transcript_length_old < isoform['CDS end'] + 2 <= cumulative_transcript_length:
                 # exon contains at least part of the last codon, but not the last character
-                read_codon2_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
+                read_codon_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
                                        cumulative_transcript_length - cumulative_transcript_length_old)
-                read_codon2_seq += exon['sequence'][-read_codon1_len:]
-            if read_codon2_len > 0:
+                read_stop_codon_seq += exon['sequence'][-read_codon_len:]
+            if read_codon_len > 0:
                 if strand == '+':
-                    exon['genome stop codon start'] = exon['chromosome end'] - exon['3utr length'] - read_codon2_len + 1
+                    exon['genome stop codon start'] = exon['chromosome end'] - exon['3utr length'] - read_codon_len + 1
                     exon['genome stop codon end'] = exon['chromosome end'] - exon['3utr length']
                 else:
-                    exon['genome start codon start'] = exon['chromosome end'] + exon['3utr length']
-                    exon['genome start codon end'] = exon['chromosome end'] + exon['3utr length'] + read_codon2_len - 1
+                    exon['genome stop codon start'] = exon['chromosome start'] + exon['3utr length']
+                    exon['genome stop codon end'] = exon['chromosome start'] + exon['3utr length'] + read_codon_len - 1
 
             if strand == '+':
                 if cumulative_transcript_length >= isoform['CDS start'] and cumulative_transcript_length_old < isoform['CDS end'] - 3:
@@ -742,9 +745,10 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         if strand == '+':
             exons = range(isoform["number exons"])
         else:
-            exons = range(isoform["number exons"]).reverse()
+            exons = range(isoform["number exons"] - 1, 0, -1)
         cumulative_transcript_length = 0
-#        import pdb; pdb.set_trace()
+        #        import pdb; pdb.set_trace()
+        logging.debug(exons)
         for exon_id in exons:
             exon = isoform['exons'][exon_id]
             if 'genome start codon end' in exon:
@@ -756,7 +760,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             if 'genome stop codon end' in exon:
                 exon['frame stop codon'] = (3 - ((cumulative_transcript_length) % 3)) % 3
                 cumulative_transcript_length += exon['genome stop codon end'] - exon['genome stop codon start'] + 1
-            
+
     # import pdb; pdb.set_trace()
     # Clean up the data structure and write the json file
     del gene['factorizations']
