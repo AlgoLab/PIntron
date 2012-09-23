@@ -42,7 +42,6 @@ bool verify_factor(plist,pfactor);
 plist update_windows(plist, pfactor);
 int get_factor_position(pfactor,plist,bool);
 void add_factoriz(pEST ,plist,plist,bool);
-void add_EST(pEST ,plist, bool);
 plist color_matrix_create(plist, bool);
 
 #if defined (LOG_MSG) && (LOG_LEVEL_DEBUG <= LOG_THRESHOLD)

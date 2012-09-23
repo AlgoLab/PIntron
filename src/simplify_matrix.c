@@ -27,7 +27,7 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#include "semplify_matrix.h"
+#include "simplify_matrix.h"
 #include "list.h"
 #include "bit_vector.h"
 #include "log.h"
@@ -36,27 +36,28 @@
 //Semplificazione delle colonne di tutti 1 all'interno
 //della matrice colorata.
 
-bool semplify_column(plist bin_fact,pbit_vect used)
+static bool
+simplify_column(plist bin_fact,pbit_vect used)
 {
   bool elimination=false;
-  bool semplify=true;
+  bool simplify=true;
   pbit_vect vect_fact;
   plistit list_it_fact;
 
   for(unsigned int i=0;i<used->n;i++){
 
-	 semplify=true;
+	 simplify=true;
 	 list_it_fact=list_first(bin_fact);
 
-	 while((listit_has_next(list_it_fact))&&(semplify==true)&&(BV_get(used,i)==false)){
+	 while((listit_has_next(list_it_fact))&&(simplify==true)&&(BV_get(used,i)==false)){
 
 		vect_fact=listit_next(list_it_fact);
 
 		if(BV_get(vect_fact,i)==false){
-		  semplify=false;
+		  simplify=false;
 		}
 	 }
-	 if((semplify==true)&&(BV_get(used,i)==false)) {
+	 if((simplify==true)&&(BV_get(used,i)==false)) {
 		//fprintf(stdout, "Used %d\n", i);
 		BV_set(used,i,true);
 		elimination=true;
@@ -69,7 +70,8 @@ bool semplify_column(plist bin_fact,pbit_vect used)
 //semplificazione delle righe avente tutti 0
 //nella matrice colorata.
 
-bool semplify_row(plist bin_fact,pbit_vect ests_ok,pbit_vect factors_used,int number_est)
+static bool
+simplify_row(plist bin_fact,pbit_vect ests_ok,pbit_vect factors_used,int number_est)
 {
   bool elimination=false;
   bool all_zero=true;
@@ -104,7 +106,8 @@ bool semplify_row(plist bin_fact,pbit_vect ests_ok,pbit_vect factors_used,int nu
 //semplificazione delle colonne di tutti 0
 //nella matrice colorata
 
-bool semplify_column_zero(plist bin_factorizations,int column)
+static bool
+simplify_column_zero(plist bin_factorizations,int column)
 {
   plistit list_it_fact;
   pbit_vect bv;
@@ -127,13 +130,13 @@ bool semplify_column_zero(plist bin_factorizations,int column)
 
 //Funzione che iterativamente applica il processo di semplificazione della matrice
 //colorata. Non avviene una vera e propria eliminazione in quanto i risultati del
-//processo vengono memorizzati nella struttura _sempl_info.
+//processo vengono memorizzati nella struttura _simpl_info.
 
 
 
-psempl semplification(plist color_matrix, plist unique_factors)
+psimpl simplification(plist color_matrix, plist unique_factors)
 {
-  psempl p=psempl_create();
+  psimpl p=psimpl_create();
 
   p->factors_used=BV_create(list_size(unique_factors));
   p->factors_not_used=BV_create(list_size(unique_factors));
@@ -147,7 +150,7 @@ psempl semplification(plist color_matrix, plist unique_factors)
 
   plistit list_it_est;
 
-  INFO("Inizio dell fase di semplificazione");
+  DEBUG("Simplification started...");
   do{
 
   list_it_est=list_first(color_matrix);
@@ -169,7 +172,7 @@ psempl semplification(plist color_matrix, plist unique_factors)
 	 listit_destroy(temp);*/
 
 
-	 el_column= semplify_column(est->bin_factorizations,p->factors_used);
+	 el_column= simplify_column(est->bin_factorizations,p->factors_used);
   }
   listit_destroy(list_it_est);
 
@@ -194,7 +197,7 @@ psempl semplification(plist color_matrix, plist unique_factors)
 
 	 //fprintf(stdout, "EST %s\n", est->info->EST_id);
 
-	 el_row=semplify_row(est->bin_factorizations,p->ests_ok,p->factors_used,number_est);
+	 el_row=simplify_row(est->bin_factorizations,p->ests_ok,p->factors_used,number_est);
 	 number_est=number_est+1;
   }
 
@@ -212,7 +215,7 @@ psempl semplification(plist color_matrix, plist unique_factors)
 		est=listit_next(list_it_est);
 
 		if((BV_get(p->ests_ok,number_est)==false)&&(BV_get(p->factors_used,column)==false)){
-		  all_zero= semplify_column_zero(est->bin_factorizations,column);
+		  all_zero= simplify_column_zero(est->bin_factorizations,column);
 		}
 		number_est=number_est+1;
 		}
@@ -226,9 +229,8 @@ psempl semplification(plist color_matrix, plist unique_factors)
   }
 
 
- }while((el_column==true)||(el_row==true)||(el_col_zero==true));
+  }while((el_column)||(el_row)||(el_col_zero));
 
-  INFO("fine semplificazione");
-  psempl_print(p);
+  DEBUG("Simplification terminated!");
   return p;
 }

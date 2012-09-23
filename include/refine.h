@@ -64,6 +64,19 @@ refine_borders(const char* const p,
 					size_t* out_offset_t2,
 					unsigned int* out_edit_distance);
 
+bool
+general_refine_borders(const char* const p,
+							  const size_t len_p,
+							  const size_t min_p_cut,
+							  const size_t max_p_cut,
+							  const char* const t,
+							  const size_t len_t,
+							  const unsigned int max_errs,
+							  size_t* out_offset_p,
+							  size_t* out_offset_t1,
+							  size_t* out_offset_t2,
+							  unsigned int* out_edit_distance);
+
 unsigned int*
 edit_distance(const char* const s1, const size_t ls1,
 				  const char* const s2, const size_t ls2);

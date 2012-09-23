@@ -33,13 +33,9 @@
 #include "list.h"
 #include "bit_vector.h"
 #include "types.h"
-#include <stdio.h>
-#include "sempl_info.h"
+#include "simpl_info.h"
 #include "log.h"
 
-psempl semplification(plist, plist);
-bool semplify_row(plist,pbit_vect,pbit_vect,int);
-bool semplify_column(plist,pbit_vect);
-
+psimpl simplification(plist, plist);
 
 #endif

@@ -40,7 +40,7 @@ struct _bit_vect
 {
   _BTYPE* arr;
   unsigned int n;
-  size_t ncelle;
+  size_t ncells;
 };
 
 typedef struct _bit_vect * pbit_vect;
@@ -70,7 +70,9 @@ pbit_vect BV_clone(pbit_vect bv);
 
 void BV_copy(pbit_vect ris, pbit_vect bv);
 
-bool contained(pbit_vect,pbit_vect);
+bool BV_contained(pbit_vect bv1, pbit_vect bv2);
+
+bool BV_all_true(pbit_vect bv);
 
 #ifdef LOG_MSG
 char* BV_to_string(pbit_vect);

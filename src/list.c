@@ -113,19 +113,20 @@ void list_add_before_iterator(plistit it, plist l, item p) {
   my_assert(it != NULL && it->prev != it->l->sentinel);
 
 //Se e' il primo elemento della lista
-  if(it->prev->prev == it->l->sentinel)
+  if(it->prev->prev == it->l->sentinel) {
 	 list_add_to_head(l, p);
+  } else {
+	 _pnode n= PALLOC(struct _node);
+	 n->element= p;
 
-  _pnode n= PALLOC(struct _node);
-  n->element= p;
+	 n->prev=it->prev->prev;
+	 n->next=it->prev;
 
-  n->prev=it->prev->prev;
-  n->next=it->prev;
+	 it->prev->prev->next=n;
+	 it->prev->prev=n;
 
-  it->prev->prev->next=n;
-  it->prev->prev=n;
-
-  l->size= l->size+1;
+	 l->size= l->size+1;
+  }
 }
 
 item list_remove_from_head(plist l) {

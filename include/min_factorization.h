@@ -34,38 +34,18 @@
 #include "types.h"
 #include <stdio.h>
 #include "bit_vector.h"
-#include "semplify_matrix.h"
-#include "sempl_info.h"
+#include "simplify_matrix.h"
+#include "simpl_info.h"
 #include "log.h"
 
-bool create_combinations(int,int,pbit_vect,plist);
-
-bool all_false(pbit_vect);
-
-bool all_true(pbit_vect);
-
-void print_factorizations_result(pbit_vect,plist,plist,psempl);
-
-void color_matrix_semplified_destroy(plist);
-
+void print_factorizations_result(pbit_vect,plist,plist,psimpl);
 
 pbit_vect min_fact(plist);
 
-int count_true(pbit_vect);
+plist color_matrix_simplified_create(plist, psimpl);
 
-int min_number_of_factor(plist);
+void color_matrix_simplified_destroy(plist);
 
-int max_of_min(plist);
-
-void addFactoriz(pbit_vect,plist,psempl);
-
-void addEST(pEST,plist,psempl);
-
-plist color_matrix_semplified_create(plist,psempl);
-
-bool valuate_list(pbit_vect , plist);
-
-bool valuate_combination(pbit_vect ,plist);
 
 #if defined (LOG_MSG) && (LOG_LEVEL_DEBUG <= LOG_THRESHOLD)
 

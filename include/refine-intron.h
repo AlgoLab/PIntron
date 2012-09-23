@@ -46,7 +46,7 @@
 //Refining of 5' and 3' intron splice sites
 bool refine_intron(pconfiguration, pEST_info, pEST_info, pfactor, pfactor, bool);
 
-int Try_Burset_after_match(char *, char *, int *, int *, int *);
+int Try_Burset_after_match(char *, char *, int *, int *, int *, int, int);
 
 int Check_Burset_patterns(char *, int, int);
 

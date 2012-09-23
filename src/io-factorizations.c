@@ -207,7 +207,7 @@ plist read_factorizations(FILE* fp) {
   bytes_read= custom_getline(&my_string,&n_bytes,fp);
 
   while(!(feof(fp))){
-	 if((my_string[0]=='>')){
+	 if((bytes_read>0)&&(my_string[0]=='>')){
 
 		substr=substring(1,my_string);
 		substr[strlen(substr)-1]='\0';
@@ -225,10 +225,8 @@ plist read_factorizations(FILE* fp) {
 		  numero_fattorizz=numero_fattorizz+1;  //no commit!
 		  pfree(substr);
 		  addFactorization(fp,list_tail(est_factorizations),my_string);  //no commit!
-// else{bytes_read= custom_getline(&my_string,&n_bytes,fp);}
 		}
-	 }
-	 else{
+	 } else {
 		bytes_read= custom_getline(&my_string,&n_bytes,fp);
 	 }
   }
