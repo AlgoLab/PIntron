@@ -376,7 +376,7 @@ int main(int argc, char *argv[]){
          MarkTranscriptType(&trs[i]);
   }
 
-  ref=SetREFToLongestTranscript();
+  //ref=SetREFToLongestTranscript();
 
   i=0;
   Tcds=100;     //Lunghezza minima delle ORF
@@ -399,6 +399,8 @@ int main(int argc, char *argv[]){
          }
          i++;
   }
+
+  ref=SetREFToLongestTranscript();
 
   i=0;
   while(i < number_of_transcripts){
@@ -672,12 +674,36 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
          }
   }
 
-  if(number_of_transcripts != 0){
-         if(trs[0].tr_from[0] > trs[0].tr_from[trs[0].exons-1])
-                strand=-1;
-         else
-                strand=1;
+  //CORREZIONE PER JOB 288 (gene TBCC) - se ogni trascritto ha un solo esone, non va bene... :(((
+  /*if(number_of_transcripts != 0){
+	  	  int p=0;
+	  	  while(p < number_of_transcripts && trs[p].exons == 1){
+	  		  p++;
+	  	  }
+	  	  if(p == number_of_transcripts){
+	  		fprintf(stderr, "The strand is not retrieved!\n");
+	  		#ifdef HALT_EXIT_MODE
+	  		         exit(1);
+	  		#else
+	  		         exit(EXIT_FAILURE);
+	  		#endif
+	  	  }else{
+	  		  if(trs[p].tr_from[0] > trs[p].tr_from[trs[p].exons-1])
+	  			  strand=-1;
+	  		  else
+	  			  strand=1;
+	  	  }
+  }*/
+  char *temp = (char *) malloc(255*sizeof(char)); temp[0] = '\0';
+  sprintf(temp,"%sgenomic.txt",out_path);
+  FILE *in_gen=fopen(temp, "r");
+  if(in_gen == NULL){
+         fprintf(stderr, "Error genomic file!\n");
+         exit(0);
   }
+  fscanf(in_gen, ">chr%*d:%*d:%*d:%d\n", &strand);
+  fclose(in_gen);
+  free(temp);
 
   exons=(struct exon *)malloc(number_of_exons*sizeof(struct exon));
   if(exons == NULL){
@@ -2899,11 +2925,21 @@ int SetREFToLongestTranscript(){
   i=0;
 
   while(i<number_of_transcripts){
+
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 	  j=0;
 	 first=1;
+
 	 while(j < trs[i].exons-1){
-		 intron_left=exons[trs[i].exon_index[j]].right+1;
-		intron_right=exons[trs[i].exon_index[j+1]].left-1;
+		 //CORREZIONE PER JOB 288 (gene TBCC)
+		 if(strand == 1){
+			 intron_left=exons[trs[i].exon_index[j]].right+1;
+			 intron_right=exons[trs[i].exon_index[j+1]].left-1;
+		 }else{
+			 intron_right=exons[trs[i].exon_index[j+1]].left-1;
+			 intron_left=exons[trs[i].exon_index[j]].right+1;
+		 }
 		k=0;
 		stop=0;
 		DEBUG("Looking for intron %d-%d.", intron_left, intron_right);
@@ -2915,6 +2951,7 @@ int SetREFToLongestTranscript(){
 			 k++;
 		  }
 		}
+
 		my_assert(k<number_of_introns);
 		if(first){
 		  first=0;
@@ -2926,6 +2963,7 @@ int SetREFToLongestTranscript(){
 		}
 		j++;
 	 }
+	}
 	 i++;
   }
 #endif
@@ -2940,6 +2978,8 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
 	 if(trs[i].type == 0 && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
 		trs_exons=trs[i].exons;
@@ -2952,6 +2992,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -2969,6 +3010,8 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
 	 if(trs[i].type == 1 && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
 		trs_exons=trs[i].exons;
@@ -2981,6 +3024,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -2998,6 +3042,8 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
 	 if(trs[i].exons >= trs_exons && trs[i].length >= trs_length){
 		trs_exons=trs[i].exons;
@@ -3010,6 +3056,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -3023,6 +3070,8 @@ int SetREFToLongestTranscript(){
   trs_exons=0;
   int current_type=-1;
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 	 if(current_type != 0){
 		 if(trs[i].exons >= trs_exons && trs[i].length >= trs_length){
 		   	trs_exons=trs[i].exons;
@@ -3039,6 +3088,7 @@ int SetREFToLongestTranscript(){
 		 	index=i;
 		 }
 	 }
+	}
   	 i++;
     }
   //FINE 30nov10
