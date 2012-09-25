@@ -179,6 +179,7 @@ remove_duplicated_factorizations(plist factorizations) {
 //
 // Search for potentially true small exons
 // Issue #11: Small exons not found
+// Issue #28: Small external exons are not detected
 //
 
 #include "util.h"
@@ -193,6 +194,58 @@ typedef struct struct_lcs_visit_node {
   LST_Node* node;
   SLIST_ENTRY(struct_lcs_visit_node) visit_list;
 } lcs_visit_node;
+
+static
+void
+find_longest_common_factor_dp(const char* const restrict s1, const size_t l1,
+										const char* const restrict s2, const size_t l2,
+										size_t* const pocc1, size_t* const pocc2,
+										size_t* const plen) {
+  DEBUG("Searching for a longest common factor using a dynamic programming algorithm...");
+  if (l2 > l1) {
+	 find_longest_common_factor_dp(s2, l2, s1, l1, pocc2, pocc1, plen);
+  }
+  size_t* curr= NPALLOC(size_t, l2+1);
+  size_t* prev= NPALLOC(size_t, l2+1);
+  size_t* swap= NULL;
+  *pocc1= 0;
+  *pocc2= 0;
+  *plen= 0;
+
+  for (size_t i2= 0; i2<=l2; ++i2) {
+	 prev[i2]= 0;
+  }
+  for (size_t i1= 0; i1<l1; ++i1) {
+	 curr[0]= 0;
+	 for (size_t i2= 0; i2<l2; ++i2) {
+		if (s1[i1] != s2[i2]) {
+		  curr[i2+1]= 0;
+		} else {
+		  curr[i2+1]= 1 + prev[i2];
+		}
+		if (*plen < curr[i2+1]) {
+		  *plen= curr[i2+1];
+		  *pocc1= i1+1-*plen;
+		  *pocc2= i2+1-*plen;
+		}
+	 }
+	 swap= curr;
+	 curr= prev;
+	 prev= swap;
+  }
+  DEBUG("Found a %zu-long common substring.", *plen);
+  DEBUG("S1 (%8zu): %.2s>%.*s<%.2s", *pocc1,
+		  (*pocc1>=2)? s1+*pocc1-2 : "  ",
+		  *plen, s1+*pocc1,
+		  s1+*pocc1+*plen);
+  DEBUG("S2 (%8zu): %.2s>%.*s<%.2s", *pocc2,
+		  (*pocc2>=2)? s2+*pocc2-2 : "  ",
+		  *plen, s2+*pocc2,
+		  s2+*pocc2+*plen);
+  pfree(curr);
+  pfree(prev);
+}
+
 
 static
 void
@@ -356,7 +409,7 @@ search_small_exon_at_prefix(pfactor * pp1,
   my_assert(p1->GEN_start <= p1->GEN_end);
   const size_t e1len= p1->EST_end + 1 - p1->EST_start;
   const size_t g1len= p1->GEN_end + 1 - p1->GEN_start;
-// Check if it is possible to decompose the three exons into one small exon and two normal exons
+// Check if it is possible to decompose the prefix and the first exon into one small exon and one normal exon
   if ((e1len + p1->EST_start) >= (_LB_SMALL_EXON_LENGTH_ + _UB_SMALL_EXON_LENGTH_)) {
 	 const size_t eplen= MIN(MIN(p1->EST_start, p1->GEN_start), 2*_UB_SMALL_EXON_LENGTH_);
 	 const char* const epfact= factorized_est->info->EST_seq + p1->EST_start - eplen;
@@ -372,9 +425,9 @@ search_small_exon_at_prefix(pfactor * pp1,
 
 // Search the longest common factor of epfact and g1sfact
 	 size_t pg, pe, cflen;
-	 find_longest_common_factor(GEN_seq, p1->GEN_start,
-										 epfact, eplen,
-										 &pg, &pe, &cflen);
+	 find_longest_common_factor_dp(GEN_seq, p1->GEN_start,
+											 epfact, eplen,
+											 &pg, &pe, &cflen);
 	 if (cflen >= _LB_SMALL_EXON_LENGTH_) {
 		DEBUG("Found a possible small exon of length (at most) %zu.", cflen);
 		TRACE("First border refinement.");

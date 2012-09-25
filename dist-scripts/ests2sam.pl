@@ -50,6 +50,7 @@ die "Can't open file. $!" unless (-e $genome);
 my $rname=`head -n 1 $genome`;
 chomp $rname;
 $rname=~s/^>//;
+$rname=~s/[^!-()+-<>-~]//g;
 
 my %ests=();
 my $current_label='';
@@ -62,6 +63,11 @@ while (<INC>) {
 	chomp $current_line;
 	write_est($current_label, @{$ests{$current_label}}) unless ($current_label eq '' );
 	$current_label=$current_line;
+	# Sanitize name according to SAM specs
+	$current_label=~s/^>\///;
+	$current_label=~s/\/.*//;
+	$current_label=~s/[^!-?A-~]//g;
+
 	die "Gene $current_label appears more then once in $!\n" if exists $ests{$current_label};
 	$ests{$current_label}=[];
 	next;
