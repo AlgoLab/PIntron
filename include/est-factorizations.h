@@ -52,7 +52,7 @@
 pEST get_EST_factorizations(pEST_info, pext_array, pconfiguration, pEST_info,
 									 pmytime_timeout);
 
-char* real_substring(const int, const int, char*);
+char* real_substring(int index, int length, const char* const string);
 
 void print_split_string_on_stderr(const int, char*);
 

@@ -1618,19 +1618,25 @@ static bool check_gap_errors(plist factorization, char *est_seq, char *gen_seq, 
 	  return ok;
 }
 
-char* real_substring(const int index, const int length, char* string){
+char* real_substring(int index, int length, const char* const string){
 
-  my_assert(index>=0);
-  my_assert(string != NULL);
+  NOT_NULL(string);
+
+  if (index < 0){
+	 length+= index;
+	 index= 0;
+  }
+
   my_assert(length >= 0);
 
-  //TRACE("index value is: %d", index);
-  //TRACE("string value is: |%s|", string);
-  //TRACE("length value is: %d", length);
+  TRACE("index value is: %d", index);
+  TRACE("string value is: |%s|", string);
+  TRACE("length value is: %d", length);
 
-  char * const ris= c_palloc(length+1);
-  memcpy(ris, string+index, length*sizeof(char));
+  char * const restrict ris= c_palloc(length + 1);
+  strncpy(ris, string + index, length);
   ris[length]= '\0';
+
   return ris;
 }//end real_substring
 
