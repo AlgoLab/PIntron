@@ -3,8 +3,8 @@ title: PIntron
 subtitle: Gene-structure prediction based on spliced alignments of transcript sequences.
 description: PIntron-A novel pipeline for gene-structure prediction based on spliced alignment of ESTs and mRNAs against a genomic sequence.
 
-url: http://algolab.github.com/PIntron
-root: /PIntron
+url: http://pintron.algolab.eu
+root: /
 author: AlgoLab
 
 github_repository: PIntron
