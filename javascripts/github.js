@@ -52,8 +52,10 @@ var github = (function(){
           if (!data || !data.data ) { return; }
           for (var i = 0; i < data.data.length; i++) {
             var d = data.data[i];
-            var tag = getTag(d.ref);
-            tags.push({ref: d.ref, tag: tag, url: d.object.url, sha: d.object.sha, version: splitTag(tag)});
+            if (d.ref.substr(0, 11) == "refs/tags/v") {
+              var tag = getTag(d.ref);
+              tags.push({ref: d.ref, tag: tag, url: d.object.url, sha: d.object.sha, version: splitTag(tag)});
+            }
           }
           tags.sort(function(a, b) {
             var av = a.version,
