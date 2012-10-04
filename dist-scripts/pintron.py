@@ -282,6 +282,7 @@ def json2gtf(infile, outfile, gene_name, all_isoforms):
                                        exon['genome 3UTR start'], exon['genome 3UTR end'],
                                        "0", entry['genome']['strand'], ".", gene_name, isoform_id)
 
+
 def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
     def dump_and_exit(exon, isoform, isoform_id):
         logging.debug("Exon =>")
@@ -293,18 +294,18 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     # Find the sequence ID
     # It is stored in the first line of the genomic sequence
     with open(genomic_seq, 'r', encoding='utf-8') as f:
-        line=f.readline().rstrip("\r\n")
-        m=re.search('^>[^\d]*(\d+):.*:([+-]?\d+)$',line)
+        line = f.readline().rstrip("\r\n")
+        m = re.search('^>[^\d]*(\d+):.*:([+-]?\d+)$', line)
         sequence_id = line[1:]
-        strand=m.group(2)
+        strand = m.group(2)
         if strand == '-1' or strand == '-':
             strand = '-'
         else:
             strand = '+'
 
-    gene={
-        'version': 4, # Hardcoding version number
-        'program_version': options.version, # Program version
+    gene = {
+        'version': 4,  # Hardcoding version number
+        'program_version': options.version,  # Program version
         'isoforms': {},
         'introns': {},
         'factorizations': {},
@@ -329,15 +330,14 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 new = re.search('\/gb=([A-Z_0-9]+)', l).groups()
                 current = new[0]
                 gene['factorizations'][current] = {
-                    'polyA?' : False,
-                    'PAS' : False,
-                    'exons' : [],
-                    'EST' : current,
+                    'polyA?': False,
+                    'PAS': False,
+                    'exons': [],
+                    'EST': current,
                 }
                 if re.search('\/clone_end=([35])', l):
                     new = re.search('\/clone_end=([35])', l).groups()
                     gene['factorizations'][current]['clone end'] = new[0]
-
 
             elif re.match('#polya=1', l):
                 gene['factorizations'][current]['polyA?'] = True
@@ -348,27 +348,27 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 # pprint.pprint(l)
                 # pprint.pprint(new)
                 exon = {
-                    'EST start'        : int(new[0]),
-                    'EST end'          : int(new[1]),
-                    'relative start'   : int(new[2]),
-                    'relative end'     : int(new[3]),
-                    'EST sequence'     : new[4],
-                    'genome sequence'  : new[5],
+                    'EST start': int(new[0]),
+                    'EST end': int(new[1]),
+                    'relative start': int(new[2]),
+                    'relative end': int(new[3]),
+                    'EST sequence': new[4],
+                    'genome sequence': new[5],
                 }
                 gene['factorizations'][current]['exons'].append(exon)
                 if gene['factorizations'][current]['PAS']:
-                    gene['factorizations'][current]['exon']=exon
+                    gene['factorizations'][current]['exon'] = exon
 
     with open(variant_file, mode='r', encoding='utf-8') as fd:
         for line in fd:
             row = re.split(' /', line.rstrip())
-            index=int(re.sub('^.*\#', '', row.pop(0)))
+            index = int(re.sub('^.*\#', '', row.pop(0)))
             isoform = {
-                'exons' : [],
-                'polyA?' : False,
-                'PAS?' : False,
-                'annotated CDS?' : False,
-                'Reference frame?' : False,
+                'exons': [],
+                'polyA?': False,
+                'PAS?': False,
+                'annotated CDS?': False,
+                'Reference frame?': False,
             }
             for t in row:
                 (k, v) = re.split('=', t, 2)
@@ -483,9 +483,9 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         gene['isoforms'][isoform]['exons'].reverse()
 
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
-        index=1
+        index = 1
         for line in fd:
-            intron = { "supporting ESTs": {}}
+            intron = {"supporting ESTs": {}}
             (intron['relative start'], intron['relative end'],
              intron['chromosome start'], intron['chromosome end'], intron['length'], intron['number supporting EST'], EST_list,
              intron['donor alignment average error'], intron['acceptor alignment average error'], intron['donor score'],
@@ -520,10 +520,10 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
             list_extremes = [pair[0]['chromosome end'], pair[0]['chromosome start'],
                              pair[1]['chromosome end'], pair[1]['chromosome start']]
             list_extremes.sort()
-            left_border = list_extremes[1]+1
-            right_border = list_extremes[2]-1
+            left_border = list_extremes[1] + 1
+            right_border = list_extremes[2] - 1
             for index in gene['introns'].keys():
-                intron=gene['introns'][index]
+                intron = gene['introns'][index]
                 if intron['chromosome start'] == left_border and intron['chromosome end'] == right_border or intron['chromosome end'] == left_border and intron['chromosome start'] == right_border:
                     isoform['introns'].append(index)
 
@@ -535,8 +535,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         for est in intron["supporting ESTs"].keys():
             factor = gene['factorizations'][est]
             #                    import pdb; pdb.set_trace()
-            good_left  = [ exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] -1 ]
-            good_right = [ exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] +1 ]
+            good_left  = [exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] - 1]
+            good_right = [exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] + 1]
             if len(good_left) == 1 and len(good_right) == 1:
                 pairs.append([est, good_left[0], good_right[0]])
         if len(pairs) != intron['number supporting EST']:
@@ -558,12 +558,12 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         for [est, donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
 #            import pdb; pdb.set_trace()
             gene['introns'][index]['supporting ESTs'][est] = {
-                'EST donor factor suffix' : donor_factor['EST sequence'][-len(gene['introns'][index]['donor suffix']):],
-                'EST acceptor factor prefix'    : acceptor_factor['EST sequence'][:len(gene['introns'][index]['acceptor prefix'])],
-                'begin EST acceptor factor' : acceptor_factor['EST start'],
-                'end EST donor factor'      : donor_factor['EST end'],
-                'end EST acceptor factor' : acceptor_factor['EST end'],
-                'begin EST donor factor'      : donor_factor['EST start'],
+                'EST donor factor suffix': donor_factor['EST sequence'][-len(gene['introns'][index]['donor suffix']):],
+                'EST acceptor factor prefix': acceptor_factor['EST sequence'][:len(gene['introns'][index]['acceptor prefix'])],
+                'begin EST acceptor factor': acceptor_factor['EST start'],
+                'end EST donor factor': donor_factor['EST end'],
+                'end EST acceptor factor': acceptor_factor['EST end'],
+                'begin EST donor factor': donor_factor['EST start'],
                 # 'EST prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
                 # 'EST suffix next exon'  : gene['introns'][index]['donor suffix'],
             # 'EST prefix end'   : acceptor_exon['EST end'],
@@ -583,8 +583,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                               'last': ["TGA", "TAG", "TAA"]
                           }
             codon = {
-                'first' : gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS start'] - 1 : gene['isoforms'][isoform]['CDS start'] + 2],
-                'last' : gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS end']-3:gene['isoforms'][isoform]['CDS end']]
+                'first': gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS start'] - 1: gene['isoforms'][isoform]['CDS start'] + 2],
+                'last': gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS end'] - 3:gene['isoforms'][isoform]['CDS end']]
             }
             for p in ['first', 'last']:
                 logging.debug("Codon  %s in  [%s]", codon[p].upper(), "/".join(allowed_codons[p]))
@@ -769,6 +769,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
+        
 def exec_system_command(command, error_comment, logfile, output_file="",
                         from_scratch=True):
     if not from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
@@ -815,7 +816,6 @@ def pintron_pipeline(options):
     """Executes the whole pipeline, using the input options.
     """
 
-
     logging.info("PIntron%s", pintron_version)
     logging.info("Copyright (C) 2010,2011  Paola Bonizzoni, Gianluca Della Vedova, Yuri Pirola, Raffaella Rizzi.")
     logging.info("This program is distributed under the terms of the GNU Affero General Public License (AGPL), either version 3 of the License, or (at your option) any later version.")
@@ -824,13 +824,12 @@ def pintron_pipeline(options):
 
     logging.info("Running: " + " ".join(sys.argv))
 
-
     # Check and copy input data
     logging.info("STEP  1:  Checking executables and preparing input data...")
 
     logging.debug("Using main program 'pintron' in dir '{}' (md5: {})".format(os.path.realpath(os.path.abspath(sys.argv[0])),
                                                                               md5Checksum(sys.argv[0])))
-    exes= check_executables(options.bindir, ["est-fact",
+    exes = check_executables(options.bindir, ["est-fact",
                                              "min-factorization",
                                              "intron-agreement",
                                              "gene-structure",
@@ -846,12 +845,12 @@ def pintron_pipeline(options):
     if not os.path.isfile(options.EST_filename) or not os.access(options.EST_filename, os.R_OK):
         raise PIntronIOError(options.EST_filename,
                              'Could not read file "' + options.EST_filename + '"!')
-    if ( os.access('genomic.txt', os.F_OK) and
+    if (os.access('genomic.txt', os.F_OK) and
          not os.path.samefile('genomic.txt', options.genome_filename) and
          not os.access('genomic.txt', os.W_OK) ):
         raise PIntronIOError('genomic.txt',
                              'Could not write file "genomic.txt"!')
-    if ( os.access('ests.txt', os.F_OK) and
+    if (os.access('ests.txt', os.F_OK) and
          not os.path.samefile('ests.txt', options.EST_filename) and
          not os.access('ests.txt', os.W_OK) ):
         raise PIntronIOError('ests.txt',
@@ -879,42 +878,38 @@ def pintron_pipeline(options):
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
-
     # Compute factorizations
     logging.info("STEP  2:  Pre-aligning transcript data...")
 
     exec_system_command(
-        command="ulimit -t "+ str(options.max_factorization_time * 60) + " && ulimit -v " +
+        command="ulimit -t " + str(options.max_factorization_time * 60) + " && ulimit -v " +
         str(options.max_factorization_memory * 1024) + " && " + exes["est-fact"],
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
         output_file='raw-multifasta-out.txt',
         from_scratch=options.from_scratch)
 
-
     # Min factorization agreement
     logging.info("STEP  3:  Computing a raw consensus gene structure...")
 
     exec_system_command(
-        command="ulimit -t "+ str(options.max_exon_agreement_time * 60) +" && " +
+        command="ulimit -t " + str(options.max_exon_agreement_time * 60) + " && " +
         exes["min-factorization"] + " < raw-multifasta-out.txt >out-agree.txt",
         error_comment="Could not minimize the factorizations",
         logfile=options.plogfile,
         output_file='out-agree.txt',
         from_scratch=options.from_scratch)
 
-
     # Intron prediction
     logging.info("STEP  4:  Predicting introns...")
 
     exec_system_command(
-        command="ulimit -t "+ str(options.max_intron_agreement_time*60) +" && " +
+        command="ulimit -t " + str(options.max_intron_agreement_time * 60) + " && " +
         exes["intron-agreement"],
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
-
 
     # Compute the Gene structure
     logging.info("STEP  5:  Computing the final gene structure...")
@@ -932,7 +927,6 @@ def pintron_pipeline(options):
     # if options.step1:
     #     sys.exit(0)
 
-
     # Transform compositions into exons
     logging.info("STEP  6:  Computing the final transcript alignments...")
 
@@ -942,7 +936,6 @@ def pintron_pipeline(options):
         logfile=options.plogfile,
         output_file='build-ests.txt',
         from_scratch=options.from_scratch)
-
 
     # Compute maximal transcripts
     logging.info("STEP  7:  Computing the final full-length isoforms...")
@@ -960,7 +953,6 @@ def pintron_pipeline(options):
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
-
     # Annotate CDS
     logging.info("STEP  8:  Annotating CDS...")
 
@@ -972,12 +964,10 @@ def pintron_pipeline(options):
         from_scratch=options.from_scratch)
 
     # TODO: Transcripts browser
-
-
     # Output the desired file
     logging.info("STEP  9:  Saving outputs...")
 
-    json_output=compute_json(ccds_file="CCDS_transcripts.txt",
+    json_output = compute_json(ccds_file="CCDS_transcripts.txt",
                              variant_file="VariantGTF.txt",
                              output_file=options.output_filename,
                              from_scratch=options.from_scratch,
@@ -997,20 +987,19 @@ def pintron_pipeline(options):
         output_file='est-alignments.sam',
         from_scratch=options.from_scratch)
 
-
     # Clean mess
     logging.info("STEP 10:  Finalizing...")
 
     if options.compress:
-        exec_system_command("gzip -q9 " + " ".join( [ options.output_filename,
-                                                      options.plogfile,
-                                                      options.glogfile ] ),
+        exec_system_command("gzip -q9 " + " ".join([options.output_filename,
+                                                    options.plogfile,
+                                                    options.glogfile]),
                             error_comment="Could not compress final files",
                             logfile="/dev/null",
         output_file=options.output_filename + '.gz')
 
     if not options.no_clean:
-        tempfiles=("TEMP_COMPOSITION_TRANS1_1.txt", "TEMP_COMPOSITION_TRANS1_2.txt",
+        tempfiles = ("TEMP_COMPOSITION_TRANS1_1.txt", "TEMP_COMPOSITION_TRANS1_2.txt",
                    "TEMP_COMPOSITION_TRANS1_3.txt", "TEMP_COMPOSITION_TRANS1_4.txt",
                    "TRANSCRIPTS1_1.txt", "TRANSCRIPTS1_2.txt", "TRANSCRIPTS1_3.txt", "TRANSCRIPTS1_4.txt",
                    "VariantGTF.txt", "build-ests.txt", "CCDS_transcripts.txt", "config-dump.ini",
@@ -1042,11 +1031,10 @@ def prepare_loggers(options):
 
 if __name__ == '__main__':
 
-
     try:
         options = parse_command_line()
 ## Program version
-        pintron_version='_____%PINTRON_VERSION%_____'
+        pintron_version = '_____%PINTRON_VERSION%_____'
         if (pintron_version[0] == '_' and
             pintron_version[1:] == '____%PINTRON_VERSION%_____'):
             options.version = ''
