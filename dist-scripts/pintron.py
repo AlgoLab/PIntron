@@ -42,7 +42,6 @@ import pprint
 import traceback
 import csv
 import hashlib
-from pprint_data import data
 
 from optparse import OptionParser
 
@@ -769,7 +768,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     with open(output_file, mode='w', encoding='utf-8') as fd:
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
-        
+
 def exec_system_command(command, error_comment, logfile, output_file="",
                         from_scratch=True):
     if not from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
