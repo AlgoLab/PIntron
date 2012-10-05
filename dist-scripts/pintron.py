@@ -681,9 +681,9 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                     logging.debug(read_start_codon_seq)
                     logging.debug("read_codon_len = " + str(read_codon_len))
                     logging.debug("type = " + ordered_codons[0])
-                    logging.debug(pformat(exon))
-                    logging.debug(pformat(isoform))
-                    logging.debug("isoform_id = " + isoform_id)
+                    logging.debug(pprint.pformat(exon))
+                    logging.debug(pprint.pformat(isoform))
+                    logging.debug("isoform_id = " + str(isoform_id))
             elif cumulative_transcript_length_old < (isoform['CDS start'] + 1) <= cumulative_transcript_length or cumulative_transcript_length_old < (isoform['CDS start'] + 2) <= cumulative_transcript_length:
                 # exon contains at least part of the start codon, but not the first character
                 # Note: the first character of the exon is in the first codon, hence 5utr length=0
