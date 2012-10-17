@@ -106,9 +106,9 @@ option "min-intron-length" B
 details=
 "Represents the minimum length of an intron (i.e. parameter b' of the article).
 Valid values: >= 0.
-Suggested value: at least 50."
+Suggested value: at least 40."
 int typestr="nt"
-default="60"
+default="40"
 optional
 
 option "max-intron-length" -
@@ -247,6 +247,18 @@ Valid values: -1 to disable or >=0 to enable.
 Suggested values: >= 20."
 int typestr="number"
 default="20"
+optional
+
+option "complexity-threshold" -
+"The maximum exon dust score that an exon can have."
+details=
+"The maximum exon dust score that an exon can have.
+Exons with dust score greater than this threshold are \
+discarded.
+Valid values: > 0.0. \
+Suggested value: 20.0."
+double typestr="> 0.0"
+default="20.0"
 optional
 
 option "retain-externals" E

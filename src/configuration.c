@@ -114,6 +114,10 @@ check_and_copy(struct gengetopt_args_info* args) {
   INFO("CONFIG: The minimum gap length difference for accepting a factorization: %d",
 		 config->max_gapLength_diff);
 
+  fail_if(args->complexity_threshold_arg<=0.0);
+  config->complexity_threshold= args->complexity_threshold_arg;
+  INFO("CONFIG: The minimum complexity threshold is %f", config->complexity_threshold);
+
   config->retain_externals=
 	 (args->retain_externals_arg == retain_externals_arg_true) ?
 	 1 : 0;
@@ -233,6 +237,7 @@ config_clone(pconfiguration src) {
   config->trans_red= src->trans_red;
   config->short_edge_comp= src->short_edge_comp;
   config->max_single_factorization_time= src->max_single_factorization_time;
+  config->complexity_threshold= src->complexity_threshold;
 
   return config;
 }
@@ -300,6 +305,7 @@ pconfiguration config_create(int argc, char** argv) {
   COPY_int_VALUE(suff_pref_length_intron);
   COPY_long_VALUE(max_single_factorization_time);
 //  COPY_int_VALUE(max_seq_in_gst);
+  COPY_double_VALUE(complexity_threshold);
 
   args_info.retain_externals_orig=
 	 alloc_and_copy((args_info.retain_externals_arg==retain_externals_arg_true) ?

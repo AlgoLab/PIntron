@@ -127,6 +127,11 @@ struct _configuration {
   //After the time limit expires, a new MEG is computed with increased
   //minimum pairing length (hence the MEG should be smaller)
   unsigned int max_single_factorization_time;
+
+  //The minimum value of a "low complexity" dust score. When an exon sequence
+  //has a dust score greater than this value, then the exon is "low complex".
+  //Suggested value: 20.0 (see ASPicDB)
+  double complexity_threshold;
 };
 
 typedef struct _configuration* pconfiguration;

@@ -235,7 +235,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			 }
 
 			 if(is_ok){
-				 add_f=clean_low_complexity_exons_2(add_f, gen_info->EST_seq, est->info->EST_seq);
+				 add_f=clean_low_complexity_exons_2(add_f, gen_info->EST_seq, est->info->EST_seq, config);
 				 if(list_is_empty(add_f))
 					 is_ok=false;
 			 }
@@ -1761,7 +1761,7 @@ plist clean_low_complexity_exons(plist factorization, char *genomic_sequence, ch
 	return factorization;
 }
 
-plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, char *est_sequence){
+plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, char *est_sequence, pconfiguration config){
 	my_assert(genomic_sequence != NULL);
 	my_assert(est_sequence != NULL);
 	my_assert(factorization != NULL);
@@ -1785,8 +1785,7 @@ plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, 
 			estdscore=dustScoreByLeftAndRight(est_sequence, exon->EST_start, exon->EST_end);
 		}
 
-		//XXX
-		if(gendscore > 1.0 || estdscore > 1.0){
+		if(gendscore > config->complexity_threshold || estdscore > config->complexity_threshold){
 			TRACE("\t exon %d-%d (%d-%d) has a low complexity", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end);
 			intlist_add_to_tail(split_list, index);
 		}

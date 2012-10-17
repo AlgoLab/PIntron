@@ -60,7 +60,7 @@ void print_split_string_on_stderr(const int, char*);
  * Discards low complexity exons from a factorization and retains the best part
  */
 plist clean_low_complexity_exons(plist, char *, char *);
-plist clean_low_complexity_exons_2(plist, char *, char *);
+plist clean_low_complexity_exons_2(plist, char *, char *, pconfiguration);
 
 plist clean_external_exons(plist, char *, char *);
 
