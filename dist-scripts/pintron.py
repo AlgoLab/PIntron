@@ -688,10 +688,12 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 # exon contains at least part of the start codon, but not the first character
                 # Note: the first character of the exon is in the first codon, hence 5utr length=0
                 read_codon_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
-                                       cumulative_transcript_length - cumulative_transcript_length_old)
+                                     cumulative_transcript_length - cumulative_transcript_length_old)
                 read_start_codon_seq += exon['sequence'][:read_codon_len]
                 if len(read_start_codon_seq) == 3 and check_codon("start", read_start_codon_seq):
-                    dump_and_exit(exon, isoform, isoform_id)
+                    logging.debug(pprint.pformat(exon))
+                    logging.debug(pprint.pformat(isoform))
+                    logging.debug(pprint.pformat(isoform_id))
             if read_codon_len > 0:
                 if strand == '+':
                     exon['genome start codon start'] = exon['chromosome start'] + exon['5utr length']
@@ -714,7 +716,9 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                     logging.debug(cumulative_transcript_length_old)
                     logging.debug(isoform['CDS end'])
                     logging.debug(cumulative_transcript_length)
-                    dump_and_exit(exon, isoform, isoform_id)
+                    logging.debug(pprint.pformat(exon))
+                    logging.debug(pprint.pformat(isoform))
+                    logging.debug(pprint.pformat(isoform_id))
             elif cumulative_transcript_length_old < (isoform['CDS end'] - 2) <= cumulative_transcript_length:
                 # exon contains the first character, but not the last of the stop codon
                 read_codon_len = cumulative_transcript_length - (isoform['CDS end'] - 3)
