@@ -114,53 +114,60 @@ extern const char* const __LOG_PREFIXES__[];
 
 #endif
 
-#define FATAL(...) LOG(LOG_LEVEL_FATAL, __VA_ARGS__)
-#define ERROR(...) LOG(LOG_LEVEL_ERROR, __VA_ARGS__)
-#define WARN(...) LOG(LOG_LEVEL_WARN, __VA_ARGS__)
-#define INFO(...) LOG(LOG_LEVEL_INFO, __VA_ARGS__)
-#define DEBUG(...) LOG(LOG_LEVEL_DEBUG, __VA_ARGS__)
-#define TRACE(...) LOG(LOG_LEVEL_TRACE, __VA_ARGS__)
-#define FINETRACE(...) LOG(LOG_LEVEL_FINETRACE, __VA_ARGS__)
 
 #if (LOG_LEVEL_FATAL <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_FATAL_ENABLED
+#define FATAL(...) LOG(LOG_LEVEL_FATAL, __VA_ARGS__)
 #else
 #undef LOG_FATAL_ENABLED
+#define FATAL(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_ERROR <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_ERROR_ENABLED
+#define ERROR(...) LOG(LOG_LEVEL_ERROR, __VA_ARGS__)
 #else
 #undef LOG_ERROR_ENABLED
+#define ERROR(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_WARN <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_WARN_ENABLED
+#define WARN(...) LOG(LOG_LEVEL_WARN, __VA_ARGS__)
 #else
 #undef LOG_WARN_ENABLED
+#define WARN(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_INFO <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_INFO_ENABLED
+#define INFO(...) LOG(LOG_LEVEL_INFO, __VA_ARGS__)
 #else
 #undef LOG_INFO_ENABLED
+#define INFO(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_DEBUG <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_DEBUG_ENABLED
+#define DEBUG(...) LOG(LOG_LEVEL_DEBUG, __VA_ARGS__)
 #else
 #undef LOG_DEBUG_ENABLED
+#define DEBUG(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_TRACE <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_TRACE_ENABLED
+#define TRACE(...) LOG(LOG_LEVEL_TRACE, __VA_ARGS__)
 #else
 #undef LOG_TRACE_ENABLED
+#define TRACE(...) do { } while (0)
 #endif
 
 #if (LOG_LEVEL_FINETRACE <= LOG_THRESHOLD) && defined LOG_MSG
 #define LOG_FINETRACE_ENABLED
+#define FINETRACE(...) LOG(LOG_LEVEL_FINETRACE, __VA_ARGS__)
 #else
 #undef LOG_FINETRACE_ENABLED
+#define FINETRACE(...) do { } while (0)
 #endif
 

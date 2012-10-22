@@ -65,6 +65,16 @@ size_t
 compute_edit_distance(const char* const s1, const size_t l1,
 							 const char* const s2, const size_t l2);
 
+size_t //edit distance
+compute_best_suffix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2);
+
+size_t //edit distance
+compute_best_prefix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2);
+
 bool K_band_edit_distance(char *, char *, unsigned int, unsigned int *);
 
 #endif

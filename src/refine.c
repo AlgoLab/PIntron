@@ -82,14 +82,6 @@ unsigned int* M= NPALLOC(unsigned int, (ls1+1)*(ls2+1));
   return M;
 }
 
-static char*
-reverse(const char* const s, const size_t len) {
-  char* const rs= c_palloc(len);
-  for (size_t i= 0; i<len; ++i)
-	 rs[len-1-i]= s[i];
-  return rs;
-}
-
 bool
 refine_borders(const char* const p,
 					const size_t len_p,

@@ -120,6 +120,8 @@ void noop_free(void*) __attribute__ ((const));
 
 char* substring(const int, const char* ) __attribute__ ((pure));
 
+char* reverse(const char* const s, const size_t len);
+
 #ifdef __APPLE__
 
 // Rewrite of GNU getline for MacOS compatibility

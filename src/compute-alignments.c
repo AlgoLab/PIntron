@@ -248,6 +248,70 @@ compute_edit_distance(const char* const s1, const size_t l1,
   return dist;
 }
 
+size_t
+compute_best_suffix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2) {
+  if ((l1 == l2) && (strncmp(s1, s2, l1)==0)) {
+	 *pcut1= l1;
+	 *pcut2= l2;
+	 return 0;
+  } else {
+	 size_t* matrix= edit_distance_matrix(s1, l1, s2, l2);
+// Get the min in last column and last row
+	 size_t i, j;
+	 size_t mincol= matrix[(l1+1)*(l2+1)-1];
+	 size_t minrow= matrix[(l1+1)*(l2+1)-1];
+	 size_t mincolpos= l1;
+	 size_t minrowpos= l2;
+	 size_t ed;
+	 for (i= 0, j= l2; i<l1; ++i, j+= l2+1) {
+		if (mincol >=  matrix[j]) {
+		  mincol= matrix[j];
+		  mincolpos= i;
+		}
+	 }
+	 for (i= 0, j= l1*(l2+1); i<l2; ++i, ++j) {
+		if (minrow >=  matrix[j]) {
+		  minrow= matrix[j];
+		  minrowpos= i;
+		}
+	 }
+	 if (minrow < mincol) {
+		*pcut1= l1;
+		*pcut2= minrowpos;
+		ed= minrow;
+	 } else {
+		*pcut1= mincolpos;
+		*pcut2= l2;
+		ed= mincol;
+	 }
+	 pfree(matrix);
+	 return ed;
+  }
+}
+
+size_t
+compute_best_prefix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2) {
+  if ((l1 == l2) && (strncmp(s1, s2, l1)==0)) {
+	 *pcut1= 0;
+	 *pcut2= 0;
+	 return 0;
+  }
+// Reverse strings
+  const char* s1x= reverse(s1, l1);
+  const char* s2x= reverse(s2, l2);
+  size_t ed= compute_best_suffix_cut(s1x, l1, s2x, l2, pcut1, pcut2);
+  pfree(s1x);
+  pfree(s2x);
+  *pcut1= l1-*pcut1;
+  *pcut2= l2-*pcut2;
+  return ed;
+}
+
+
 
 /*
  * In edit is the real error if the procedures returns true

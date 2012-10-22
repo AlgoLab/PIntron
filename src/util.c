@@ -134,6 +134,14 @@ char* substring(const int index, const char* const string){
   return ris;
 }//end subString
 
+char*
+reverse(const char* const s, const size_t len) {
+  char* const rs= c_palloc(len);
+  for (size_t i= 0; i<len; ++i)
+	 rs[len-1-i]= s[i];
+  return rs;
+}
+
 ssize_t my_getline(char **lineptr, size_t *n, FILE *stream) {
   ssize_t ris= custom_getline(lineptr, n, stream);
   while (ris>0 && (*lineptr)[ris-1]<' ') {
