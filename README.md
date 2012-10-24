@@ -8,7 +8,7 @@ spliced alignment of transcript sequences (ESTs and mRNAs) against a genomic seq
 --------------------------------------------------------------------------------------
 
 
-Please refer to [PIntron website](http://www.algolab.eu/PIntron) for the installation
+Please refer to [PIntron website](http://pintron.algolab.eu/) for the installation
 instructions and the program documentation.
 
 
