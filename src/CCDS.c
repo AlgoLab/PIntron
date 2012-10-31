@@ -701,7 +701,30 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
          fprintf(stderr, "Error genomic file!\n");
          exit(0);
   }
-  fscanf(in_gen, ">chr%*d:%*d:%*d:%d\n", &strand);
+  
+  char *tmp_line= NULL;
+  size_t tmp_string_l = 0;
+  int bytes_read;
+  bytes_read=my_getline(&tmp_line, &tmp_string_l, in_gen);
+  if (bytes_read == -1) {
+		 DEBUG("Empty genomic file!");
+		 strand=1;
+  }
+  else{
+	 char *occurrence=strrchr(tmp_line, ':');
+	 if(occurrence == NULL){
+	 	DEBUG("Strand not found in genomic file!");
+	 	strand=1;
+	 }else{
+	 	strand=atoi(occurrence+1);
+		DEBUG("Genomic strand: %d", strand);
+	 }
+  }
+  if (tmp_line!=NULL) {
+	 pfree(tmp_line);
+  }
+
+  //fscanf(in_gen, ">chr%*d:%*d:%*d:%d\n", &strand);
   fclose(in_gen);
   free(temp);
 
