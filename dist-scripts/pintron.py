@@ -294,7 +294,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     # It is stored in the first line of the genomic sequence
     with open(genomic_seq, 'r', encoding='utf-8') as f:
         line = f.readline().rstrip("\r\n")
-        m = re.search('^>[^\d]*(\d+):.*:([+-]?\d+)$', line)
+        m = re.search('^>[^\d]*?(X|Y|x|y|\d+):.*:([\+\-]?\d+)$', line)
         sequence_id = line[1:]
         strand = m.group(2)
         if strand == '-1' or strand == '-':
