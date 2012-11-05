@@ -82,35 +82,42 @@ extern const char* const __LOG_PREFIXES__[];
 
 #define LOG(level, ...) __INTERNAL_LOG(level, __LOG_PREFIXES__[level], __VA_ARGS__, "")
 
+#define ALWAYS_LOG(level, ...) __INTERNAL_ALWAYS_LOG(__LOG_PREFIXES__[level], __VA_ARGS__, "")
+
 #define __INTERNAL_LOG(level, prefix, format, ...) do {						\
 	 if (level<=LOG_THRESHOLD) {														\
-		char __my_internal_funz__[MAX_LEN_FUNC_NAME+1];							\
-		const int __my_internal_log_len__= strlen(__func__);					\
-		strncpy(__my_internal_funz__, __func__, MAX_LEN_FUNC_NAME);			\
-		for (int i= __my_internal_log_len__; i<MAX_LEN_FUNC_NAME; ++i) {	\
-		  __my_internal_funz__[i]=' ';												\
-		}																						\
-		if (__my_internal_log_len__+2>=MAX_LEN_FUNC_NAME)						\
-		  __my_internal_funz__[MAX_LEN_FUNC_NAME-1]=								\
-			 __my_internal_funz__[MAX_LEN_FUNC_NAME-2]= '.';					\
-		__my_internal_funz__[MAX_LEN_FUNC_NAME]= '\0';							\
-		char __my_internal_file__[MAX_LEN_FILE_NAME+1];							\
-		const int __my_internal_file_len__= strlen(__FILE__);					\
-		strncpy(__my_internal_file__, __FILE__+									\
-				  (__my_internal_file_len__>MAX_LEN_FILE_NAME ?					\
-					__my_internal_file_len__-MAX_LEN_FILE_NAME : 0)				\
-				  , MAX_LEN_FILE_NAME);													\
-		fprintf (stderr, LOG_PREFIX "%s(%s@%*.*s:%-4d) " format "  %s\n",	\
-					prefix, __my_internal_funz__,										\
-					MAX_LEN_FILE_NAME, MAX_LEN_FILE_NAME,							\
-					__my_internal_file__, __LINE__,									\
-					__VA_ARGS__);														\
+		__INTERNAL_ALWAYS_LOG(prefix, format, __VA_ARGS__);									\
 	 }																							\
+  } while (0)
+
+#define __INTERNAL_ALWAYS_LOG(prefix, format, ...) do {						\
+	 char __my_internal_funz__[MAX_LEN_FUNC_NAME+1];							\
+	 const int __my_internal_log_len__= strlen(__func__);						\
+	 strncpy(__my_internal_funz__, __func__, MAX_LEN_FUNC_NAME);			\
+	 for (int i= __my_internal_log_len__; i<MAX_LEN_FUNC_NAME; ++i) {		\
+		__my_internal_funz__[i]=' ';													\
+	 }																							\
+	 if (__my_internal_log_len__+2>=MAX_LEN_FUNC_NAME)							\
+		__my_internal_funz__[MAX_LEN_FUNC_NAME-1]=								\
+		  __my_internal_funz__[MAX_LEN_FUNC_NAME-2]= '.';						\
+	 __my_internal_funz__[MAX_LEN_FUNC_NAME]= '\0';								\
+	 char __my_internal_file__[MAX_LEN_FILE_NAME+1];							\
+	 const int __my_internal_file_len__= strlen(__FILE__);					\
+	 strncpy(__my_internal_file__, __FILE__+										\
+				(__my_internal_file_len__>MAX_LEN_FILE_NAME ?					\
+				 __my_internal_file_len__-MAX_LEN_FILE_NAME : 0)				\
+				, MAX_LEN_FILE_NAME);													\
+	 fprintf (stderr, LOG_PREFIX "%s(%s@%*.*s:%-4d) " format "  %s\n",	\
+				 prefix, __my_internal_funz__,										\
+				 MAX_LEN_FILE_NAME, MAX_LEN_FILE_NAME,								\
+				 __my_internal_file__, __LINE__,										\
+				 __VA_ARGS__);																\
   } while (0)
 
 #else
 
 #define LOG(level, prefix, ...) do { } while (0)
+#define ALWAYS_LOG(level, prefix, ...) do { } while (0)
 
 #endif
 
@@ -170,4 +177,3 @@ extern const char* const __LOG_PREFIXES__[];
 #undef LOG_FINETRACE_ENABLED
 #define FINETRACE(...) do { } while (0)
 #endif
-

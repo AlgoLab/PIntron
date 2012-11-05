@@ -41,9 +41,11 @@
 #include "compute-alignments.h"
 #include "detect-polya.h"
 
+//#define LOG_THRESHOLD LOG_LEVEL_TRACE
 #include "log.h"
 #include "max-emb-graph.h"
-//#define LOG_THRESHOLD LOG_LEVEL_TRACE
+
+#include "factorization-util.h"
 
 // Define a long string composed only by spaces (1024, in particular) to be used to align the recursive calls of getsubtreeembeddings
 #define _A_LOT_OF_SPACES_ "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "
@@ -73,10 +75,6 @@ static plist get_computed_subtree_embeddings(ppairing);
 //Funzione per copiare liste di pfactor
 static ppairing copy_ppairing(ppairing);
 
-//Funzione di stampa di una lista di fattorizzazioni
-static void print_factorizations(plist);
-//Funzione di stampa di una fattorizzazione (lista di fattori pfactor)
-static void print_factorization(plist);
 
 //Funzione di stampa di una lista di embeddings
 static void print_embeddings(plist);
@@ -88,11 +86,6 @@ static void print_embedding(plist);
 
 //L'argomento deve essere una lista di embeddings (lista di liste di pairing)
 static void embedding_list_destroy(plist);
-
-//Funzione di stampa di una lista di fattorizzazioni
-static void print_factorizations_on_log(const int log_level, plist, const char* const);
-//Funzione di stampa di una fattorizzazione (lista di fattori pfactor)
-static void print_factorization_on_log(const int log_level, plist, const char* const);
 
 //Funzione di stampa di una lista di embeddings
 //static void print_embeddings_for_info(plist);
@@ -210,7 +203,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 		  //printf("...ALL THE FACTORIZATIONS FOR THE PATH ARE OBTAINED %zu!\n", list_size(subtree_fact_list));
 
 		  DEBUG("\t\t...ALL THE FACTORIZATIONS FOR THE PATH ARE OBTAINED!");
-		  print_factorizations(subtree_fact_list);
+		  print_factorizations_on_log(LOG_LEVEL_TRACE, subtree_fact_list);
 
 		  plistit add_it=list_first(subtree_fact_list);
 		  int counter_add=1;
@@ -315,7 +308,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	 plist add_factorization=(plist)listit_next(plist_add_factorization);
 	 double coverage=(double)doublelistit_next(d_it);
 	 DEBUG("\t\tThe factorization number %d", count_f);
-	 print_factorization(add_factorization);
+	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
 	 if(coverage == -1.0 || max_coverage-coverage > config->max_coverage_diff){
 		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
@@ -362,11 +355,11 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	 plist add_factorization=(plist)listit_next(plist_add_factorization);
 	 int exonNUM=(int)intlistit_next(i_it);
 	 DEBUG("\t\tThe factorization number %d", count_f);
-	 print_factorization(add_factorization);
+	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
 	 if ((config->max_exonNUM_diff != -1) && (exonNUM-min_exonNUM > config->max_exonNUM_diff)){
 		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
-		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
 		DEBUG("\t\t\t...has been discarded!");
 	 }
 	 count_f++;
@@ -405,11 +398,11 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
  	 plist add_factorization=(plist)listit_next(plist_add_factorization);
  	 int gapLength=(int)intlistit_next(i2_it);
  	 DEBUG("\t\tThe factorization number %d", count_f);
- 	 print_factorization(add_factorization);
+ 	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
  	 if ((config->max_gapLength_diff != -1) && (gapLength-min_gapLength > config->max_gapLength_diff)) {
  		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
-		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
  		DEBUG("\t\t\t...has been discarded!");
  	 }
  	 count_f++;
@@ -427,10 +420,10 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
      while(listit_has_next(plist_add_factorization)){
   	 plist add_factorization=(plist)listit_next(plist_add_factorization);
   	 DEBUG("\t\tThe factorization number %d", count_f);
-  	 print_factorization(add_factorization);
+  	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
   	 if(!check_gap_errors(add_factorization, est->info->EST_seq, gen_info->EST_seq, config)){
   		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
- 		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
  		DEBUG("\t\t\t...has been discarded!");
   	 }
   	 count_f++;
@@ -438,7 +431,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
     listit_destroy(plist_add_factorization);
 
   DEBUG("Preliminary factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
-  print_factorizations_on_log(LOG_LEVEL_DEBUG, factorization_list, gen_info->EST_seq);
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG, factorization_list, gen_info->EST_seq);
 
   if(config->max_number_of_factorizations != 0 && ((int) list_size(factorization_list)) > config->max_number_of_factorizations){
 	 INFO("\tbut it is an artifact! There are too many factorizations!");
@@ -453,7 +446,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	 plist fact_to_be_refined=(plist)listit_next(plist_fact_to_be_refined);
 	 if(!list_is_empty(fact_to_be_refined)){
 		 DEBUG("New factorization to be refined:");
-		 print_factorization_on_log(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
+		 print_factorization_on_log_full(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 		 plistit plist_f_t_r=list_first(fact_to_be_refined);
 		 pfactor donor=(pfactor)listit_next(plist_f_t_r);
 		 bool first_intron=true;
@@ -490,7 +483,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 		 }
 		 listit_destroy(plist_f_t_r);
 		 DEBUG("Refined factorization:");
-		 print_factorization_on_log(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
+		 print_factorization_on_log_full(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 	 }
   }
 
@@ -591,7 +584,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
   INFO("Refined factorizations of EST %s => %zd",
 		 est->info->EST_id, list_size(final_factorization_list));
-  print_factorizations_on_log(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
+  print_factorizations_on_log_full(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
 
   return est;
 }
@@ -998,32 +991,6 @@ static ppairing copy_ppairing(ppairing arg)
 
 }
 
-static void print_factorizations(plist factorization_list){
-  plistit plist_it_id;
-
-  TRACE("\t\tFactorizations->");
-
-  plist_it_id=list_first(factorization_list);
-  while(listit_has_next(plist_it_id)){
-	 plist factorization=(plist)listit_next(plist_it_id);
-	 print_factorization(factorization);
-  }
-  listit_destroy(plist_it_id);
-}
-
-static void print_factorization(plist factorization){
-  plistit plist_it_f;
-
-  TRACE("\t\tFactorization->");
-
-  plist_it_f=list_first(factorization);
-  while(listit_has_next(plist_it_f)){
-	 pfactor pfact=listit_next(plist_it_f);
-	 TRACE("\t\t\tE_START=%d E_END=%d G_START=%d G_END=%d", pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end);
-  }
-  listit_destroy(plist_it_f);
-}
-
 static void print_embeddings(plist embedding_list){
   plistit plist_it_id;
 
@@ -1049,41 +1016,6 @@ static void print_embedding(plist embedding){
   }
   listit_destroy(plist_it_e);
 }
-
-static void
-print_factorization_on_log(const int log_level,
-									plist factorization, const char* const gen_seq){
-  plistit plist_it_f;
-
-  plist_it_f=list_first(factorization);
-  size_t exon_n= 0;
-  while(listit_has_next(plist_it_f)){
-	 pfactor pfact=(pfactor)listit_next(plist_it_f);
-	 ++exon_n;
-	 LOG(log_level, "   %3zu) E_START=%8d  E_END=%8d  --  G_START=%10d  G_END=%10d  "
-		  "%.2s...%.2s",
-		  exon_n, pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end,
-		  (exon_n==1)?"  ":gen_seq+pfact->GEN_start-2,
-			!listit_has_next(plist_it_f)?"  ":gen_seq+pfact->GEN_end+1);
-  }
-  listit_destroy(plist_it_f);
-}
-
-static void
-print_factorizations_on_log(const int log_level,
-									 plist factorization_list, const char* const gen_seq){
-  plistit plist_it_id= list_first(factorization_list);
-  size_t factorization_no= 1;
-  while(listit_has_next(plist_it_id)){
-	 plist factorization=(plist)listit_next(plist_it_id);
-	 LOG(log_level, "  Factorization %-3zu [%2zu exon(s)]",
-		  factorization_no, list_size(factorization));
-	 print_factorization_on_log(log_level, factorization, gen_seq);
-	 ++factorization_no;
-  }
-  listit_destroy(plist_it_id);
-}
-
 
 /*
 //UNUSED
@@ -1618,29 +1550,6 @@ static bool check_gap_errors(plist factorization, char *est_seq, char *gen_seq, 
 	  return ok;
 }
 
-char* real_substring(int index, int length, const char* const string){
-
-  NOT_NULL(string);
-
-  if (index < 0){
-	 length+= index;
-	 index= 0;
-  }
-
-  my_assert(length >= 0);
-
-  TRACE("index value is: %d", index);
-  TRACE("string value is: |%s|", string);
-  TRACE("length value is: %d", length);
-
-  char * const restrict ris= c_palloc(length + 1);
-  strncpy(ris, string + index, length);
-  ris[length]= '\0';
-
-  return ris;
-}//end real_substring
-
-
 void print_split_string_on_stderr(const int token_dim, char* string){
 
   my_assert(token_dim > 0);
@@ -1666,7 +1575,7 @@ plist clean_low_complexity_exons(plist factorization, char *genomic_sequence, ch
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check complexity:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	plist help_list=list_create();
 
@@ -1768,7 +1677,7 @@ plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, 
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check complexity:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	pintlist split_list=intlist_create();
 	plistit plist_f_t_r=list_first(factorization);
@@ -1943,7 +1852,7 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check noise:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	pintlist split_list=intlist_create();
 	plistit plist_f_t_r=list_first(factorization);
@@ -2145,7 +2054,7 @@ plist add_if_not_exists(plist factorization_to_be_added, plist factorization_lis
 	while(listit_has_next(cmp_it) && found == false){
 		plist cmp_f=(plist)listit_next(cmp_it);
 
-		print_factorization(cmp_f);
+		print_factorization_on_log(LOG_LEVEL_TRACE, cmp_f);
 
 		int cont_result=0;
 		//Gestione del caso in cui entrambe le fattorizzazioni siano composte da un solo esone
@@ -2228,7 +2137,7 @@ plist handle_endpoints(plist factorization, char *genomic_sequence, char *est_se
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Handle end points:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	size_t gen_length=strlen(genomic_sequence);
 	size_t est_length=strlen(est_sequence);

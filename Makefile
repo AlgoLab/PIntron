@@ -320,7 +320,6 @@ base_SOURCE= \
 	$(SRC_DIR)/bit_vector.c\
 	$(SRC_DIR)/io-meg.c\
 	$(SRC_DIR)/io-gen-ests.c\
-	$(SRC_DIR)/est-factorizations.c \
 	$(SRC_DIR)/refine-intron.c \
 	$(SRC_DIR)/refine.c \
 	$(SRC_DIR)/compute-alignments.c \
@@ -350,7 +349,6 @@ base_OBJ= \
 	$(OBJ_DIR)/bit_vector.o\
 	$(OBJ_DIR)/io-meg.o\
 	$(OBJ_DIR)/io-gen-ests.o\
-	$(OBJ_DIR)/est-factorizations.o \
 	$(OBJ_DIR)/refine-intron.o \
 	$(OBJ_DIR)/refine.o \
 	$(OBJ_DIR)/compute-alignments.o \
@@ -369,6 +367,8 @@ stree_OBJ= \
 
 
 est_fact_SOURCE= \
+	$(SRC_DIR)/est-factorizations.c \
+	$(SRC_DIR)/factorization-util.c \
 	$(SRC_DIR)/factorization-refinement.c \
 	$(SRC_DIR)/max-emb-graph.c \
 	$(SRC_DIR)/aug_suffix_tree.c \
@@ -377,6 +377,8 @@ est_fact_SOURCE= \
 	$(SRC_DIR)/main-est-fact.c
 
 est_fact_OBJ= \
+	$(OBJ_DIR)/est-factorizations.o \
+	$(OBJ_DIR)/factorization-util.o \
 	$(OBJ_DIR)/factorization-refinement.o \
 	$(OBJ_DIR)/max-emb-graph.o \
 	$(OBJ_DIR)/aug_suffix_tree.o \

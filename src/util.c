@@ -134,6 +134,27 @@ char* substring(const int index, const char* const string){
   return ris;
 }//end subString
 
+char* real_substring(int index, int length, const char* const string){
+  NOT_NULL(string);
+
+  if (index < 0){
+	 length+= index;
+	 index= 0;
+  }
+
+  my_assert(length >= 0);
+
+  TRACE("index value is:  %d", index);
+  TRACE("string value is: |%s|", string);
+  TRACE("length value is: %d", length);
+
+  char * const restrict ris= c_palloc(length + 1);
+  strncpy(ris, string + index, length);
+  ris[length]= '\0';
+
+  return ris;
+}//end real_substring
+
 char*
 reverse(const char* const s, const size_t len) {
   char* const rs= c_palloc(len);
