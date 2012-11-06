@@ -602,8 +602,19 @@ search_small_exon(pfactor * pp1,
 	 DEBUG("        original edit distance of the prefix of the second exon: %zu (cuts= %zu, %zu)",
 			 ped, e2pcut, g2pcut);
 
-	 if ((sed + ped + e1scut + g1scut + e2plen + g2plen - e2pcut - g2pcut) > (_MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_)) {
+	 const size_t prev_ed= (sed + ped + e1scut + g1scut + e2plen + g2plen - e2pcut - g2pcut);
+	 bool perform_search= false;
+	 if (prev_ed > (_MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_)) {
 		DEBUG("Border alignment is not good. There could be a small exon.");
+		perform_search= true;
+	 }
+	 if ((prev_ed > 0) && !is_canonical_intron(genomic->EST_seq,
+															 p1->GEN_end+1, p2->GEN_start-1)) {
+		DEBUG("Border alignment is quite good but the intron is not canonical. "
+				"There could be a small exon.");
+		perform_search= true;
+	 }
+	 if (perform_search) {
 // Make the cut
 		e1sfact += e1scut;
 		e1sstart += e1scut;
