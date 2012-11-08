@@ -809,11 +809,11 @@ search_for_new_small_exons(pEST_info genomic,
 //
 
 static
-void
+bool
 analyze_possibly_small_exon(pfactor * ppprev,
 									 pfactor * ppcurr,
 									 pfactor pnext,
-									 pfactorization pfact,
+									 plistit pfactit,
 									 pEST_info genomic,
 									 pEST factorized_est,
 									 pconfiguration config) {
@@ -824,7 +824,7 @@ analyze_possibly_small_exon(pfactor * ppprev,
 	 DEBUG("  ...skipped external factor %d-%d %d-%d.",
 			 pcurr->EST_start, pcurr->EST_end,
 			 pcurr->GEN_start, pcurr->GEN_end);
-	 return;
+	 return false;
   }
   DEBUG("  ...analyzing factor %d-%d %d-%d...",
 		  pcurr->EST_start, pcurr->EST_end,
@@ -833,6 +833,7 @@ analyze_possibly_small_exon(pfactor * ppprev,
   my_assert(pcurr->GEN_start <= pcurr->GEN_end);
   const size_t elen= pcurr->EST_end + 1 - pcurr->EST_start;
   const size_t glen= pcurr->GEN_end + 1 - pcurr->GEN_start;
+  bool removed= false;
   if (//(elen <= config->min_factor_len) &&
 		(elen <= _UB_MED_EXON_LENGTH_)) {
 	 DEBUG("     it is a small exon! Trying to remove it...");
@@ -926,14 +927,20 @@ analyze_possibly_small_exon(pfactor * ppprev,
 		  INFO("Modified 'local' factorization on genomic: (%8d -%8d)   ... skipped ...    (%8d -%8d).",
 				 pprev->GEN_start, pprev->GEN_end,
 				 pnext->GEN_start, pnext->GEN_end);
-		  list_remove_element(pfact, pcurr, (delete_function)factor_destroy);
+		  listit_prev(pfactit);
+		  list_remove_at_iterator(pfactit, (delete_function)factor_destroy);
 		  *ppcurr= pprev;
-		  *ppprev= NULL;
+		  listit_prev(pfactit);
+		  *ppprev= listit_get(pfactit); // Gets NULL if it is at the beginning
+		  listit_next(pfactit);
+		  listit_next(pfactit);
+		  removed= true;
 		} else {
 		  INFO("The new placement decreases intron score, thus the exon will NOT be split.");
 		}
 	 }
   }
+  return removed;
 }
 
 static
@@ -948,17 +955,21 @@ remove_false_small_exons(pEST_info genomic,
 	 pfactorization pfact= listit_next(pl_f_it);
 
 	 pfactor pprev= NULL, pcurr= NULL, pnext= NULL;
+	 bool removed= false;
 	 plistit pl_factor_it= list_first(pfact);
 	 if (listit_has_next(pl_factor_it))
 		pnext= listit_next(pl_factor_it);
 	 while (pnext != NULL) {
-		pprev= pcurr;
-		pcurr= pnext;
-		pnext= NULL;
-		if (listit_has_next(pl_factor_it))
-		  pnext= listit_next(pl_factor_it);
-		analyze_possibly_small_exon(&pprev, &pcurr, pnext, pfact,
-											 genomic, factorized_est, config);
+		if (!removed) {
+		  pprev= pcurr;
+		  pcurr= pnext;
+		  pnext= NULL;
+		  if (listit_has_next(pl_factor_it))
+			 pnext= listit_next(pl_factor_it);
+		}
+		removed=
+		  analyze_possibly_small_exon(&pprev, &pcurr, pnext, pl_factor_it,
+												genomic, factorized_est, config);
 	 }
 	 listit_destroy(pl_factor_it);
   }
@@ -1115,6 +1126,7 @@ refine_EST_factorizations(pEST_info genomic,
   INFO("Further refinement of EST factorizations...");
   recover_lost_prefixes_and_suffixes(genomic, factorized_est, config);
   remove_false_small_exons(genomic, factorized_est, config);
+  remove_duplicated_factorizations(factorized_est->factorizations);
   search_for_new_small_exons(genomic, factorized_est, config);
 }
 
