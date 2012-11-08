@@ -1349,7 +1349,7 @@ void Get_Transcripts_from_File(){
   }
 
 //03set04
-  sequences=(char **)malloc(number_of_exons*sizeof(char *));
+  sequences=(char **)calloc(number_of_exons, sizeof(char *));
   if(sequences == NULL){
          fprintf(stderr, "Problem21 of memory allocation in Get_Transcripts_from_File!\n");
 #ifdef HALT_EXIT_MODE
@@ -5489,7 +5489,7 @@ void First_Filtering(){
          if(contained[i]){
                 pos--;
          }
-         else{
+			else if (pos!=0) {
                 transcript_list[i+pos].left_ext=transcript_list[i].left_ext;
                 for(j=0; j<transcript_list[i].exons-2; j++)
                   transcript_list[i+pos].exon_list[j]=transcript_list[i].exon_list[j];
