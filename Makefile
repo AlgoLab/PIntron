@@ -182,6 +182,15 @@ endif
 #####################
 
 
+#####################
+# TCMalloc detection
+# TCMalloc is a (generally faster) drop-in replacement for the standard malloc
+# See: http://code.google.com/p/gperftools/
+#
+HAS_TCMALLOC:=/$(shell echo "void main() {}" | $(CC) -x c -o /tmp/test - -ltcmalloc_minimal 2> /dev/null && echo yes || echo no)/
+#####################
+
+
 
 #####################
 # Common compiler options
@@ -269,6 +278,13 @@ COMPFLAGS=$(ARCH_DEP) $(WLBIT) $(OPTB) $(OPTP) $(OPTD) $(OPTPROF)
 INCLUDE=-I. -I$(INCLUDE_DIR)/ -I$(STREE_DIR)/
 
 LIBS=-lm #-lgsl -lgslcblas #-lefence
+
+ifeq ($(STATUS), production)
+ifeq ($(HAS_TCMALLOC), /yes/)
+$(warning Using TCMalloc)
+LIBS+=-ltcmalloc_minimal
+endif
+endif
 
 override ADD_DFLAGS:=$(patsubst %,-%,$(subst :, ,$(PERS_DEFINE)))
 
