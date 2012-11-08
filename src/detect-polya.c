@@ -114,7 +114,7 @@ bool detect_polyA_signal(plist factorization, char *genomic_sequence, char *est_
 	if(stop == true){
 		//PAS su genomica
 		//XXX
-		i=tail->GEN_end-39;
+	  i=MAX(0, tail->GEN_end-39);
 		while(i <= tail->GEN_end && *polyadenil == false){
 			if(genomic_sequence[i] == 'a' || genomic_sequence[i] == 'A'){
 				//XXX
@@ -129,9 +129,9 @@ bool detect_polyA_signal(plist factorization, char *genomic_sequence, char *est_
 
 	if(stop == true){
 		//XXX
-		i=tail->GEN_end-9;
+	  i=MAX(0, tail->GEN_end-9);
 		matches=0;
-		while(i <= tail->GEN_end+10 && stop == true){
+		while(i <= tail->GEN_end+10 && stop == true && genomic_sequence[i]!='\0'){
 			//XXX
 			if(matches >= 6)
 				stop=false;
@@ -149,7 +149,7 @@ bool detect_polyA_signal(plist factorization, char *genomic_sequence, char *est_
 			i=tail->GEN_end+1;
 			int count=0;
 			//XXX
-			while(i <= tail->GEN_end+10 && stop == true){
+			while(i <= tail->GEN_end+10 && stop == true && genomic_sequence[i]!='\0'){
 				//XXX
 				if(count >= 7)
 					stop=false;
