@@ -126,7 +126,7 @@ static char* getData(char *buffer, size_t n, FILE *f_in, int* lenght){
 	 ind = ind + strlen(tmp);
   }
   res[ind] = '\0';
-  list_destroy(l, (delete_function)pfree);
+  list_destroy(l, (delete_function)pfree_function);
   listit_destroy(li);
   FINETRACE("the concatenated string is |%s|", res);
   return res;

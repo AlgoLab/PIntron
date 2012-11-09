@@ -65,6 +65,7 @@ item list_tail(plist);
 
 bool list_is_empty(plist);
 
+static inline
 size_t list_size(const plist const);
 
 
@@ -154,6 +155,7 @@ int relaxed_list_compare(plist, plist, relaxed_comparator, int);
  * List iterator definitions
  **/
 
+static inline
 plistit list_first(const plist const l);
 
 void list_first_reuse(plist const l, plistit* pli);
@@ -166,17 +168,84 @@ plistit listit_copy(plistit li);
 
 void listit_copy_reuse(plistit const li, plistit* prli);
 
+static inline
 void listit_destroy(plistit li);
 
+static inline
 bool listit_has_next(const plistit const li);
 
-item listit_get(plistit li);
-
+static inline
 item listit_next(plistit li);
+
+item listit_get(plistit li);
 
 bool listit_has_prev(plistit li);
 
 item listit_prev(plistit li);
 
+
+
+
+#include "util.h"
+
+typedef struct _node* _pnode;
+
+struct _node {
+	_pnode next;
+	_pnode prev;
+	item element;
+};
+
+struct _list {
+  _pnode sentinel;
+  size_t size;
+};
+
+struct _listit {
+  _pnode next;
+  _pnode prev;
+  _pnode sentinel;
+  struct _list* l;
+};
+
+static inline
+size_t list_size(plist l) {
+  NOT_NULL(l);
+  return l->size;
+}
+
+static inline
+plistit list_first(const plist const l) {
+  my_assert(l!=NULL);
+  plistit li= PALLOC(struct _listit);
+  li->l= l;
+  const _pnode const sentinel= l->sentinel;
+  li->next= sentinel->next;
+  li->prev= sentinel;
+  li->sentinel= sentinel;
+  return li;
+}
+
+static inline
+void listit_destroy(plistit li) {
+  if (li!=NULL)
+	 pfree(li);
+}
+
+static inline
+bool listit_has_next(const plistit const li) {
+  my_assert(li!=NULL);
+  return li->next != li->sentinel;
+}
+
+static inline
+item listit_next(plistit li) {
+  my_assert(li!=NULL);
+  my_assert(listit_has_next(li));
+  item p= li->next->element;
+  li->prev= li->next;
+  li->next= li->next->next;
+  return p;
+}
 
 #endif

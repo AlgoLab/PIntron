@@ -101,7 +101,7 @@ char* c_palloc(size_t size) {
   return (char*)palloc(size*sizeof(char));
 }
 
-void pfree(const void* const p) {
+void pfree_function(const void* const p) {
   if (p==NULL) {
 	 FATAL("Cannot free a NULL pointer.");
 	 fail();

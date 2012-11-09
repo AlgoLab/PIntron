@@ -32,28 +32,6 @@
 #include "util.h"
 #include <stdlib.h>
 
-typedef struct _node* _pnode;
-
-struct _node {
-	_pnode next;
-	_pnode prev;
-	item element;
-};
-
-struct _list {
-  _pnode sentinel;
-  size_t size;
-};
-
-
-struct _listit {
-  _pnode next;
-  _pnode prev;
-  _pnode sentinel;
-  struct _list* l;
-};
-
-
 plist list_create(void) {
   FINETRACE("New list creation");
   plist ris= PALLOC(struct _list);
@@ -168,11 +146,6 @@ item list_tail(plist l) {
 bool list_is_empty(plist l) {
   NOT_NULL(l);
   return (l->sentinel->next == l->sentinel);
-}
-
-size_t list_size(plist l) {
-  NOT_NULL(l);
-  return l->size;
 }
 
 bool
@@ -544,17 +517,6 @@ void list_complete_difference(plist l1, plist l2, comparator cmp, delete_functio
  * List iterator definitions
  */
 
-plistit list_first(const plist const l) {
-  my_assert(l!=NULL);
-  plistit li= PALLOC(struct _listit);
-  li->l= l;
-  const _pnode const sentinel= l->sentinel;
-  li->next= sentinel->next;
-  li->prev= sentinel;
-  li->sentinel= sentinel;
-  return li;
-}
-
 void list_first_reuse(plist l, plistit* pli) {
   my_assert(l!=NULL);
   plistit li= NULL;
@@ -619,25 +581,6 @@ listit_copy_reuse(plistit const li, plistit* prli) {
   rli->next= li->next;
   rli->l= li->l;
   rli->sentinel= li->sentinel;
-}
-
-void listit_destroy(plistit li) {
-  if (li!=NULL)
-	 pfree(li);
-}
-
-bool listit_has_next(const plistit const li) {
-  my_assert(li!=NULL);
-  return li->next != li->sentinel;
-}
-
-item listit_next(plistit li) {
-  my_assert(li!=NULL);
-  my_assert(listit_has_next(li));
-  item p= li->next->element;
-  li->prev= li->next;
-  li->next= li->next->next;
-  return p;
 }
 
 item listit_get(plistit li) {

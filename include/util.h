@@ -94,8 +94,8 @@
 
 #endif
 
-static inline void*
-palloc(const size_t size) {
+static inline
+void* palloc(const size_t size) {
 
   void* p= malloc(size);
   if (p==NULL) {
@@ -106,11 +106,16 @@ palloc(const size_t size) {
   return p;
 }
 
-void pfree(const void* const p)
-#ifndef __ICC
-  __attribute__ ((nonnull))
-#endif
-  ;
+static inline
+void pfree(const void* const p) {
+  if (p==NULL) {
+	 FATAL("Cannot free a NULL pointer.");
+	 fail();
+  }
+  free((void *)p);
+}
+
+void pfree_function(const void* const p);
 
 char* c_palloc(size_t dim) __attribute__ ((malloc));
 
