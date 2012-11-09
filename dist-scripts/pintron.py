@@ -34,6 +34,7 @@ import random
 import sys
 import re
 import os
+import os.path
 import subprocess
 import time
 import logging
@@ -773,7 +774,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         fd.write(json.dumps(gene, sort_keys=True, indent=4))
 
 
-def exec_system_command(command, error_comment, logfile, output_file="",
+def exec_system_command(command, error_comment, logfile, cmd_label,
+                        output_file="",
                         from_scratch=True):
     if not from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
         logging.debug(str(time.localtime()))
@@ -783,6 +785,11 @@ def exec_system_command(command, error_comment, logfile, output_file="",
             retcode = subprocess.call(command + " 2>> " + logfile, shell=True)
             if retcode < 0:
                 print(error_comment, -retcode, file=sys.stderr)
+            if os.path.exists("gmon.out"):
+                try:
+                    os.rename("gmon.out", cmd_label+".gmon.out")
+                except:
+                    pass
         except OSError as e:
             print("Execution failed:", e, file=sys.stderr)
             raise PIntronError
@@ -867,6 +874,7 @@ def pintron_pipeline(options):
             command="cp " + options.genome_filename + " genomic.txt ",
             error_comment="Could not prepare genomic input file",
             logfile=options.plogfile,
+            cmd_label='cmd-1a-copy-genomic',
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
@@ -878,6 +886,7 @@ def pintron_pipeline(options):
             command="cp " + options.EST_filename + " ests.txt ",
             error_comment="Could not prepare ESTs input file",
             logfile=options.plogfile,
+            cmd_label='cmd-1b-copy-ests',
             output_file='raw-multifasta-out.txt',
             from_scratch=options.from_scratch)
 
@@ -889,6 +898,7 @@ def pintron_pipeline(options):
         str(options.max_factorization_memory * 1024) + " && " + exes["est-fact"],
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
+        cmd_label='cmd-2-est-fact',
         output_file='raw-multifasta-out.txt',
         from_scratch=options.from_scratch)
 
@@ -900,6 +910,7 @@ def pintron_pipeline(options):
         exes["min-factorization"] + " < raw-multifasta-out.txt >out-agree.txt",
         error_comment="Could not minimize the factorizations",
         logfile=options.plogfile,
+        cmd_label='cmd-3-min-factorization',
         output_file='out-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -911,6 +922,7 @@ def pintron_pipeline(options):
         exes["intron-agreement"],
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
+        cmd_label='cmd-4-intron-agreement',
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -921,6 +933,7 @@ def pintron_pipeline(options):
         command=exes["gene-structure"] + " ./",
         error_comment="Could not compute maximal transcripts",
         logfile=options.plogfile,
+        cmd_label='cmd-5-gene-structure',
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
 
@@ -937,6 +950,7 @@ def pintron_pipeline(options):
         command=exes["compact-compositions"] + " < out-after-intron-agree.txt > build-ests.txt",
         error_comment="Could not transform factorizations into exons",
         logfile=options.plogfile,
+        cmd_label='cmd-6-compact-compositions',
         output_file='build-ests.txt',
         from_scratch=options.from_scratch)
 
@@ -947,12 +961,14 @@ def pintron_pipeline(options):
         command=exes["maximal-transcripts"] + " < build-ests.txt",
         error_comment="Could not compute maximal transcripts",
         logfile=options.plogfile,
+        cmd_label='cmd-7-maximal-transcripts',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
     exec_system_command(
         command="cp -f TRANSCRIPTS1_1.txt isoforms.txt",
         error_comment="Could not link isoforms",
         logfile=options.plogfile,
+        cmd_label='cmd-7-copy-maximal-transcripts',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
@@ -963,6 +979,7 @@ def pintron_pipeline(options):
         command=exes["cds-annotation"] + " ./ ./ " + options.gene + " " + options.organism,
         error_comment="Could not annotate the CDSs",
         logfile=options.plogfile,
+        cmd_label='cmd-8-cds-annotation',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
@@ -984,11 +1001,12 @@ def pintron_pipeline(options):
         json2gtf(options.output_filename, options.extended_gtf_filename, options.gene, True)
     if options.output_est_alignments:
         exec_system_command(
-        command=exes["ests2sam"] + " --directory=. --genome=" + options.genome_filename,
-        error_comment="Could not create ESTs-genome alignment file",
-        logfile=options.plogfile,
-        output_file='est-alignments.sam',
-        from_scratch=options.from_scratch)
+            command=exes["ests2sam"] + " --directory=. --genome=" + options.genome_filename,
+            error_comment="Could not create ESTs-genome alignment file",
+            logfile=options.plogfile,
+            cmd_label='cmd-8-ests2sam',
+            output_file='est-alignments.sam',
+            from_scratch=options.from_scratch)
 
     # Clean mess
     logging.info("STEP 10:  Finalizing...")
@@ -999,7 +1017,8 @@ def pintron_pipeline(options):
                                                     options.glogfile]),
                             error_comment="Could not compress final files",
                             logfile="/dev/null",
-        output_file=options.output_filename + '.gz')
+                            cmd_label='cmd-10-compress',
+                            output_file=options.output_filename + '.gz')
 
     if not options.no_clean:
         tempfiles = ("TEMP_COMPOSITION_TRANS1_1.txt", "TEMP_COMPOSITION_TRANS1_2.txt",

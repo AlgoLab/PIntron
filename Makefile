@@ -198,9 +198,9 @@ endif
 #
 ifeq ($(STATUS), production)
 ifeq ($(CC), icc)
-OPTP=-O2 -xHost -ip -ipo -vec-report1 -fomit-frame-pointer
+OPTP=-O2 -xHost -ip -ipo -vec-report1
 else
-OPTP=-O2 -fomit-frame-pointer
+OPTP=-O2
 endif
 LOG_LEVEL=INFO
 else
@@ -235,6 +235,9 @@ OPTPROF=-pg -fprofile-arcs
 endif
 else
 OPTPROF=
+ifeq ($(STATUS), production)
+OPTP+=-fomit-frame-pointer
+endif
 endif
 #####################
 
