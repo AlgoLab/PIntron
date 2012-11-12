@@ -162,6 +162,7 @@ plistit list_first(const plist const l);
 static inline
 void list_first_stack(plist const l, plistit pli);
 
+static inline
 void list_first_reuse(plist const l, plistit* pli);
 
 plistit list_last(plist l);
@@ -237,6 +238,22 @@ void list_first_stack(plist const l, plistit pli) {
   pli->next= sentinel->next;
   pli->prev= sentinel;
   pli->sentinel= sentinel;
+}
+
+static inline
+void list_first_reuse(plist l, plistit* pli) {
+  my_assert(l!=NULL);
+  plistit li= NULL;
+  if (*pli == NULL) {
+	 li= PALLOC(struct _listit);
+	 *pli= li;
+  } else {
+	 li= *pli;
+  }
+  li->next= l->sentinel->next;
+  li->prev= l->sentinel;
+  li->l= l;
+  li->sentinel= l->sentinel;
 }
 
 static inline

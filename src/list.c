@@ -517,21 +517,6 @@ void list_complete_difference(plist l1, plist l2, comparator cmp, delete_functio
  * List iterator definitions
  */
 
-void list_first_reuse(plist l, plistit* pli) {
-  my_assert(l!=NULL);
-  plistit li= NULL;
-  if (*pli == NULL) {
-	 li= PALLOC(struct _listit);
-	 *pli= li;
-  } else {
-	 li= *pli;
-  }
-  li->next= l->sentinel->next;
-  li->prev= l->sentinel;
-  li->l= l;
-  li->sentinel= l->sentinel;
-}
-
 plistit list_last(plist const l) {
   my_assert(l!=NULL);
   plistit li= PALLOC(struct _listit);

@@ -695,8 +695,9 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 		  print_embeddings(updated_embedding_list);
 
 		  if(!list_is_empty(updated_embedding_list)){
-			 plistit add_it=list_first(updated_embedding_list);
-			 while(listit_has_next(add_it)){
+			 listit add_it;
+			 list_first_stack(updated_embedding_list, &add_it);
+			 while(listit_has_next(&add_it)){
 
 // Check timeout (but not often)
 				if (!time_limit_check && MYTIME_timeout_expired(ptt)) {
@@ -705,9 +706,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 				time_limit_check += 1;
 				time_limit_check &= 1023u;
 
-				plist add_emb=(plist)listit_next(add_it);
-
-				plistit cmp_it=list_first(embedding_list);
+				plist add_emb=(plist)listit_next(&add_it);
 
 //Valori di ritorno della funzione maximality_relation(add_emb, cmp_emb):
 //2 ==> add_emb e' massimale
@@ -715,20 +714,21 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 //0 ==> cmp_emb e' massimale
 				char is_maximal=2;
 
-				while(listit_has_next(cmp_it) && is_maximal >= 1){
-				  plist cmp_emb=(plist)listit_next(cmp_it);
+				listit cmp_it;
+				list_first_stack(embedding_list, &cmp_it);
+				while(listit_has_next(&cmp_it) && is_maximal >= 1){
+				  plist cmp_emb=(plist)listit_next(&cmp_it);
 				  is_maximal=maximality_relation(add_emb, cmp_emb);
 
 				  if(is_maximal == 2){
-					 list_remove_at_iterator(cmp_it, (delete_function)pairing_destroy_2);
+					 list_remove_at_iterator(&cmp_it, (delete_function)pairing_destroy_2);
 				  }
 				}
-				listit_destroy(cmp_it);
 
 				if(is_maximal >= 1)
 				  list_add_to_tail(embedding_list, add_emb);
 				else{
-				  list_remove_at_iterator(add_it, (delete_function)pairing_destroy_2);
+				  list_remove_at_iterator(&add_it, (delete_function)pairing_destroy_2);
 				}
 			 }
 
@@ -736,7 +736,6 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 				embedding_list_destroy(updated_embedding_list);
 			 }
 
-			 listit_destroy(add_it);
 		  }
 		  else{
 			 embedding_list_destroy(updated_embedding_list);
