@@ -1357,28 +1357,28 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 //Il confronto parte dal primo pairing per entrambi gli embedding in quanto e' una procedura applicata
 //agli embedding relativi ad un sottoalbero del MEG radicato in un determinato nodo.
 static char maximality_relation(plist add_emb, plist cmp_emb){
+  listit add_pair_it;
+  listit cmp_pair_it;
+  bool check;
+
+  list_first_stack(add_emb, &add_pair_it);
+  list_first_stack(cmp_emb, &cmp_pair_it);
 
   if(list_size(add_emb) > list_size(cmp_emb)){
-	 plistit add_pair_it=list_first(add_emb);
-	 plistit cmp_pair_it=list_first(cmp_emb);
 
-	 bool check=true;
-	 while(listit_has_next(add_pair_it) && listit_has_next(cmp_pair_it) && check){
-		ppairing add_pair=(ppairing)listit_next(add_pair_it);
-		ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it);
+	 check= true;
+	 while (listit_has_next(&cmp_pair_it) && check) {
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
 		if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
 		  check=false;
-		}
-		else{
+		} else {
 		  if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
 			 check=false;
 		  }
 		}
 	 }
-
-	 listit_destroy(add_pair_it);
-	 listit_destroy(cmp_pair_it);
 
 	 if(check)
 		return 2;
@@ -1387,13 +1387,10 @@ static char maximality_relation(plist add_emb, plist cmp_emb){
   }
 
   if(list_size(add_emb) < list_size(cmp_emb)){
-	 plistit add_pair_it=list_first(add_emb);
-	 plistit cmp_pair_it=list_first(cmp_emb);
-
-	 bool check=true;
-	 while(listit_has_next(add_pair_it) && listit_has_next(cmp_pair_it) && check){
-		ppairing add_pair=(ppairing)listit_next(add_pair_it);
-		ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it);
+	 check= true;
+	 while(listit_has_next(&add_pair_it) && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
 		if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
 		  check=false;
@@ -1405,64 +1402,58 @@ static char maximality_relation(plist add_emb, plist cmp_emb){
 		}
 	 }
 
-	 listit_destroy(add_pair_it);
-	 listit_destroy(cmp_pair_it);
-
 	 if(check)
 		return 0;
 	 else
 		return 1;
   }
 
-  plistit add_pair_it_2=list_first(add_emb);
-  plistit cmp_pair_it_2=list_first(cmp_emb);
+  my_assert(list_size(add_emb) == list_size(cmp_emb));
 
-  bool check_2=true;
-  while(listit_has_next(add_pair_it_2) && listit_has_next(cmp_pair_it_2) && check_2){
-	 ppairing add_pair=(ppairing)listit_next(add_pair_it_2);
-	 ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it_2);
+  {
+	 check= true;
+	 while(listit_has_next(&add_pair_it)  && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
-	 if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
-		check_2=false;
-	 }
-	 else{
-		if(add_pair->t < cmp_pair->t || (add_pair->t+add_pair->l > cmp_pair->t+cmp_pair->l)){
-		  check_2=false;
+		if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
+		  check=false;
+		}else{
+		  if(add_pair->t < cmp_pair->t || (add_pair->t+add_pair->l > cmp_pair->t+cmp_pair->l)){
+			 check=false;
+		  }
 		}
 	 }
-  }
-  listit_destroy(add_pair_it_2);
-  listit_destroy(cmp_pair_it_2);
 
-  if(check_2){
-	 return 0;
-  }
-
-  add_pair_it_2=list_first(add_emb);
-  cmp_pair_it_2=list_first(cmp_emb);
-
-  check_2=true;
-  while(listit_has_next(add_pair_it_2) && listit_has_next(cmp_pair_it_2) && check_2){
-	 ppairing add_pair=(ppairing)listit_next(add_pair_it_2);
-	 ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it_2);
-
-	 if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
-		check_2=false;
+	 if(check){
+		return 0;
 	 }
-	 else{
-		if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
-		  check_2=false;
+
+	 list_first_stack(add_emb, &add_pair_it);
+	 list_first_stack(cmp_emb, &cmp_pair_it);
+
+
+	 check= true;
+	 while(listit_has_next(&add_pair_it) && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
+
+		if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
+		  check=false;
+		}
+		else{
+		  if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
+			 check=false;
+		  }
 		}
 	 }
+
+	 if(check)
+		return 2;
+	 else
+		return 1;
+
   }
-
-  listit_destroy(add_pair_it_2);
-  listit_destroy(cmp_pair_it_2);
-
-  if(check_2)
-	 return 2;
-
-  return 1;
 }
 
 static bool check_gap_errors(plist factorization, char *est_seq, char *gen_seq, pconfiguration config){

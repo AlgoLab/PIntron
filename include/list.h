@@ -43,6 +43,7 @@
 #include <stddef.h>
 
 typedef struct _list* plist;
+typedef struct _listit listit;
 typedef struct _listit* plistit;
 
 plist list_create(void);
@@ -158,6 +159,9 @@ int relaxed_list_compare(plist, plist, relaxed_comparator, int);
 static inline
 plistit list_first(const plist const l);
 
+static inline
+void list_first_stack(plist const l, plistit pli);
+
 void list_first_reuse(plist const l, plistit* pli);
 
 plistit list_last(plist l);
@@ -224,6 +228,15 @@ plistit list_first(const plist const l) {
   li->prev= sentinel;
   li->sentinel= sentinel;
   return li;
+}
+
+static inline
+void list_first_stack(plist const l, plistit pli) {
+  pli->l= l;
+  const _pnode const sentinel= l->sentinel;
+  pli->next= sentinel->next;
+  pli->prev= sentinel;
+  pli->sentinel= sentinel;
 }
 
 static inline
