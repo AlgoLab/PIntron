@@ -76,6 +76,10 @@ bool Shift_left_to_right_1(char *, char *, int, pgap_alignment, int *, int *, in
 
 bool Shift_left_to_right_2(char *, char *, int, pgap_alignment, int *, int *, int *, char *);
 
+//Per gene PKM2, lista 4916, EST BE908023
+char *Get_genomic_substring_from_alignment(pgap_alignment, int, int, int *);
+char *Get_est_substring_from_alignment(pgap_alignment, int, int, int *);
+
 void Find_AG_before_on_the_right(pgap_alignment, int, int *);
 
 char *To_lower(char *);
