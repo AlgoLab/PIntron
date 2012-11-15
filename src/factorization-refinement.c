@@ -607,9 +607,8 @@ search_small_exon(pfactor * pp1,
 	 if (prev_ed > (_MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_)) {
 		DEBUG("Border alignment is not good. There could be a small exon.");
 		perform_search= true;
-	 }
-	 if ((prev_ed > 0) && !is_canonical_intron(genomic->EST_seq,
-															 p1->GEN_end+1, p2->GEN_start-1)) {
+	 } else if ((prev_ed > 0) && !is_canonical_intron(genomic->EST_seq,
+																	  p1->GEN_end+1, p2->GEN_start-1)) {
 		DEBUG("Border alignment is quite good but the intron is not canonical. "
 				"There could be a small exon.");
 		perform_search= true;
@@ -700,6 +699,14 @@ search_small_exon(pfactor * pp1,
 			 } else if (offset_p_2 > _UB_SMALL_EXON_LENGTH_) {
 				DEBUG("The small exon is too long (%zunt). "
 						"Small exon discarded.", offset_p_2);
+			 } else if (!is_canonical_intron(allgfact, offset_t1_1, offset_t2_1 - 1)) {
+				DEBUG("The first new intron induced by the small exon is not canonical (%.2s..%.2s). "
+						"Small exon discarded.",
+						allgfact + offset_t1_1, allgfact + offset_t1_1 - 2);
+			 } else if (!is_canonical_intron(allgfact+offset_t2_1, offset_t1_2, offset_t2_2 - 1)) {
+				DEBUG("The second new intron induced by the small exon is not canonical (%.2s..%.2s). "
+						"Small exon discarded.",
+						allgfact + offset_t2_1 + offset_t1_2, allgfact + offset_t2_1 + offset_t2_2 - 2);
 			 } else {
 // Compare the "Burset scores"
 				const double prev_burset_freq=
