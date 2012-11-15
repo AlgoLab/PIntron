@@ -40,6 +40,7 @@
 #include "exon-complexity.h"
 #include "compute-alignments.h"
 #include "detect-polya.h"
+#include "util.h"
 
 //#define LOG_THRESHOLD LOG_LEVEL_TRACE
 #include "log.h"
@@ -47,8 +48,6 @@
 
 #include "factorization-util.h"
 
-// Define a long string composed only by spaces (1024, in particular) to be used to align the recursive calls of getsubtreeembeddings
-#define _A_LOT_OF_SPACES_ "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "
 
 //Computa per un dato subtree
 //di un grafo degli embedding (GEM) gli embeddings e restituisce una lista di ppairing
@@ -605,7 +604,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 
   my_assert(root != NULL);
 
-  DEBUG("\t\t%.*s->%d) Pairing node (%d, %d, %d)", counter, _A_LOT_OF_SPACES_, counter,
+  DEBUG("\t\t%.*s->%d) Pairing node (%d, %d, %d)", counter, SPACE_STRING, counter,
 		  root->p, root->t, root->l);
 
   plist computed_sub_e=get_computed_subtree_embeddings(root);
@@ -617,7 +616,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 	 return computed_sub_e;
   }
   DEBUG("\t\t  %.*sThe subtree embeddings are to be computed!",
-		  counter, _A_LOT_OF_SPACES_);
+		  counter, SPACE_STRING);
 
 // Check timeout
   if (MYTIME_timeout_expired(ptt)) {
@@ -635,7 +634,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 
 //Se il nodo root e' una foglia
   if(list_is_empty(adj_list)){
-	 DEBUG("\t\t\t%.*s...IS A LEAF!", counter, _A_LOT_OF_SPACES_);
+	 DEBUG("\t\t\t%.*s...IS A LEAF!", counter, SPACE_STRING);
 
 //Creazione dell'embedding (lista di ppairing vuota)
 	 embedding=list_create();
@@ -666,7 +665,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 		}
 
 		DEBUG("\t\t\t%.*sEmbeddings of subtree rooted in (%d, %d, %d) obtained!",
-				counter, _A_LOT_OF_SPACES_,
+				counter, SPACE_STRING,
 				next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
 
 		print_embeddings(subtree_embedding_list);
@@ -675,7 +674,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 		subtree_embedding_iter=list_first(subtree_embedding_list);
 
 		DEBUG("\t\t\t%.*sAdding the node (%d, %d, %d) to the embeddings above...",
-				counter, _A_LOT_OF_SPACES_, root->p, root->t, root->l);
+				counter, SPACE_STRING, root->p, root->t, root->l);
 
 		int count_f=1;
 
@@ -685,13 +684,13 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 		  next_embedding=(plist)listit_next(subtree_embedding_iter);
 
 		  DEBUG("\t\t\t\t%.*s...adding the node to the embedding %d...",
-				  counter, _A_LOT_OF_SPACES_, count_f);
+				  counter, SPACE_STRING, count_f);
 		  print_embedding(next_embedding);
 
 //Adds the root node; ritorna una lista di embedding (attualmente uno solo)
 		  updated_embedding_list=update_embedding(next_embedding, root, GEN_seq, config);
 
-		  DEBUG("\t\t\t\t%.*s...node added!", counter, _A_LOT_OF_SPACES_);
+		  DEBUG("\t\t\t\t%.*s...node added!", counter, SPACE_STRING);
 		  print_embeddings(updated_embedding_list);
 
 		  if(!list_is_empty(updated_embedding_list)){
@@ -748,7 +747,7 @@ static plist get_subtree_embeddings(const int counter, ppairing root, pconfigura
 	 listit_destroy(adj_list_iter);
 
 	 DEBUG("\t\t\t%.*s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!",
-			 counter, _A_LOT_OF_SPACES_, root->p, root->t, root->l);
+			 counter, SPACE_STRING, root->p, root->t, root->l);
 	 print_embeddings(embedding_list);
   }
 

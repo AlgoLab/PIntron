@@ -41,22 +41,7 @@
 #include "compute-alignments.h"
 #include "refine.h"
 #include "refine-intron.h"
-
-#ifdef LOG_TRACE_ENABLED
-
-#define DOT_100_STRING "...................................................................................................."
-
-#define DOT_1K_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING
-
-#define DOT_10K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING
-
-#define DOT_100K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING
-
-#define DOT_1M_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING
-
-#define DOT_STRING DOT_1M_STRING
-
-#endif
+#include "factorization-util.h"
 
 // ------------------------------------------------------------------------
 //
@@ -1132,8 +1117,20 @@ refine_EST_factorizations(pEST_info genomic,
 								  pconfiguration config) {
   INFO("Further refinement of EST factorizations...");
   recover_lost_prefixes_and_suffixes(genomic, factorized_est, config);
+  DEBUG("Factorizations after recovering prefixes and suffixes:");
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
   remove_false_small_exons(genomic, factorized_est, config);
+  DEBUG("Factorizations after removing false small exons:");
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
   remove_duplicated_factorizations(factorized_est->factorizations);
   search_for_new_small_exons(genomic, factorized_est, config);
+  DEBUG("Factorizations after adding true small exons:");
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
 }
 

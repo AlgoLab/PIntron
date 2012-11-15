@@ -370,7 +370,7 @@ int getBursetFrequency_adaptor(const char* const t,
   donor[1]= t[cut1+1];
   acceptor[0]= t[cut2-2];
   acceptor[1]= t[cut2-1];
-  DEBUG("Get Burset frequency of intron %s-%s.", donor, acceptor);
+  TRACE("Get Burset frequency of intron %s-%s.", donor, acceptor);
   return getBursetFrequency(donor, acceptor);
 }
 
