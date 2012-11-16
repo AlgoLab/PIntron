@@ -50,9 +50,9 @@
 // Exons shorter than that cause the factorization to be discarded
 #define _UB_VERY_SMALL_EXON_LENGTH_ 2
 // Perfect matches shorter than this are never considered as exons
-#define _LB_SMALL_EXON_LENGTH_ 3
+#define _LB_SMALL_EXON_LENGTH_ 6
 // Exons longer than this are always considered NOT SMALL
-#define _UB_SMALL_EXON_LENGTH_ 15
+#define _UB_SMALL_EXON_LENGTH_ 18
 #define _UB_MED_EXON_LENGTH_ 100
 // Lenght of prefixes/suffixes considered during alignment
 #define _AFFIXES_LENGTH_ 5
@@ -60,14 +60,14 @@
 #define _MAX_ERROR_RATE_ 0.17   //approx. 1 error every 6 bases
 // The (minimum) length of a substring common to the border of a suffix (prefix, resp.)
 // of an exon in order to search for a small exons
-#define _MIN_PERFECT_BORDER_LENGTH_ 8
+#define _MIN_PERFECT_BORDER_LENGTH_ 6
 
 // If the following 'define' is not commented,
 // then the 'N's in the sequences are always
 // considered as matching (i.e., a wildcard)
 // when computing the longest common substrings
 // (only via dynamic programming)
-//#define Ns_ALWAYS_MATCH_FOR_LCS
+#define Ns_ALWAYS_MATCH_FOR_LCS
 
 
 
