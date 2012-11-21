@@ -42,6 +42,7 @@
 #include "refine.h"
 #include "refine-intron.h"
 #include "factorization-util.h"
+#include "classify-intron.h"
 
 // ------------------------------------------------------------------------
 //
@@ -61,6 +62,7 @@
 // The (minimum) length of a substring common to the border of a suffix (prefix, resp.)
 // of an exon in order to search for a small exons
 #define _MIN_PERFECT_BORDER_LENGTH_ 6
+#define _MAX_ERRORS_CONSIDERED_AS_SMALL_ 2
 
 // If the following 'define' is not commented,
 // then the 'N's in the sequences are always
@@ -424,7 +426,7 @@ find_longest_common_factor(const char* const s1, const size_t l1,
 }
 */
 
-static
+static inline
 bool
 is_canonical_intron(const char* const GEN_seq,
 						  int intron_start, int intron_end) {
@@ -549,6 +551,36 @@ search_small_exon_at_prefix(pfactor * pp1,
 }
 
 
+
+// A wrapper for 'classify_genomic_intron_start_end'
+static inline
+char _classify_intron(const char* const gen_seq, size_t istart, size_t iend) {
+  // Initialize constant and frequently used matrices as static members (not freed!)
+  static double **pwm_matx= NULL;
+  if (pwm_matx==NULL) pwm_matx= LoadPWMMatrices();
+  static double **CVector= NULL;
+  if (CVector==NULL) CVector= LoadCVPWMMatrices(pwm_matx);
+  static double **MAXVector= NULL;
+  if (MAXVector==NULL) MAXVector= LoadMAXPWMMatrices(pwm_matx);
+// END static initialization
+  double score5, score3, BPS_score;
+  int BPS_position;
+  char type= classify_genomic_intron_start_end(gen_seq,
+															  istart, iend,
+															  &score5, &score3,
+															  &BPS_position, &BPS_score,
+															  pwm_matx, CVector, MAXVector);
+  return type;
+}
+
+static inline
+size_t min3size_t(const size_t v1, const size_t v2, const size_t v3) {
+  size_t tmp= v1;
+  if (tmp>v2) tmp= v2;
+  if (tmp>v3) tmp= v3;
+  return tmp;
+}
+
 static
 void
 search_small_exon(pfactor p1,
@@ -589,12 +621,14 @@ search_small_exon(pfactor p1,
 	 TRACE("GEN suffix: %s", g1sfact);
 
 	 const size_t e2plen= MIN(MIN(e2len, g2len), _UB_SMALL_EXON_LENGTH_);
+	 const size_t e2pstart= p2->EST_start;
 	 char* const e2pfact= c_palloc(e2plen+1);
-	 strncpy(e2pfact, factorized_est->info->EST_seq + p2->EST_start, e2plen);
+	 strncpy(e2pfact, factorized_est->info->EST_seq + e2pstart, e2plen);
 	 e2pfact[e2plen]= '\0';
 	 const size_t g2plen= MIN(MIN(e2len, g2len), _UB_SMALL_EXON_LENGTH_);
+	 const size_t g2pstart= p2->GEN_start;
 	 char* const g2pfact= c_palloc(g2plen+1);
-	 strncpy(g2pfact, genomic->EST_seq + p2->GEN_start, g2plen);
+	 strncpy(g2pfact, genomic->EST_seq + g2pstart, g2plen);
 	 g2pfact[g2plen]= '\0';
 	 TRACE("EST prefix: %s", e2pfact);
 	 TRACE("GEN prefix: %s", g2pfact);
@@ -604,16 +638,17 @@ search_small_exon(pfactor p1,
 	 DEBUG("        original edit distance of the suffix of the first exon:  %zu", sed);
 	 DEBUG("        original edit distance of the prefix of the second exon: %zu", ped);
 	 bool continue_search= false;
-	 if (prev_ed > (_MAX_ERROR_RATE_*_UB_SMALL_EXON_LENGTH_)) {
-		DEBUG("Border alignment is not good. There could be a small exon.");
-		continue_search= true;
-	 } else if ((prev_ed > 0) && !is_canonical_intron(genomic->EST_seq,
-																	  p1->GEN_end+1, p2->GEN_start-1)) {
-		DEBUG("Border alignment is quite good but the intron is not canonical. "
-				"There could be a small exon.");
+	 const char orig_intron_classification = _classify_intron(genomic->EST_seq,
+																				 p1->GEN_end+1, p2->GEN_start-1);
+	 if (prev_ed > _MAX_ERRORS_CONSIDERED_AS_SMALL_) {
+		DEBUG("Border alignment is not good. Search a small exon...");
 		continue_search= true;
 	 }
-	 if (continue_search) { // if borders are not good or intron is not canonical
+	 if (orig_intron_classification == _intron_ND) {
+		DEBUG("The intron is not classified. Search a small exon...");
+		continue_search= true;
+	 }
+	 if (continue_search) { // if borders are not good or intron is not classified
 		DEBUG("Search the possible perfect borders...");
 		size_t e1socc= 0, g1socc= 0, f1slen= e1slen;
 		if (sed>0) {
@@ -631,6 +666,11 @@ search_small_exon(pfactor p1,
 		DEBUG("Border of the prefix of the second exon (match of %zunt):", f2plen);
 		DEBUG("EST: %.*s%s", (e2pocc>=g2pocc)?0:(int)(g2pocc-e2pocc), DOT_STRING, e2pfact);
 		DEBUG("GEN: %.*s%s", (g2pocc>=e2pocc)?0:(int)(e2pocc-g2pocc), DOT_STRING, g2pfact);
+		const size_t elen= (e1slen-e1socc) + (e2pocc+f2plen) - (2*_MIN_PERFECT_BORDER_LENGTH_);
+		const size_t estart= e1sstart + e1socc + _MIN_PERFECT_BORDER_LENGTH_;
+		const size_t allgstart= g1sstart + g1socc + _MIN_PERFECT_BORDER_LENGTH_;
+		const size_t allglen= g2pstart + g2pocc + f2plen - _MIN_PERFECT_BORDER_LENGTH_ - allgstart;
+		const size_t MIN_INTRON_LENGTH= MAX(4, config->min_intron_length);
 		if (f1slen<_MIN_PERFECT_BORDER_LENGTH_) {
 		  DEBUG("The suffixes of the first exon match for less than %unt. "
 				  "Terminate search of a small exon...", _MIN_PERFECT_BORDER_LENGTH_);
@@ -639,76 +679,89 @@ search_small_exon(pfactor p1,
 		  DEBUG("The prefixes of the second exon match for less than %unt. "
 				  "Terminate search of a small exon...", _MIN_PERFECT_BORDER_LENGTH_);
 		  continue_search= false;
+		} else if (allglen < 2*MIN_INTRON_LENGTH+_LB_SMALL_EXON_LENGTH_) {
+		  DEBUG("There is not space on the genomic sequence for two introns and "
+				  "a small exon! Terminate search of a small exon...");
+		  continue_search= false;
+		} else if (elen<_LB_SMALL_EXON_LENGTH_) {
+		  DEBUG("There is not space on the EST sequence for a small exon! "
+				  "Terminate search of a small exon...");
+		  continue_search= false;
 		}
 		if (continue_search) {
-		  const size_t elen= (e1slen-e1socc) + (e2pocc+f2plen) - (2*_MIN_PERFECT_BORDER_LENGTH_);
-		  const size_t estart= e1sstart + e1socc + _MIN_PERFECT_BORDER_LENGTH_;
 		  char* const efact= c_palloc(elen+1);
 		  strncpy(efact, factorized_est->info->EST_seq + estart, elen);
 		  efact[elen]= '\0';
 		  DEBUG("Factor of the EST: %s", efact);
 
-		  const size_t allgstart= g1sstart + g1socc + _MIN_PERFECT_BORDER_LENGTH_;
-		  const size_t allglen= p2->GEN_start + g2pocc + f2plen - _MIN_PERFECT_BORDER_LENGTH_ - allgstart;
 		  char* allgfact= c_palloc(allglen+1);
 		  strncpy(allgfact, genomic->EST_seq + allgstart, allglen);
 		  allgfact[allglen]= '\0';
 		  DEBUG("Factor of the GEN: %.*s...", _UB_SMALL_EXON_LENGTH_+2, allgfact);
 		  DEBUG("                   ...%s", allgfact + allglen - _UB_SMALL_EXON_LENGTH_ - 2);
-		  char* const genomic_exon= c_palloc(elen+5);
-		  genomic_exon[0]= 'A';
-		  genomic_exon[1]= 'G';
+
 		  size_t max_sexon_len= 0;
 		  size_t ecut1= 0, ecut2= 0;
 		  size_t gcut1_1= 0, gcut1_2= 0, gcut2_1= 0, gcut2_2= 0;
-		  const size_t MIN_INTRON_LENGTH= MAX(4, config->min_intron_length);
-// Search the first GT on the genomic
-		  char* cursor1= strstr(allgfact, "GT");
-		  while ((cursor1 != NULL) &&
-					((size_t)(cursor1-allgfact)<=(size_t)(f1slen-_MIN_PERFECT_BORDER_LENGTH_)) &&
-					((allglen-(cursor1-allgfact))>=(_LB_SMALL_EXON_LENGTH_+2*MIN_INTRON_LENGTH))) {
-			 const size_t cursor1pos= cursor1-allgfact;
-			 DEBUG("Found a possible genomic canonical (GT) left cut at (relative) position %zu.",
-					 cursor1pos);
-			 strncpy(genomic_exon+2, efact+cursor1pos, elen-cursor1pos);
-			 size_t curr_len= MIN(_UB_SMALL_EXON_LENGTH_, (elen-cursor1pos));
-			 bool found= false;
-			 while ((curr_len>=_LB_SMALL_EXON_LENGTH_) && !found) {
-				genomic_exon[2+curr_len  ]= 'G';
-				genomic_exon[2+curr_len+1]= 'T';
-				genomic_exon[2+curr_len+2]= '\0';
-				TRACE("Search the possible exon: AG>%.*s<GT", (int)curr_len, genomic_exon+2);
-				char* cursor2= strstr(cursor1+MIN_INTRON_LENGTH-2, genomic_exon);
-				if ((cursor2!=NULL)&&(allglen+cursor1pos-elen-(cursor2-allgfact)-2)>=MIN_INTRON_LENGTH) {
-				  DEBUG("Found the possible genomic exon: AG>%.*s<GT", (int)curr_len, genomic_exon+2);
-// Check that the rest matches with the corresponding suffix of allgfact
-				  const size_t rest_len= elen - cursor1pos - curr_len;
-				  if (strncmp(efact+cursor1pos+curr_len, allgfact+allglen-rest_len, rest_len)==0) {
-					 DEBUG("The remaining EST part (%s) matches with the corresponding suffix (%s) "
-							 "of the GEN factor.", efact+cursor1pos+curr_len, allgfact+allglen-rest_len);
-					 if ((allgfact[allglen-rest_len-2]=='A') &&
-						  (allgfact[allglen-rest_len-1]=='G')) {
-						DEBUG(" ...and the two introns are canonical!");
-						found= true;
-						if (curr_len>max_sexon_len) {
-						  DEBUG(" ...and it improves the best small exon length seen so far!");
-						  max_sexon_len= curr_len;
-						  ecut1= estart+cursor1pos;
-						  ecut2= estart+cursor1pos+curr_len;
-						  gcut1_1= allgstart+cursor1pos;
-						  gcut1_2= allgstart+(cursor2-allgfact)+2;
-						  gcut2_1= gcut1_2+curr_len;
-						  gcut2_2= allgstart+allglen-rest_len;
-						}
+// Not inclusive!!
+		  const size_t max_offstart= min3size_t(f1slen+1-_MIN_PERFECT_BORDER_LENGTH_,
+															 elen+1-_LB_SMALL_EXON_LENGTH_,
+															 allglen+1-(2*MIN_INTRON_LENGTH)-_LB_SMALL_EXON_LENGTH_);
+		  DEBUG("§ %zu %zu %zu %zu %zu",
+				  elen, allglen, f1slen, f2plen, max_offstart);
+		  for (size_t offstart= 0; offstart < max_offstart; ++offstart) {
+// Not inclusive!!
+			 const size_t max_offend= min3size_t(f2plen+1-_MIN_PERFECT_BORDER_LENGTH_,
+															 elen+1-offstart-_LB_SMALL_EXON_LENGTH_,
+															 allglen+1-(2*MIN_INTRON_LENGTH)-_LB_SMALL_EXON_LENGTH_-offstart);
+			 DEBUG("§ %zu %zu %zu %zu %zu %zu %zu",
+					 elen, allglen, f1slen, f2plen, max_offstart, offstart, max_offend);
+			 for (size_t offend= 0; offend < max_offend; ++offend) {
+// Save the last character and replace it with \0
+				const char endechar= efact[elen-offend];
+				efact[elen-offend]= '\0';
+				const char endgchar= allgfact[allglen-offend-MIN_INTRON_LENGTH];
+				allgfact[allglen-offend-MIN_INTRON_LENGTH]= '\0';
+				char* occurrence= allgfact+offstart+MIN_INTRON_LENGTH;
+				while ((occurrence= strstr(occurrence, efact+offstart))) {
+				  TRACE("Found an occurrence of '%s' on the genomic sequence (%zunt)",
+						  efact+offstart, elen-offstart-offend);
+				  const size_t i1start= allgstart+offstart;
+				  const size_t i1end= allgstart+(occurrence-allgfact)-1;
+				  const size_t i2start= i1end+1+elen-offstart-offend;
+				  const size_t i2end= allgstart+allglen-offend-1;
+				  TRACE("The two new possible introns are: [%8zu(%.2s)--(%.2s)%8zu] and [%8zu(%.2s)--(%.2s)%8zu]",
+						  i1start, genomic->EST_seq+i1start, genomic->EST_seq+i1end-1, i1end,
+						  i2start, genomic->EST_seq+i2start, genomic->EST_seq+i2end-1, i2end);
+				  const char i1type= _classify_intron(genomic->EST_seq, i1start, i1end);
+				  const char i2type= _classify_intron(genomic->EST_seq, i2start, i2end);
+				  TRACE("The two introns are classified as: '%s' and '%s'",
+						  _intron_type_str(i1type), _intron_type_str(i2type));
+				  if ((i1type!=_intron_ND)&&(i2type!=_intron_ND)) {
+					 DEBUG("Found a possible small exon '%s' which induces two classified introns "
+							 "[%8zu(%.2s)--(%.2s)%8zu](%s) and [%8zu(%.2s)--(%.2s)%8zu](%s)",
+							 efact+offstart,
+							 i1start, genomic->EST_seq+i1start, genomic->EST_seq+i1end-1, i1end, _intron_type_str(i1type),
+							 i2start, genomic->EST_seq+i2start, genomic->EST_seq+i2end-1, i2end, _intron_type_str(i2type));
+					 const size_t sexon_len= elen-offstart-offend;
+					 if (sexon_len>max_sexon_len) {
+						DEBUG("...which is longer than the small exon previously found. Keep it.");
+						max_sexon_len= sexon_len;
+						ecut1= estart+offstart;
+						ecut2= estart+offstart+sexon_len;
+						gcut1_1= i1start;
+						gcut1_2= i1end+1;
+						gcut2_1= i2start;
+						gcut2_2= i2end+1;
+					 } else {
+						DEBUG("...which is shorter than the small exon previously found. Discard it.");
 					 }
-				  } else {
-					 DEBUG("The remaining EST part (%s) does not match with the corresponding suffix (%s) "
-							 "of the GEN factor.", efact+cursor1pos+curr_len, allgfact+allglen-rest_len);
 				  }
+				  ++occurrence;
 				}
-				--curr_len;
+				efact[elen-offend]= endechar;
+				allgfact[allglen-offend-MIN_INTRON_LENGTH]= endgchar;
 			 }
-			 cursor1= strstr(cursor1+2, "GT");
 		  }
 		  if (max_sexon_len>=_LB_SMALL_EXON_LENGTH_) {
 			 INFO("A new small exon (%zunt) has been detected.", max_sexon_len);
@@ -737,7 +790,6 @@ search_small_exon(pfactor p1,
 					p2->GEN_start, p2->GEN_end);
 			 list_add_before_iterator(pfactit, pfact, pnew);
 		  }
-		  pfree(genomic_exon);
 		  pfree(efact);
 		  pfree(allgfact);
 		}

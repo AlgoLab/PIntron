@@ -386,6 +386,7 @@ stree_OBJ= \
 
 
 est_fact_SOURCE= \
+	$(SRC_DIR)/classify-intron.c \
 	$(SRC_DIR)/est-factorizations.c \
 	$(SRC_DIR)/factorization-util.c \
 	$(SRC_DIR)/factorization-refinement.c \
@@ -396,6 +397,7 @@ est_fact_SOURCE= \
 	$(SRC_DIR)/main-est-fact.c
 
 est_fact_OBJ= \
+	$(OBJ_DIR)/classify-intron.o \
 	$(OBJ_DIR)/est-factorizations.o \
 	$(OBJ_DIR)/factorization-util.o \
 	$(OBJ_DIR)/factorization-refinement.o \
