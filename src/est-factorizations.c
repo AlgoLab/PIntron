@@ -226,6 +226,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 					 is_ok=false;
 			 }
 
+
 			 if(is_ok){
 				 add_f=clean_low_complexity_exons_2(add_f, gen_info->EST_seq, est->info->EST_seq, config);
 				 if(list_is_empty(add_f))
@@ -242,6 +243,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 				 is_ok=check_est_coverage(add_f, est->info->EST_seq);
 			 }
 
+
 			 if(is_ok){
 				 bool check_adding;
 				 factorization_list=add_if_not_exists(add_f, factorization_list, config, &check_adding);
@@ -251,6 +253,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			 }
 			 else
 				 list_remove_at_iterator(add_it, (delete_function) factorization_destroy);
+
 
 			 counter_add++;
 		  }
@@ -488,17 +491,18 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
   listit_destroy(plist_fact_to_be_refined);
 
-  plist final_factorization_list=list_create();
-  //plist final_factorization_list=factorization_list;
+	plistit plist_fact_to_be_corrected;
 
-  plistit plist_fact_to_be_corrected=list_first(factorization_list);
+  plist final_factorization_list=factorization_list;
+  /*plist final_factorization_list=list_create();
+  plist_fact_to_be_corrected=list_first(factorization_list);
   while(listit_has_next(plist_fact_to_be_corrected)){
 	  plist fact_to_be_corrected=(plist)listit_next(plist_fact_to_be_corrected);
 	  fact_to_be_corrected=clean_noisy_exons(fact_to_be_corrected, gen_info->EST_seq, est->info->EST_seq, false);
 	  fact_to_be_corrected=clean_external_exons(fact_to_be_corrected, gen_info->EST_seq, est->info->EST_seq);
-	  /*bool is_ok=false;
-	  if(!list_is_empty(fact_to_be_corrected))
-		  is_ok=check_exon_start_end(fact_to_be_corrected);*/
+	  //bool is_ok=false;
+	  //if(!list_is_empty(fact_to_be_corrected))
+	 //	  is_ok=check_exon_start_end(fact_to_be_corrected);
 	  //if(is_ok == false || (list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected)))
 	  if(list_is_empty(fact_to_be_corrected))// || !check_small_exons(fact_to_be_corrected))
 			list_remove_at_iterator(plist_fact_to_be_corrected, (delete_function)factorization_destroy);
@@ -510,9 +514,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			}
 	  }
   }
-
   listit_destroy(plist_fact_to_be_corrected);
-  list_destroy(factorization_list, (delete_function)noop_free);
+  list_destroy(factorization_list, (delete_function)noop_free);*/
 
   /*STAMPA QUALITA' FATTORIZZAZIONI*****************************************/
     /*plistit print_it=list_first(final_factorization_list);
@@ -563,6 +566,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
     }
     listit_destroy(print_it);*/
     /*STAMPA QUALITA' FATTORIZZAZIONI*****************************************/
+
+  print_factorizations_on_log_full(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
 
   //Detect polyA signal
   plist_fact_to_be_corrected=list_first(final_factorization_list);

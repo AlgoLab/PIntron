@@ -44,7 +44,7 @@ plist correct_composition_tail(plist factorization, char *genomic_sequence, char
 	my_assert(est_sequence != NULL);
 	my_assert(factorization != NULL);
 	my_assert(!list_is_empty(factorization));
-
+	
 	pfactor tail=list_tail(factorization);
 
 	size_t i=tail->EST_end+1;
@@ -63,7 +63,7 @@ plist correct_composition_tail(plist factorization, char *genomic_sequence, char
 
 	tail->EST_end=i-1;
 	tail->GEN_end=j-1;
-
+	
 	return factorization;
 }
 

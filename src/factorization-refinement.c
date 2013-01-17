@@ -44,6 +44,8 @@
 #include "factorization-util.h"
 #include "classify-intron.h"
 
+#include "est-factorizations.h"
+
 // ------------------------------------------------------------------------
 //
 // Common definitions
@@ -840,6 +842,44 @@ search_for_new_small_exons(pEST_info genomic,
   listit_destroy(pl_f_it);
 }
 
+static
+void
+clean_factorizations(pEST_info genomic,
+									pEST factorized_est, pconfiguration config) {
+									
+  DEBUG("Cleaning noisy factorizations...");
+  
+  
+  plistit pl_f_it= list_first(factorized_est->factorizations);
+  plist cleaned_factorizations=list_create();
+  
+  while (listit_has_next(pl_f_it)) {
+	 DEBUG("Analyzing a factorization...");
+	 pfactorization pfact= listit_next(pl_f_it);
+	 
+											  
+	  //pfact=clean_noisy_exons(pfact, genomic->EST_seq, factorized_est->info->EST_seq, false);	  
+	  //pfact=clean_external_exons(pfact, genomic->EST_seq, factorized_est->info->EST_seq);
+
+	  pfact=clean_noisy_exons(pfact, genomic->EST_seq, factorized_est->info->original_EST_seq, false); 
+	  pfact=clean_external_exons(pfact, genomic->EST_seq, factorized_est->info->original_EST_seq);
+	  
+
+	  if(list_is_empty(pfact))
+			list_remove_at_iterator(pl_f_it, (delete_function)factorization_destroy);
+	  else{
+			bool check_adding;
+			cleaned_factorizations=add_if_not_exists(pfact, cleaned_factorizations, config, &check_adding);
+			if(check_adding == false){
+				list_remove_at_iterator(pl_f_it, (delete_function) factorization_destroy);
+			}
+	  }
+	}
+
+  	listit_destroy(pl_f_it);
+  	list_destroy(factorized_est->factorizations, (delete_function)noop_free);
+  	factorized_est->factorizations=cleaned_factorizations;
+}
 
 
 // ------------------------------------------------------------------------
@@ -1176,7 +1216,12 @@ refine_EST_factorizations(pEST_info genomic,
 											  genomic->EST_seq);
   remove_duplicated_factorizations(factorized_est->factorizations);
   search_for_new_small_exons(genomic, factorized_est, config);
-  DEBUG("Factorizations after adding true small exons:");
+	print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
+
+  clean_factorizations(genomic, factorized_est, config);								
+  DEBUG("Factorizations after factorization cleaning:");
   print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
 											  factorized_est->factorizations,
 											  genomic->EST_seq);
