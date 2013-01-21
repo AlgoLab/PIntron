@@ -504,7 +504,7 @@ void reverse_and_complement(pEST_info EST_info) {
 }
 
 
-void polyAT_substitution(pEST_info EST_info) {
+static void old_polyAT_substitution(pEST_info EST_info) {
   my_assert(EST_info != NULL);
   my_assert(EST_info->EST_seq != NULL);
 
@@ -641,6 +641,172 @@ void polyAT_substitution(pEST_info EST_info) {
   }
 }
 
+void polyAT_substitution(pEST_info EST_info) {
+  my_assert(EST_info != NULL);
+  my_assert(EST_info->EST_seq != NULL);
+
+  char c;
+  size_t i;
+  const size_t est_len= strlen(EST_info->EST_seq);
+
+  my_assert(est_len>0);
+
+  EST_info->pref_polyA_length=-1;
+  EST_info->suff_polyA_length=-1;
+  EST_info->pref_polyT_length=-1;
+  EST_info->suff_polyT_length=-1;
+
+  if (est_len<_POLYA_MIN_LEN) {
+	 return;
+  }
+
+// Check the beginning
+// Look for a sequence of at least
+// POLYA_MIN_LEN characters, otherwise it does not consider
+// it as a polyAT
+  size_t count_A= 0;
+  size_t count_T= 0;
+  size_t running_count_A= 0;
+  size_t running_count_T= 0;
+  size_t last_A= 0;
+  size_t last_T= 0;
+  size_t last_A_count= 0;
+  size_t last_T_count= 0;
+  for (i= 0;
+		 i<_POLYA_MIN_LEN &&
+			i<est_len;
+		 ++i) {
+	 if (EST_info->EST_seq[i]=='A') {
+		++count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[i]=='T') {
+		++count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+  }
+  DEBUG("Found %zu A and %zu T at the beginning of the sequence.", count_A, count_T);
+  running_count_A= count_A;
+  running_count_T= count_T;
+  while ((i<est_len) &&
+			((running_count_A>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)) ||
+			 (running_count_T>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)))) {
+	 if (EST_info->EST_seq[i-_POLYA_MIN_LEN]=='A') {
+		--running_count_A;
+	 }
+	 if (EST_info->EST_seq[i-_POLYA_MIN_LEN]=='T') {
+		--running_count_T;
+	 }
+	 if (EST_info->EST_seq[i]=='A') {
+		++count_A;
+		++running_count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[i]=='T') {
+		++count_T;
+		++running_count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+	 ++i;
+  }
+  last_A= (last_A<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_A;
+  last_T= (last_T<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_T;
+  if ((last_A_count>=(_POLYA_MIN_FRACTION*(last_A+1))) ||
+		(last_T_count>=(_POLYA_MIN_FRACTION*(last_T+1)))) {
+	 if ((((double)last_A_count)/(last_A+1))>=(((double)last_T_count)/(last_T+1)))
+		c= 'A';
+	 else
+		c= 'T';
+// A polyA/T has been found
+	 char sc= (c=='A')?_POLYA_CHR:_POLYT_CHR;
+	 size_t mlen= ((c=='A')?last_A+1:last_T+1);
+	 INFO("Found a %zubp long initial poly%c.", mlen, c);
+	 for (i= 0; i<mlen; ++i)
+		EST_info->EST_seq[i]= sc;
+	 if(c=='A'){
+		EST_info->pref_polyA_length=mlen;
+	 } else {
+		EST_info->pref_polyT_length=mlen;
+	 }
+  } else {
+	 DEBUG("No polyA/T has been found at the beginning of the sequence.");
+  }
+
+// Check the end
+  count_A= 0;
+  count_T= 0;
+  last_A= 0;
+  last_T= 0;
+  last_A_count= 0;
+  last_T_count= 0;
+  for (i= 0;
+		 i<_POLYA_MIN_LEN &&
+			i<est_len;
+		 ++i) {
+	 if (EST_info->EST_seq[est_len-i-1]=='A') {
+		++count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='T') {
+		++count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+  }
+  DEBUG("Found %zu A and %zu T at the end of the sequence.", count_A, count_T);
+  running_count_A= count_A;
+  running_count_T= count_T;
+  while ((i<est_len) &&
+			((running_count_A>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)) ||
+			 (running_count_T>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)))) {
+	 if (EST_info->EST_seq[est_len-i-1+_POLYA_MIN_LEN]=='A') {
+		--running_count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1+_POLYA_MIN_LEN]=='T') {
+		--running_count_T;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='A') {
+		++count_A;
+		++running_count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='T') {
+		++count_T;
+		++running_count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+	 ++i;
+  }
+  last_A= (last_A<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_A;
+  last_T= (last_T<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_T;
+  if ((last_A_count>=(_POLYA_MIN_FRACTION*(last_A+1))) ||
+		(last_T_count>=(_POLYA_MIN_FRACTION*(last_T+1)))) {
+	 if ((((double)last_A_count)/(last_A+1))>=(((double)last_T_count)/(last_T+1)))
+		c= 'A';
+	 else
+		c= 'T';
+// A polyA/T has been found
+	 char sc= (c=='A')?_POLYA_CHR:_POLYT_CHR;
+	 size_t mlen= ((c=='A')?last_A+1:last_T+1);
+	 INFO("Found a %zubp long final poly%c.", mlen, c);
+	 for (i= 0; i<mlen; ++i)
+		EST_info->EST_seq[est_len-i-1]= sc;
+	 if(c=='A'){
+		EST_info->suff_polyA_length=mlen;
+	 } else {
+		EST_info->suff_polyT_length=mlen;
+	 }
+  } else {
+	 DEBUG("No polyA/T has been found at the end of the sequence.");
+  }
+}
 
 void Ntails_removal(pEST_info EST_info) {
   int pref= 0;
