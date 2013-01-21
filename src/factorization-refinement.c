@@ -55,7 +55,7 @@
 // Perfect matches shorter than this are never considered as exons
 #define _LB_SMALL_EXON_LENGTH_ 6
 // Exons longer than this are always considered NOT SMALL
-#define _UB_SMALL_EXON_LENGTH_ 18
+#define _UB_SMALL_EXON_LENGTH_ 23
 #define _UB_MED_EXON_LENGTH_ 100
 // Lenght of prefixes/suffixes considered during alignment
 #define _AFFIXES_LENGTH_ 5
@@ -668,6 +668,20 @@ search_small_exon(pfactor p1,
 		DEBUG("Border of the prefix of the second exon (match of %zunt):", f2plen);
 		DEBUG("EST: %.*s%s", (e2pocc>=g2pocc)?0:(int)(g2pocc-e2pocc), DOT_STRING, e2pfact);
 		DEBUG("GEN: %.*s%s", (g2pocc>=e2pocc)?0:(int)(e2pocc-g2pocc), DOT_STRING, g2pfact);
+// Try to see if the match of the first exon can be extended to the second exon
+		if ((f1slen==e1slen) && (e2pocc>0)) {
+		  size_t new_f1slen= f1slen+1;
+		  while (((new_f1slen-f1slen)<e2pocc) &&
+					(factorized_est->info->EST_seq[e1sstart + e1socc + f1slen] ==
+					 genomic->EST_seq[g2pstart+new_f1slen-f1slen])) {
+			 ++new_f1slen;
+		  }
+		  if (new_f1slen-1>f1slen) {
+			 DEBUG("Recovered %zu bases of the second exon that could be of the first exon.",
+					 new_f1slen-1-f1slen);
+			 f1slen= new_f1slen-1;
+		  }
+		}
 		const size_t elen= (e1slen-e1socc) + (e2pocc+f2plen) - (2*_MIN_PERFECT_BORDER_LENGTH_);
 		const size_t estart= e1sstart + e1socc + _MIN_PERFECT_BORDER_LENGTH_;
 		const size_t allgstart= g1sstart + g1socc + _MIN_PERFECT_BORDER_LENGTH_;
@@ -709,14 +723,14 @@ search_small_exon(pfactor p1,
 		  const size_t max_offstart= min3size_t(f1slen+1-_MIN_PERFECT_BORDER_LENGTH_,
 															 elen+1-_LB_SMALL_EXON_LENGTH_,
 															 allglen+1-(2*MIN_INTRON_LENGTH)-_LB_SMALL_EXON_LENGTH_);
-		  DEBUG("§ %zu %zu %zu %zu %zu",
+		  TRACE("§ %zu %zu %zu %zu %zu",
 				  elen, allglen, f1slen, f2plen, max_offstart);
 		  for (size_t offstart= 0; offstart < max_offstart; ++offstart) {
 // Not inclusive!!
 			 const size_t max_offend= min3size_t(f2plen+1-_MIN_PERFECT_BORDER_LENGTH_,
 															 elen+1-offstart-_LB_SMALL_EXON_LENGTH_,
 															 allglen+1-(2*MIN_INTRON_LENGTH)-_LB_SMALL_EXON_LENGTH_-offstart);
-			 DEBUG("§ %zu %zu %zu %zu %zu %zu %zu",
+			 TRACE("§ %zu %zu %zu %zu %zu %zu %zu",
 					 elen, allglen, f1slen, f2plen, max_offstart, offstart, max_offend);
 			 for (size_t offend= 0; offend < max_offend; ++offend) {
 // Save the last character and replace it with \0
