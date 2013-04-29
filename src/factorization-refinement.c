@@ -938,15 +938,15 @@ analyze_possibly_small_exon(pfactor * ppprev,
 	 DEBUG("        original edit distance: %zu", orig_ed);
 
 // Take a short suffix of the previous exon and a short prefix of the following exon
-	 const size_t estart= MAX(pprev->EST_start, pprev->EST_end + 1 - _AFFIXES_LENGTH_);
-	 const size_t eend= MIN(pnext->EST_end + 1, pnext->EST_start + _AFFIXES_LENGTH_);
+	 const size_t estart= MAX(pprev->EST_start + 1, pprev->EST_end + 1 - _AFFIXES_LENGTH_);
+	 const size_t eend= MIN(pnext->EST_end, pnext->EST_start + _AFFIXES_LENGTH_);
 	 const size_t epreflen= pprev->EST_end + 1 - estart;
 	 const size_t esufflen= eend - pnext->EST_start;
 	 const size_t allelen= eend - estart;
 	 const char* const allefact= factorized_est->info->EST_seq + estart;
 	 my_assert(epreflen + esufflen + elen == allelen);
-	 const size_t gstart= MAX(pprev->GEN_start, pprev->GEN_end + 1 - _AFFIXES_LENGTH_);
-	 const size_t gend= MIN(pnext->GEN_end + 1, pnext->GEN_start + _AFFIXES_LENGTH_);
+	 const size_t gstart= MAX(pprev->GEN_start + 1, pprev->GEN_end + 1 - _AFFIXES_LENGTH_);
+	 const size_t gend= MIN(pnext->GEN_end, pnext->GEN_start + _AFFIXES_LENGTH_);
 	 const size_t gpreflen= pprev->GEN_end + 1 - gstart;
 	 const size_t gsufflen= gend - pnext->GEN_start;
 	 const size_t allglen= gend - gstart;
