@@ -114,6 +114,59 @@ remove_factorizations_with_very_small_exons(plist factorizations) {
 
 // ------------------------------------------------------------------------
 //
+// Removing invalid factorizations (i.e. the positions are not increasing)
+//
+
+void
+remove_invalid_factorizations(plist factorizations) {
+  DEBUG("Removing invalid factorizations...");
+  plistit pl_f_it= list_first(factorizations);
+  size_t fact_id= 0;
+  while (listit_has_next(pl_f_it)) {
+	 ++fact_id;
+	 DEBUG("Analyzing factorization %zu...", fact_id);
+	 pfactorization pfact= listit_next(pl_f_it);
+	 plistit pl_factor_it= list_first(pfact);
+	 bool is_invalid= false;
+	 pfactor pprev= NULL;
+	 if (listit_has_next(pl_factor_it)) {
+		pprev= listit_next(pl_factor_it);
+		is_invalid= (pprev->EST_start > pprev->EST_end) || (pprev->GEN_start > pprev->GEN_end);
+		if (is_invalid) {
+		  DEBUG("Exon (%d-%d) -- (%d-%d) is invalid. Factorization discarded.",
+				  pprev->EST_start, pprev->EST_end, pprev->GEN_start, pprev->GEN_end);
+		}
+	 }
+	 while (!is_invalid && listit_has_next(pl_factor_it)) {
+		pfactor pcurr= listit_next(pl_factor_it);
+		is_invalid= (pcurr->EST_start > pcurr->EST_end) || (pcurr->GEN_start > pcurr->GEN_end);
+		if (is_invalid) {
+		  DEBUG("Exon (%d-%d) -- (%d-%d) is invalid. Factorization discarded.",
+				  pcurr->EST_start, pcurr->EST_end, pcurr->GEN_start, pcurr->GEN_end);
+		} else {
+		  is_invalid= (pprev->EST_end >= pcurr->EST_start) ||
+			 (pprev->GEN_end >= pcurr->GEN_start);
+		  if (is_invalid) {
+			 DEBUG("Exons (%d-%d) -- (%d-%d) and (%d-%d) -- (%d-%d) overlaps. Factorization discarded.",
+					 pprev->EST_start, pprev->EST_end, pprev->GEN_start, pprev->GEN_end,
+					 pcurr->EST_start, pcurr->EST_end, pcurr->GEN_start, pcurr->GEN_end);
+		  }
+		}
+		pprev= pcurr;
+	 }
+	 listit_destroy(pl_factor_it);
+	 if (is_invalid) {
+		INFO("Factorization %zu is invalid. Deleting...", fact_id);
+		list_remove_at_iterator(pl_f_it, (delete_function)factorization_destroy);
+	 }
+  }
+  listit_destroy(pl_f_it);
+}
+
+
+
+// ------------------------------------------------------------------------
+//
 // Removing duplicated factorizations
 // Issue #14: Duplicated factorizations reported by 'est-fact'
 //
@@ -1047,7 +1100,7 @@ remove_false_small_exons(pEST_info genomic,
   while (listit_has_next(pl_f_it)) {
 	 DEBUG("Analyzing a factorization...");
 	 pfactorization pfact= listit_next(pl_f_it);
-
+	 print_factorization_on_log(LOG_LEVEL_DEBUG, pfact);
 	 pfactor pprev= NULL, pcurr= NULL, pnext= NULL;
 	 bool removed= false;
 	 plistit pl_factor_it= list_first(pfact);
@@ -1218,6 +1271,16 @@ refine_EST_factorizations(pEST_info genomic,
 								  pEST factorized_est,
 								  pconfiguration config) {
   INFO("Further refinement of EST factorizations...");
+  DEBUG("Initial factorizations:");
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
+  remove_invalid_factorizations(factorized_est->factorizations);
+  remove_duplicated_factorizations(factorized_est->factorizations);
+  DEBUG("Factorizations which passed the validity checks:");
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+											  factorized_est->factorizations,
+											  genomic->EST_seq);
   recover_lost_prefixes_and_suffixes(genomic, factorized_est, config);
   DEBUG("Factorizations after recovering prefixes and suffixes:");
   print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
@@ -1230,11 +1293,11 @@ refine_EST_factorizations(pEST_info genomic,
 											  genomic->EST_seq);
   remove_duplicated_factorizations(factorized_est->factorizations);
   search_for_new_small_exons(genomic, factorized_est, config);
-	print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
 											  factorized_est->factorizations,
 											  genomic->EST_seq);
 
-  clean_factorizations(genomic, factorized_est, config);								
+  clean_factorizations(genomic, factorized_est, config);
   DEBUG("Factorizations after factorization cleaning:");
   print_factorizations_on_log_full(LOG_LEVEL_DEBUG,
 											  factorized_est->factorizations,
