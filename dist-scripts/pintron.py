@@ -295,9 +295,9 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
     # It is stored in the first line of the genomic sequence
     with open(genomic_seq, 'r', encoding='utf-8') as f:
         line = f.readline().rstrip("\r\n")
-        sequence_id = line[1:]
-        m = re.match('>(?:chr)?(?:X|Y|x|y|\d+):\d+:\d+:(\+|-|\+1|-1|1)', line)
-        strand = m.group(1)
+        m = re.match('>(?P<type>chr)?(?P<chrnum>X|Y|x|y|\d+):\d+:\d+:(?P<strand>\+|-|\+1|-1|1)', line)
+        sequence_id = "chr" + m.group('chrnum')
+        strand = m.group('strand')
         if strand == '-1' or strand == '-':
             strand = '-'
         else:
