@@ -260,27 +260,27 @@ def json2gtf(infile, outfile, gene_name, all_isoforms):
                 if all_isoforms or isoform["annotated CDS?"]:
                     write_gtf_line(f, entry['genome']['sequence_id'], "exon",
                                    exon['chromosome start'], exon['chromosome end'],
-                                   "0", entry['genome']['strand'], ".", gene_name, isoform_id)
+                                   ".", entry['genome']['strand'], ".", gene_name, isoform_id)
                     if 'genome 5UTR start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "5UTR",
                                        exon['genome 5UTR start'], exon['genome 5UTR end'],
-                                       "0", entry['genome']['strand'], ".", gene_name, isoform_id)
+                                       ".", entry['genome']['strand'], ".", gene_name, isoform_id)
                     if 'genome start codon start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "start_codon",
                                        exon['genome start codon start'], exon['genome start codon end'],
-                                       "0", entry['genome']['strand'], exon['frame start codon'], gene_name, isoform_id)
+                                       ".", entry['genome']['strand'], exon['frame start codon'], gene_name, isoform_id)
                     if 'genome CDS start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "CDS",
                                        exon['genome CDS start'], exon['genome CDS end'],
-                                       "0", entry['genome']['strand'], exon['frame CDS'], gene_name, isoform_id)
+                                       ".", entry['genome']['strand'], exon['frame CDS'], gene_name, isoform_id)
                     if 'genome stop codon start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "stop_codon",
                                        exon['genome stop codon start'], exon['genome stop codon end'],
-                                       "0", entry['genome']['strand'], exon['frame stop codon'], gene_name, isoform_id)
+                                       ".", entry['genome']['strand'], exon['frame stop codon'], gene_name, isoform_id)
                     if 'genome 3UTR start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "3UTR",
                                        exon['genome 3UTR start'], exon['genome 3UTR end'],
-                                       "0", entry['genome']['strand'], ".", gene_name, isoform_id)
+                                       ".", entry['genome']['strand'], ".", gene_name, isoform_id)
 
 
 def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
