@@ -753,6 +753,7 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
         else:
             exons = range(isoform["number exons"] - 1, 0, -1)
         cumulative_transcript_length = 0
+        cumulative_stop_codon_length = 0
         #        import pdb; pdb.set_trace()
         # logging.debug(exons)
         for exon_id in range(isoform["number exons"]):
@@ -764,8 +765,8 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
                 exon['frame CDS'] = frame
                 cumulative_transcript_length += abs(exon['genome CDS end'] - exon['genome CDS start']) + 1
             if 'genome stop codon end' in exon:
-                exon['frame stop codon'] = frame
-                cumulative_transcript_length += abs(exon['genome stop codon end'] - exon['genome stop codon start']) + 1
+                exon['frame stop codon'] = cumulative_stop_codon_length
+                cumulative_stop_codon_length += abs(exon['genome stop codon end'] - exon['genome stop codon start']) + 1
 
     # import pdb; pdb.set_trace()
     # Clean up the data structure and write the json file
