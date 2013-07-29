@@ -108,9 +108,6 @@ def parse_command_line():
                       dest="glogfile", default="pintron-log.txt",
                       help="log filename of the pipline orchestration module (default = '%default')",
                       metavar="FILE")
-    parser.add_option("-c", "--continue", action="store_true",
-                      dest="from_scratch", default=False,
-                      help="resume a previosly interrupted computation (default = %default)")
     parser.add_option("-b", "--bin-dir",
                       dest="bindir", default="",
                       help="DIRECTORY containing the programs (default = system PATH)")
@@ -277,7 +274,7 @@ def json2gtf(infile, outfile, gene_name, all_isoforms):
                                        ".", entry['genome']['strand'], ".", gene_name, isoform_id)
 
 
-def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_tolerance, genomic_seq):
+def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_seq):
     def dump_and_exit(exon, isoform, isoform_id):
         logging.debug("Exon =>")
         logging.debug(exon)
@@ -770,24 +767,22 @@ def compute_json(ccds_file, variant_file, output_file, from_scratch, pas_toleran
 
 
 def exec_system_command(command, error_comment, logfile, cmd_label,
-                        output_file="",
-                        from_scratch=True):
-    if not from_scratch or (not output_file == "" and not os.access(output_file, os.R_OK)):
-        logging.debug(str(time.localtime()))
-        logging.debug(command)
+                        output_file=""):
+    logging.debug(str(time.localtime()))
+    logging.debug(command)
 
-        try:
-            retcode = subprocess.call(command + " 2>> " + logfile, shell=True)
-            if retcode < 0:
-                print(error_comment, -retcode, file=sys.stderr)
-            if os.path.exists("gmon.out"):
-                try:
-                    os.rename("gmon.out", cmd_label+".gmon.out")
-                except:
-                    pass
-        except OSError as e:
-            print("Execution failed:", e, file=sys.stderr)
-            raise PIntronError
+    try:
+        retcode = subprocess.call(command + " 2>> " + logfile, shell=True)
+        if retcode < 0:
+            print(error_comment, -retcode, file=sys.stderr)
+        if os.path.exists("gmon.out"):
+            try:
+                os.rename("gmon.out", cmd_label+".gmon.out")
+            except:
+                pass
+    except OSError as e:
+        print("Execution failed:", e, file=sys.stderr)
+        raise PIntronError
 
 
 def check_executables(bindir, exes):
@@ -868,8 +863,7 @@ def pintron_pipeline(options):
             error_comment="Could not prepare genomic input file",
             logfile=options.plogfile,
             cmd_label='cmd-1a-copy-genomic',
-            output_file='raw-multifasta-out.txt',
-            from_scratch=options.from_scratch)
+            output_file='raw-multifasta-out.txt')
 
     if os.path.isfile('ests.txt') and os.path.samefile('ests.txt', options.EST_filename):
         logging.debug('Files "%s" and "ests.txt" refer to the same file: skip copy.',
@@ -880,8 +874,7 @@ def pintron_pipeline(options):
             error_comment="Could not prepare ESTs input file",
             logfile=options.plogfile,
             cmd_label='cmd-1b-copy-ests',
-            output_file='raw-multifasta-out.txt',
-            from_scratch=options.from_scratch)
+            output_file='raw-multifasta-out.txt')
 
     # Compute factorizations
     logging.info("STEP  2:  Pre-aligning transcript data...")
@@ -892,8 +885,7 @@ def pintron_pipeline(options):
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
         cmd_label='cmd-2-est-fact',
-        output_file='raw-multifasta-out.txt',
-        from_scratch=options.from_scratch)
+        output_file='raw-multifasta-out.txt')
 
     # Min factorization agreement
     logging.info("STEP  3:  Computing a raw consensus gene structure...")
@@ -904,8 +896,7 @@ def pintron_pipeline(options):
         error_comment="Could not minimize the factorizations",
         logfile=options.plogfile,
         cmd_label='cmd-3-min-factorization',
-        output_file='out-agree.txt',
-        from_scratch=options.from_scratch)
+        output_file='out-agree.txt')
 
     # Intron prediction
     logging.info("STEP  4:  Predicting introns...")
@@ -916,8 +907,7 @@ def pintron_pipeline(options):
         error_comment="Could not compute the factorizations",
         logfile=options.plogfile,
         cmd_label='cmd-4-intron-agreement',
-        output_file='out-after-intron-agree.txt',
-        from_scratch=options.from_scratch)
+        output_file='out-after-intron-agree.txt')
 
     # The computation of the full-length isoforms should not be avoided
     # if options.step1:
@@ -931,8 +921,7 @@ def pintron_pipeline(options):
         error_comment="Could not transform factorizations into exons",
         logfile=options.plogfile,
         cmd_label='cmd-5-compact-compositions',
-        output_file='build-ests.txt',
-        from_scratch=options.from_scratch)
+        output_file='build-ests.txt')
 
     # Compute maximal transcripts
     logging.info("STEP  6:  Computing the final full-length isoforms...")
@@ -942,15 +931,13 @@ def pintron_pipeline(options):
         error_comment="Could not compute maximal transcripts",
         logfile=options.plogfile,
         cmd_label='cmd-6a-maximal-transcripts',
-        output_file='CCDS_transcripts.txt',
-        from_scratch=options.from_scratch)
+        output_file='CCDS_transcripts.txt')
     exec_system_command(
         command="cp -f TRANSCRIPTS1_1.txt isoforms.txt",
         error_comment="Could not link isoforms",
         logfile=options.plogfile,
         cmd_label='cmd-6b-copy-maximal-transcripts',
-        output_file='CCDS_transcripts.txt',
-        from_scratch=options.from_scratch)
+        output_file='CCDS_transcripts.txt')
 
     # Annotate CDS
     logging.info("STEP  7:  Annotating CDS...")
@@ -960,8 +947,7 @@ def pintron_pipeline(options):
         error_comment="Could not annotate the CDSs",
         logfile=options.plogfile,
         cmd_label='cmd-7-cds-annotation',
-        output_file='CCDS_transcripts.txt',
-        from_scratch=options.from_scratch)
+        output_file='CCDS_transcripts.txt')
 
     # TODO: Transcripts browser
     # Output the desired file
@@ -970,7 +956,6 @@ def pintron_pipeline(options):
     json_output = compute_json(ccds_file="CCDS_transcripts.txt",
                              variant_file="VariantGTF.txt",
                              output_file=options.output_filename,
-                             from_scratch=options.from_scratch,
                              pas_tolerance=options.pas_tolerance,
                              genomic_seq=options.genome_filename)
 
