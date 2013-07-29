@@ -92,9 +92,6 @@ def parse_command_line():
     parser.add_option("-s", "--EST",
                       dest="EST_filename", default="ests.txt",
                       help="FILE containing the ESTs", metavar="ESTs_FILE")
-    # parser.add_option("-1", "--no-full-lengths", action="store_true",
-    #                   dest="step1", default=False,
-    #                   help="do not compute the full-lengths")
     parser.add_option("-o", "--output",
                       dest="output_filename",
                       default="pintron-full-output.json",
@@ -103,9 +100,6 @@ def parse_command_line():
     parser.add_option("-z", "--compress", action="store_true",
                       dest="compress", default=False,
                       help="compress output (default = %default)")
-    parser.add_option("-a", "--alignments", action="store_true",
-                      dest="output_est_alignments", default=False,
-                      help="output ESTs/genome alignments (default = %default)")
     parser.add_option("-l", "--logfile",
                       dest="plogfile", default="pintron-pipeline-log.txt",
                       help="log filename of the pipeline steps (default = '%default')",
@@ -843,10 +837,8 @@ def pintron_pipeline(options):
     exes = check_executables(options.bindir, ["est-fact",
                                              "min-factorization",
                                              "intron-agreement",
-                                             "gene-structure",
                                              "compact-compositions",
                                              "maximal-transcripts",
-                                             "ests2sam",
                                              "cds-annotation"
                                              ])
 
@@ -927,66 +919,53 @@ def pintron_pipeline(options):
         output_file='out-after-intron-agree.txt',
         from_scratch=options.from_scratch)
 
-    # Compute the Gene structure
-    logging.info("STEP  5:  Computing the final gene structure...")
-
-    exec_system_command(
-        command=exes["gene-structure"] + " ./",
-        error_comment="Could not compute maximal transcripts",
-        logfile=options.plogfile,
-        cmd_label='cmd-5-gene-structure',
-        output_file='out-after-intron-agree.txt',
-        from_scratch=options.from_scratch)
-
-    # TODO: Gene structure browser
-
     # The computation of the full-length isoforms should not be avoided
     # if options.step1:
     #     sys.exit(0)
 
     # Transform compositions into exons
-    logging.info("STEP  6:  Computing the final transcript alignments...")
+    logging.info("STEP  5:  Computing the final transcript alignments...")
 
     exec_system_command(
         command=exes["compact-compositions"] + " < out-after-intron-agree.txt > build-ests.txt",
         error_comment="Could not transform factorizations into exons",
         logfile=options.plogfile,
-        cmd_label='cmd-6-compact-compositions',
+        cmd_label='cmd-5-compact-compositions',
         output_file='build-ests.txt',
         from_scratch=options.from_scratch)
 
     # Compute maximal transcripts
-    logging.info("STEP  7:  Computing the final full-length isoforms...")
+    logging.info("STEP  6:  Computing the final full-length isoforms...")
 
     exec_system_command(
         command=exes["maximal-transcripts"] + " < build-ests.txt",
         error_comment="Could not compute maximal transcripts",
         logfile=options.plogfile,
-        cmd_label='cmd-7-maximal-transcripts',
+        cmd_label='cmd-6a-maximal-transcripts',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
     exec_system_command(
         command="cp -f TRANSCRIPTS1_1.txt isoforms.txt",
         error_comment="Could not link isoforms",
         logfile=options.plogfile,
-        cmd_label='cmd-7-copy-maximal-transcripts',
+        cmd_label='cmd-6b-copy-maximal-transcripts',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
     # Annotate CDS
-    logging.info("STEP  8:  Annotating CDS...")
+    logging.info("STEP  7:  Annotating CDS...")
 
     exec_system_command(
         command=exes["cds-annotation"] + " ./ ./ " + options.gene + " " + options.organism,
         error_comment="Could not annotate the CDSs",
         logfile=options.plogfile,
-        cmd_label='cmd-8-cds-annotation',
+        cmd_label='cmd-7-cds-annotation',
         output_file='CCDS_transcripts.txt',
         from_scratch=options.from_scratch)
 
     # TODO: Transcripts browser
     # Output the desired file
-    logging.info("STEP  9:  Saving outputs...")
+    logging.info("STEP  8:  Saving outputs...")
 
     json_output = compute_json(ccds_file="CCDS_transcripts.txt",
                              variant_file="VariantGTF.txt",
@@ -1000,14 +979,6 @@ def pintron_pipeline(options):
     if options.extended_gtf_filename:
         logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html""")
         json2gtf(options.output_filename, options.extended_gtf_filename, options.gene, True)
-    if options.output_est_alignments:
-        exec_system_command(
-            command=exes["ests2sam"] + " --directory=. --genome=" + options.genome_filename,
-            error_comment="Could not create ESTs-genome alignment file",
-            logfile=options.plogfile,
-            cmd_label='cmd-8-ests2sam',
-            output_file='est-alignments.sam',
-            from_scratch=options.from_scratch)
 
     # Clean mess
     logging.info("STEP 10:  Finalizing...")
@@ -1026,7 +997,7 @@ def pintron_pipeline(options):
                    "TEMP_COMPOSITION_TRANS1_3.txt", "TEMP_COMPOSITION_TRANS1_4.txt",
                    "TRANSCRIPTS1_1.txt", "TRANSCRIPTS1_2.txt", "TRANSCRIPTS1_3.txt", "TRANSCRIPTS1_4.txt",
                    "VariantGTF.txt", "build-ests.txt", "CCDS_transcripts.txt", "config-dump.ini",
-                   "genomic-exonforCCDS.txt", "info-pid-*.log", "isoforms.txt", "gene-struct.txt",
+                   "genomic-exonforCCDS.txt", "info-pid-*.log", "isoforms.txt",
                    "meg-edges.txt", "megs.txt", "out-after-intron-agree.txt", "out-agree.txt", "out-fatt.txt",
                    "predicted-introns.txt", "processed-ests.txt", "processed-megs-info.txt",
                    "processed-megs.txt", "raw-multifasta-out.txt", "time-limits")
