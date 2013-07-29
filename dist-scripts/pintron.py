@@ -122,16 +122,15 @@ def parse_command_line():
                       help="keep all intermediate or temporary files (default = %default)")
     parser.add_option("-t", "--gtf",
                       dest="gtf_filename",
-                      default="pintron-cds-annotated-isoforms.gtf",
-                      help="output GTF FILE with the isoforms that have a CDS annotation "
-                      "(default = '%default')",
-                      metavar="GTF_FILE")
-    parser.add_option("--extended-gtf",
-                      dest="extended_gtf_filename",
                       default="pintron-all-isoforms.gtf",
                       help="output GTF FILE with all the predicted isoforms "
                       "(default = '%default')",
                       metavar="GTF_FILE")
+    parser.add_option("--strict-GTF-compliance", action="store_true",
+                      dest="only_cds_annot",
+                      default=False,
+                      help="the GTF file will only contain the CDS-annotated isoforms "
+                      "(default = '%default')")
 
     # parser.add_option("--strand",
     #                   dest="strand", type="int", default=1,
@@ -960,10 +959,8 @@ def pintron_pipeline(options):
                              genomic_seq=options.genome_filename)
 
     if options.gtf_filename:
-        json2gtf(options.output_filename, options.gtf_filename, options.gene, False)
-    if options.extended_gtf_filename:
-        logging.debug("""WARNING: you are creating a file that is not consistent with the GTF specifications.  See http://mblab.wustl.edu/GTF22.html""")
-        json2gtf(options.output_filename, options.extended_gtf_filename, options.gene, True)
+        json2gtf(options.output_filename, options.gtf_filename, options.gene,
+                 not options.only_cds_annot)
 
     # Clean mess
     logging.info("STEP 10:  Finalizing...")
