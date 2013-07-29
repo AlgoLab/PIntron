@@ -247,29 +247,29 @@ def json2gtf(infile, outfile, gene_name, all_isoforms):
 
                 logging.debug("Exon data (json): { %s } ", exon)
 #                import pdb; pdb.set_trace()
-                if all_isoforms or isoform["annotated CDS?"]:
+                if all_isoforms or isoform["annotated_CDS?"]:
                     write_gtf_line(f, entry['genome']['sequence_id'], "exon",
-                                   exon['chromosome start'], exon['chromosome end'],
+                                   exon['absolute_start'], exon['absolute_end'],
                                    ".", entry['genome']['strand'], ".", gene_name, isoform_id)
-                    if 'genome 5UTR start' in exon:
+                    if 'absolute_5UTR_start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "5UTR",
-                                       exon['genome 5UTR start'], exon['genome 5UTR end'],
+                                       exon['absolute_5UTR_start'], exon['absolute_5UTR_end'],
                                        ".", entry['genome']['strand'], ".", gene_name, isoform_id)
-                    if 'genome start codon start' in exon:
+                    if 'start_codon_absolute_start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "start_codon",
-                                       exon['genome start codon start'], exon['genome start codon end'],
-                                       ".", entry['genome']['strand'], exon['frame start codon'], gene_name, isoform_id)
-                    if 'genome CDS start' in exon:
+                                       exon['start_codon_absolute_start'], exon['start_codon_absolute_end'],
+                                       ".", entry['genome']['strand'], exon['start_codon_frame'], gene_name, isoform_id)
+                    if 'CDS_absolute_start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "CDS",
-                                       exon['genome CDS start'], exon['genome CDS end'],
-                                       ".", entry['genome']['strand'], exon['frame CDS'], gene_name, isoform_id)
-                    if 'genome stop codon start' in exon:
+                                       exon['CDS_absolute_start'], exon['CDS_absolute_end'],
+                                       ".", entry['genome']['strand'], exon['CDS_frame'], gene_name, isoform_id)
+                    if 'stop_codon_absolute_start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "stop_codon",
-                                       exon['genome stop codon start'], exon['genome stop codon end'],
-                                       ".", entry['genome']['strand'], exon['frame stop codon'], gene_name, isoform_id)
-                    if 'genome 3UTR start' in exon:
+                                       exon['stop_codon_absolute_start'], exon['stop_codon_absolute_end'],
+                                       ".", entry['genome']['strand'], exon['stop_codon_frame'], gene_name, isoform_id)
+                    if 'absolute_3UTR_start' in exon:
                         write_gtf_line(f, entry['genome']['sequence_id'], "3UTR",
-                                       exon['genome 3UTR start'], exon['genome 3UTR end'],
+                                       exon['absolute_3UTR_start'], exon['absolute_3UTR_end'],
                                        ".", entry['genome']['strand'], ".", gene_name, isoform_id)
 
 
@@ -294,12 +294,12 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
             strand = '+'
 
     gene = {
-        'version': 4,  # Hardcoding version number
+        'file_format_version': 5,  # Hardcoding version number
         'program_version': options.version,  # Program version
         'isoforms': {},
         'introns': {},
         'factorizations': {},
-        'number of processed ESTs': 0,
+        'number_of_processed_transcripts': 0,
         'genome': {
             'sequence_id': sequence_id,
             'strand': strand,
@@ -316,7 +316,7 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
         for line in fd:
             l = line.rstrip()
             if l[0] == '>':
-                gene['number of processed ESTs'] = gene['number of processed ESTs'] + 1
+                gene['number_of_processed_transcripts'] = gene['number_of_processed_transcripts'] + 1
                 new = re.search('\/gb=([A-Z_0-9]+)', l).groups()
                 current = new[0]
                 gene['factorizations'][current] = {
@@ -340,8 +340,8 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                 exon = {
                     'EST start': int(new[0]),
                     'EST end': int(new[1]),
-                    'relative start': int(new[2]),
-                    'relative end': int(new[3]),
+                    'relative_start': int(new[2]),
+                    'relative_end': int(new[3]),
                     'EST sequence': new[4],
                     'genome sequence': new[5],
                 }
@@ -357,58 +357,58 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                 'exons': [],
                 'polyA?': False,
                 'PAS?': False,
-                'annotated CDS?': False,
-                'Reference frame?': False,
+                'annotated_CDS?': False,
+                'reference_frame?': False,
             }
             for t in row:
                 (k, v) = re.split('=', t, 2)
                 logging.debug("Reading VariantGTF: " + k + "=>" + v + "!")
                 if k == "nex":
-                    isoform['number exons'] = int(v)
+                    isoform['number_of_exons'] = int(v)
                 elif k == "L":
                     isoform["length"] = int(v)
                 elif k == "CDS":
                     if v != '..':
-                        isoform["annotated CDS?"] = True
+                        isoform["annotated_CDS?"] = True
                         m = re.match('^(<?)(\d+)\.\.(\d+)(>?)$', v)
-                        (a, isoform["CDS start"], isoform["CDS end"], b) = (m.group(1), int(m.group(2)),
+                        (a, isoform["CDS_start"], isoform["CDS_end"], b) = (m.group(1), int(m.group(2)),
                                                                             int(m.group(3)), m.group(4))
-                        isoform['CDS length'] = isoform["CDS end"] - isoform["CDS start"] + 1
-                        isoform['canonical start codon?'] = False if a == '<' else True
-                        isoform['canonical end codon?']   = False if b == '>' else True
+                        isoform['CDS_length'] = isoform["CDS_end"] - isoform["CDS_start"] + 1
+                        isoform['start_codon?'] = False if a == '<' else True
+                        isoform['stop_codon?']   = False if b == '>' else True
                 elif k == "RefSeq":
                     m = re.match('^(.*?)(\(?([NY])([NY])\)?)?$', v, flags=re.IGNORECASE)
                     if m:
                         (r, a, b) = (m.group(1), m.group(3), m.group(4))
-                        isoform['reference CDS start codon?'] = False if a == 'N' else True
-                        isoform['reference CDS end codon?']   = False if b == 'N' else True
+                        isoform['reference_start_codon?'] = False if a == 'N' else True
+                        isoform['reference_stop_codon?']   = False if b == 'N' else True
                         if r != None and r:
-                            isoform['RefSeq'] = r
+                            isoform['RefSeqID'] = r
                 elif k == "ProtL":
-                    if v != '..' and isoform["annotated CDS?"]:
+                    if v != '..' and isoform["annotated_CDS?"]:
                         m = re.match('^(>?)(\d+)$', v, flags=re.IGNORECASE)
-                        (a, isoform['protein length']) = (m.group(1), int(m.group(2)))
-                        isoform['protein missing codon?'] = False if a != '>' else True
+                        (a, isoform['protein_length']) = (m.group(1), int(m.group(2)))
+                        isoform['protein_incomplete?'] = False if a != '>' else True
                 elif k == "Frame":
                     m = re.match('^y', v, flags=re.IGNORECASE)
-                    if m != None and isoform["annotated CDS?"]:
-                        isoform['Reference frame?'] = True
+                    if m != None and isoform["annotated_CDS?"]:
+                        isoform['reference_frame?'] = True
                 elif k == "Type":
                     if v == 'Ref':
-                        isoform['Reference frame?'] = True
-                        if 'RefSeq' in isoform:
-                            isoform['Type'] = isoform['RefSeq'] + " (Reference TR)"
+                        isoform['reference_frame?'] = True
+                        if 'RefSeqID' in isoform:
+                            isoform['variant_type'] = isoform['RefSeqID'] + " (Reference TR)"
                         else:
-                            isoform['Type'] = "(Reference TR)"
+                            isoform['variant_type'] = "(Reference TR)"
                     else:
-                        isoform['Type'] = re.sub('\s+$', '', v)
+                        isoform['variant_type'] = re.sub('\s+$', '', v)
                 elif not re.match('^\s*\#', line):
                     raise ValueError("Could not parse GTF file " + variant_file + "(" + k + "=>" + v + ")\n" + line + "\n")
             gene['isoforms'][index] = isoform
 
     with open(ccds_file, mode='r', encoding='utf-8') as fd:
-        gene['number_isoforms'] = int(fd.readline().rstrip())
-        gene['length_genomic_sequence'] = int(fd.readline().rstrip())
+        gene['number_of_predicted_isoforms'] = int(fd.readline().rstrip())
+        gene['genome']['length'] = int(fd.readline().rstrip())
         isoform_5utr_length = 0
         isoform_3utr_length = 0
         for line in fd:
@@ -426,45 +426,45 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                 index = fields[0]
                 if not index in gene['isoforms']:
                     raise ValueError("CCDS file " + ccds_file + "contains isoform with index " + index + " not in variant_file\n")
-                if fields[1] > gene['isoforms'][index]['number exons']:
+                if fields[1] > gene['isoforms'][index]['number_of_exons']:
 #                    import pdb; pdb.set_trace()
                     raise ValueError("Wrong number of exons: " + str(index) + "\n " + str(fields[1]) + "!= " +
-                                     str(isoform['number exons']) + "\n")
+                                     str(isoform['number_of_exons']) + "\n")
 
                 gene['isoforms'][index]['reference?'] = False if fields[2] == 0 else True
-                gene['isoforms'][index]['from RefSeq?'] = False if fields[3] == 0 else True
-                gene['isoforms'][index]['NMD flag'] = fields[4]
-                if gene['isoforms'][index]['annotated CDS?']:
-                    isoform_5utr_length = gene['isoforms'][index]['CDS start']
-                    isoform_3utr_length = gene['isoforms'][index]['CDS end']
+                gene['isoforms'][index]['from_RefSeq?'] = False if fields[3] == 0 else True
+                gene['isoforms'][index]['NMD_flag'] = fields[4]
+                if gene['isoforms'][index]['annotated_CDS?']:
+                    isoform_5utr_length = gene['isoforms'][index]['CDS_start']
+                    isoform_3utr_length = gene['isoforms'][index]['CDS_end']
             elif re.match('^(\d+:){5}(-?\d+:)(-?\d+)$', l):
                 # Row contains exon metadata
                 exon = {}
-                (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"],
-                 polyA, exon["5utr length"], exon["3utr length"]) = [max(0, int(x)) for x in  re.split(':', l)]
-                exon['genome length'] = abs(exon["chromosome end"] - exon["chromosome start"]) + 1
+                (exon["absolute_start"], exon["absolute_end"], exon["relative_start"], exon["relative_end"],
+                 polyA, exon["5UTR_length"], exon["3UTR_length"]) = [max(0, int(x)) for x in  re.split(':', l)]
+                exon['length'] = abs(exon["absolute_end"] - exon["absolute_start"]) + 1
                 # if gene['genome']['strand'] == '-':
-                #     (exon["chromosome start"], exon["chromosome end"], exon["relative start"], exon["relative end"]) = (exon["chromosome end"], exon["chromosome start"], exon["relative end"], exon["relative end"])
+                #     (exon["absolute_start"], exon["absolute_end"], exon["relative_start"], exon["relative_end"]) = (exon["absolute_end"], exon["absolute_start"], exon["relative_end"], exon["relative_end"])
                 if (polyA == 1):
                     gene['isoforms'][index]['polyA?'] = True
                 # pprint.pprint(exon)
                 logging.debug("Reading CCDS_transcripts: Row contains exon metadata { %s }",
                               "; ".join([line.rstrip(),
-                                         str(max(exon["relative end"], exon["relative start"])),
-                                         str(min(exon["relative end"], exon["relative start"])),
-                                         str(exon["5utr length"]),
-                                         str(exon["3utr length"]),
-                                         str(abs(exon["relative end"] - exon["relative start"]) + 1 - exon["5utr length"] - exon["3utr length"])
+                                         str(max(exon["relative_end"], exon["relative_start"])),
+                                         str(min(exon["relative_end"], exon["relative_start"])),
+                                         str(exon["5UTR_length"]),
+                                         str(exon["3UTR_length"]),
+                                         str(abs(exon["relative_end"] - exon["relative_start"]) + 1 - exon["5UTR_length"] - exon["3UTR_length"])
                                      ]))
                 if int(re.split(':', l)[4]) < 0:
-                    del(exon["5utr length"])
+                    del(exon["5UTR_length"])
                 if int(re.split(':', l)[5]) < 0:
-                    del(exon["3utr length"])
+                    del(exon["3UTR_length"])
                 gene['isoforms'][index]['exons'].append(exon)
 
             elif re.match('^[acgtACGT]+$', l):
                 last_exon = gene['isoforms'][index]['exons'][-1]['sequence'] = l
-                gene['isoforms'][index]['exons'][-1]['transcript length'] = len(l)
+                gene['isoforms'][index]['exons'][-1]['length_on_transcript'] = len(l)
             elif not re.match('^\s*\#', line):
                 raise ValueError("Could not parse CCDS file " + ccds_file + " at line:\n" + line + "\n")
 
@@ -475,46 +475,46 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
     with open('predicted-introns.txt', mode='r', encoding='utf-8') as fd:
         index = 1
         for line in fd:
-            intron = {"supporting ESTs": {}}
-            (intron['relative start'], intron['relative end'],
-             intron['chromosome start'], intron['chromosome end'], intron['length'], intron['number supporting EST'], EST_list,
-             intron['donor alignment average error'], intron['acceptor alignment average error'], intron['donor score'],
-             intron['acceptor score'], intron['BPS score'], intron['BPS position'], intron['type'], intron['pattern'],
-             intron['repeat sequence'], intron['donor suffix'], intron['prefix'], intron['suffix'],
-             intron['acceptor prefix']) = re.split("\t", line.rstrip())
-             # intron['begin donor'] = intron['relative end'] - len(intron['donor suffix']) +1
-             # intron['end acceptor'] = intron['relative begin'] - len(intron['acceptor prefix']) -1
-            intron["supporting ESTs"] = {i: {} for i in re.split(',', EST_list) if i != ''}
-            #pprint.pprint(intron["supporting ESTs"])
+            intron = {"supporting_transcripts": {}}
+            (intron['relative_start'], intron['relative_end'],
+             intron['absolute_start'], intron['absolute_end'], intron['length'], intron['number_of_supporting_transcripts'], EST_list,
+             intron['donor_alignment_error'], intron['acceptor_alignment_error'], intron['donor_score'],
+             intron['acceptor_score'], intron['BPS_score'], intron['BPS_position'], intron['type'], intron['pattern'],
+             intron['repeat_sequence'], intron['donor_exon_suffix'], intron['prefix'], intron['suffix'],
+             intron['acceptor_exon_prefix']) = re.split("\t", line.rstrip())
+             # intron['begin donor'] = intron['relative_end'] - len(intron['donor_exon_suffix']) +1
+             # intron['end acceptor'] = intron['relative begin'] - len(intron['acceptor_exon_prefix']) -1
+            intron["supporting_transcripts"] = {i: {} for i in re.split(',', EST_list) if i != ''}
+            #pprint.pprint(intron["supporting_transcripts"])
             #import pdb; pdb.set_trace()
 
-            for field in ('relative start', 'relative end', 'chromosome start', 'chromosome end', 'length', 'number supporting EST',
-                          'BPS position'):
+            for field in ('relative_start', 'relative_end', 'absolute_start', 'absolute_end', 'length', 'number_of_supporting_transcripts',
+                          'BPS_position'):
                 intron[field] = int(intron[field])
-            for field in ('donor alignment average error', 'acceptor alignment average error', 'donor score',
-                          'acceptor score', 'BPS score'):
+            for field in ('donor_alignment_error', 'acceptor_alignment_error', 'donor_score',
+                          'acceptor_score', 'BPS_score'):
                 intron[field] = float(intron[field])
 
-            if intron['BPS position'] < 0:
-                del intron['BPS position']
+            if intron['BPS_position'] < 0:
+                del intron['BPS_position']
 
             gene['introns'][index] = intron
             index += 1
 
     # add introns to each isoform
     for isoform in gene['isoforms'].values():
-        isoform['exons'].sort(key=lambda x: x['relative end'])
+        isoform['exons'].sort(key=lambda x: x['relative_end'])
         isoform['introns'] = []
         pairs = zip(isoform['exons'][1:], isoform['exons'][:-1])
         for pair in pairs:
-            list_extremes = [pair[0]['chromosome end'], pair[0]['chromosome start'],
-                             pair[1]['chromosome end'], pair[1]['chromosome start']]
+            list_extremes = [pair[0]['absolute_end'], pair[0]['absolute_start'],
+                             pair[1]['absolute_end'], pair[1]['absolute_start']]
             list_extremes.sort()
             left_border = list_extremes[1] + 1
             right_border = list_extremes[2] - 1
             for index in gene['introns'].keys():
                 intron = gene['introns'][index]
-                if intron['chromosome start'] == left_border and intron['chromosome end'] == right_border or intron['chromosome end'] == left_border and intron['chromosome start'] == right_border:
+                if intron['absolute_start'] == left_border and intron['absolute_end'] == right_border or intron['absolute_end'] == left_border and intron['absolute_start'] == right_border:
                     isoform['introns'].append(index)
 
     # for each intron, add the alignment of the sorrounding exons.
@@ -522,14 +522,14 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
     # step is to find all pairs of exons supporting an intron
     def supporting_factors(intron):
         pairs = []
-        for est in intron["supporting ESTs"].keys():
+        for est in intron["supporting_transcripts"].keys():
             factor = gene['factorizations'][est]
             #                    import pdb; pdb.set_trace()
-            good_left  = [exon for exon in factor['exons'] if exon['relative end'] == intron['relative start'] - 1]
-            good_right = [exon for exon in factor['exons'] if exon['relative start'] == intron['relative end'] + 1]
+            good_left  = [exon for exon in factor['exons'] if exon['relative_end'] == intron['relative_start'] - 1]
+            good_right = [exon for exon in factor['exons'] if exon['relative_start'] == intron['relative_end'] + 1]
             if len(good_left) == 1 and len(good_right) == 1:
                 pairs.append([est, good_left[0], good_right[0]])
-        if len(pairs) != intron['number supporting EST']:
+        if len(pairs) != intron['number_of_supporting_transcripts']:
             pprint.pprint(factor)
             print("\n")
             pprint.pprint(intron)
@@ -539,42 +539,38 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
         return(pairs)
 
     #
-    # Each intron has the list of supporting ESTs.
+    # Each intron has the list of supporting_transcripts.
     # For each such EST we provide the suffix/prefix of the prev/next exon
     for index in gene['introns'].keys():
-            # donor_exon = [ exon for exon in isoform['exons'] if (exon['relative end'] == intron['relative start'] - 1) ][0]
-            # acceptor_exon = [ exon for exon in isoform['exons'] if (exon['relative start'] == intron['relative end'] + 1) ][0]
+            # donor_exon = [ exon for exon in isoform['exons'] if (exon['relative_end'] == intron['relative_start'] - 1) ][0]
+            # acceptor_exon = [ exon for exon in isoform['exons'] if (exon['relative_start'] == intron['relative_end'] + 1) ][0]
             # add the alignment to each intron
         for [est, donor_factor, acceptor_factor] in supporting_factors(gene['introns'][index]):
 #            import pdb; pdb.set_trace()
-            gene['introns'][index]['supporting ESTs'][est] = {
-                'EST donor factor suffix': donor_factor['EST sequence'][-len(gene['introns'][index]['donor suffix']):],
-                'EST acceptor factor prefix': acceptor_factor['EST sequence'][:len(gene['introns'][index]['acceptor prefix'])],
-                'begin EST acceptor factor': acceptor_factor['EST start'],
-                'end EST donor factor': donor_factor['EST end'],
-                'end EST acceptor factor': acceptor_factor['EST end'],
-                'begin EST donor factor': donor_factor['EST start'],
-                # 'EST prefix previous exon'  : gene['introns'][index]['acceptor prefix'],
-                # 'EST suffix next exon'  : gene['introns'][index]['donor suffix'],
-            # 'EST prefix end'   : acceptor_exon['EST end'],
-            # 'EST suffix start' : donor_exon['EST start'],
+            gene['introns'][index]['supporting_transcripts'][est] = {
+                'donor_factor_suffix': donor_factor['EST sequence'][-len(gene['introns'][index]['donor_exon_suffix']):],
+                'acceptor_factor_prefix': acceptor_factor['EST sequence'][:len(gene['introns'][index]['acceptor_exon_prefix'])],
+                'acceptor_factor_start': acceptor_factor['EST start'],
+                'donor_factor_end': donor_factor['EST end'],
+                'acceptor_factor_end': acceptor_factor['EST end'],
+                'donor_factor_start': donor_factor['EST start'],
             }
 
     def same_coordinates(a, b):
-        return True if (a['relative start'] == b['relative start'] and
-                        30 >= a['relative end'] - b['relative end'] >= -30) else False
+        return True if (a['relative_start'] == b['relative_start'] and
+                        30 >= a['relative_end'] - b['relative_end'] >= -30) else False
 
     # pprint.pprint(gene)
     for isoform in gene['isoforms'].keys():
-        gene['isoforms'][isoform]['transcript sequence'] = ''.join([s['sequence'] for s in gene['isoforms'][isoform]['exons']])
-        if gene['isoforms'][isoform]['annotated CDS?']:
+        gene['isoforms'][isoform]['sequence'] = ''.join([s['sequence'] for s in gene['isoforms'][isoform]['exons']])
+        if gene['isoforms'][isoform]['annotated_CDS?']:
             # Check start/stop codon
             allowed_codons = {'first': ["ATG"],
                               'last': ["TGA", "TAG", "TAA"]
                           }
             codon = {
-                'first': gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS start'] - 1: gene['isoforms'][isoform]['CDS start'] + 2],
-                'last': gene['isoforms'][isoform]['transcript sequence'][gene['isoforms'][isoform]['CDS end'] - 3:gene['isoforms'][isoform]['CDS end']]
+                'first': gene['isoforms'][isoform]['sequence'][gene['isoforms'][isoform]['CDS_start'] - 1: gene['isoforms'][isoform]['CDS_start'] + 2],
+                'last': gene['isoforms'][isoform]['sequence'][gene['isoforms'][isoform]['CDS_end'] - 3:gene['isoforms'][isoform]['CDS_end']]
             }
             for p in ['first', 'last']:
                 logging.debug("Codon  %s in  [%s]", codon[p].upper(), "/".join(allowed_codons[p]))
@@ -616,7 +612,7 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                         }
                }
     for isoform_id, isoform in gene["isoforms"].items():
-        if not isoform["annotated CDS?"]:
+        if not isoform["annotated_CDS?"]:
             continue
         cumulative_genome_length = 0
         cumulative_transcript_length = 0
@@ -626,46 +622,46 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
         for exon in isoform["exons"]:
             cumulative_genome_length_old = cumulative_genome_length
             cumulative_transcript_length_old = cumulative_transcript_length
-            cumulative_genome_length += exon['genome length']
-            exon['cumulative genome length'] = cumulative_genome_length
-            cumulative_transcript_length += exon['transcript length']
-            exon['cumulative transcript length'] = cumulative_transcript_length
-            if cumulative_transcript_length < isoform['CDS start'] - 1:
+            cumulative_genome_length += exon['length']
+            exon['cumulative_length'] = cumulative_genome_length
+            cumulative_transcript_length += exon['length_on_transcript']
+            exon['cumulative_length_on_transcript'] = cumulative_transcript_length
+            if cumulative_transcript_length < isoform['CDS_start'] - 1:
                 # exon is contained in 5UTR
                 if strand == '+':
-                    exon['genome 5UTR start'], exon['genome 5UTR end'] = exon['chromosome start'], exon['chromosome end']
+                    exon['absolute_5UTR_start'], exon['absolute_5UTR_end'] = exon['absolute_start'], exon['absolute_end']
                 else:
-                    exon['genome 5UTR start'], exon['genome 5UTR end'] = exon['chromosome end'], exon['chromosome start']
+                    exon['absolute_5UTR_start'], exon['absolute_5UTR_end'] = exon['absolute_end'], exon['absolute_start']
                 continue
-            if cumulative_transcript_length_old > isoform['CDS end'] + 1:
+            if cumulative_transcript_length_old > isoform['CDS_end'] + 1:
                 # exon is contained in 3UTR
                 if strand == '+':
-                    exon['genome 3UTR start'], exon['genome 3UTR end'] = exon['chromosome start'], exon['chromosome end']
+                    exon['absolute_3UTR_start'], exon['absolute_3UTR_end'] = exon['absolute_start'], exon['absolute_end']
                 else:
-                    exon['genome 3UTR start'], exon['genome 3UTR end'] = exon['chromosome end'], exon['chromosome start']
+                    exon['absolute_3UTR_start'], exon['absolute_3UTR_end'] = exon['absolute_end'], exon['absolute_start']
                 continue
-            if cumulative_transcript_length_old + 1 <= isoform['CDS start'] - 1 <= cumulative_transcript_length:
+            if cumulative_transcript_length_old + 1 <= isoform['CDS_start'] - 1 <= cumulative_transcript_length:
                 # exon contains a 5UTR portion
                 if strand == '+':
-                    exon['genome 5UTR start'] = exon['chromosome start']
-                    exon['genome 5UTR end'] = exon['chromosome start'] + (exon['5utr length'] - 1)
+                    exon['absolute_5UTR_start'] = exon['absolute_start']
+                    exon['absolute_5UTR_end'] = exon['absolute_start'] + (exon['5UTR_length'] - 1)
                 else:
-                    exon['genome 5UTR start'] = exon['chromosome end']
-                    exon['genome 5UTR end'] = exon['chromosome end'] - (exon['5utr length'] - 1)
-            if cumulative_transcript_length_old + 1 <= isoform['CDS end'] + 1 <= cumulative_transcript_length:
+                    exon['absolute_5UTR_start'] = exon['absolute_end']
+                    exon['absolute_5UTR_end'] = exon['absolute_end'] - (exon['5UTR_length'] - 1)
+            if cumulative_transcript_length_old + 1 <= isoform['CDS_end'] + 1 <= cumulative_transcript_length:
                 # exon contains a 3UTR portion
                 if strand == '+':
-                    exon['genome 3UTR start'] = exon['chromosome end'] - (exon['3utr length'] - 1)
-                    exon['genome 3UTR end'] = exon['chromosome end']
+                    exon['absolute_3UTR_start'] = exon['absolute_end'] - (exon['3UTR_length'] - 1)
+                    exon['absolute_3UTR_end'] = exon['absolute_end']
                 else:
-                    exon['genome 3UTR start'] = exon['chromosome start']
-                    exon['genome 3UTR end'] = exon['chromosome start'] + (exon['3utr length'] - 1)
+                    exon['absolute_3UTR_start'] = exon['absolute_start']
+                    exon['absolute_3UTR_end'] = exon['absolute_start'] + (exon['3UTR_length'] - 1)
 
             read_codon_len = 0
-            if cumulative_transcript_length_old < isoform['CDS start'] <= cumulative_transcript_length:
+            if cumulative_transcript_length_old < isoform['CDS_start'] <= cumulative_transcript_length:
                 # exon contains at least part of the first codon, including the first character
-                read_codon_len = min(3, cumulative_transcript_length - isoform['CDS start'] + 1)
-                pos = isoform['CDS start'] - cumulative_transcript_length_old - 1
+                read_codon_len = min(3, cumulative_transcript_length - isoform['CDS_start'] + 1)
+                pos = isoform['CDS_start'] - cumulative_transcript_length_old - 1
                 read_start_codon_seq += exon['sequence'][pos:pos + read_codon_len]
                 if len(read_start_codon_seq) == 3 and check_codon("start", read_start_codon_seq):
                     logging.debug("pos = " + str(pos))
@@ -675,10 +671,10 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                     logging.debug(pprint.pformat(exon))
                     logging.debug(pprint.pformat(isoform))
                     logging.debug("isoform_id = " + str(isoform_id))
-            elif cumulative_transcript_length_old < (isoform['CDS start'] + 1) <= cumulative_transcript_length or cumulative_transcript_length_old < (isoform['CDS start'] + 2) <= cumulative_transcript_length:
+            elif cumulative_transcript_length_old < (isoform['CDS_start'] + 1) <= cumulative_transcript_length or cumulative_transcript_length_old < (isoform['CDS_start'] + 2) <= cumulative_transcript_length:
                 # exon contains at least part of the start codon, but not the first character
                 # Note: the first character of the exon is in the first codon, hence 5utr length=0
-                read_codon_len = min(isoform['CDS start'] + 2 - cumulative_transcript_length_old,
+                read_codon_len = min(isoform['CDS_start'] + 2 - cumulative_transcript_length_old,
                                      cumulative_transcript_length - cumulative_transcript_length_old)
                 read_start_codon_seq += exon['sequence'][:read_codon_len]
                 if len(read_start_codon_seq) == 3 and check_codon("start", read_start_codon_seq):
@@ -687,17 +683,17 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                     logging.debug(pprint.pformat(isoform_id))
             if read_codon_len > 0:
                 if strand == '+':
-                    exon['genome start codon start'] = exon['chromosome start'] + exon['5utr length']
-                    exon['genome start codon end'] = exon['chromosome start'] + exon['5utr length'] + read_codon_len - 1
+                    exon['start_codon_absolute_start'] = exon['absolute_start'] + exon['5UTR_length']
+                    exon['start_codon_absolute_end'] = exon['absolute_start'] + exon['5UTR_length'] + read_codon_len - 1
                 else:
-                    exon['genome start codon start'] = exon['chromosome end'] - exon['5utr length'] - read_codon_len + 1
-                    exon['genome start codon end'] = exon['chromosome end'] - exon['5utr length']
+                    exon['start_codon_absolute_start'] = exon['absolute_end'] - exon['5UTR_length'] - read_codon_len + 1
+                    exon['start_codon_absolute_end'] = exon['absolute_end'] - exon['5UTR_length']
 
             read_codon_len = 0
-            if cumulative_transcript_length_old < isoform['CDS end'] <= cumulative_transcript_length:
+            if cumulative_transcript_length_old < isoform['CDS_end'] <= cumulative_transcript_length:
                 # exon contains at least part of the stop codon, including the last character
                 read_codon_len = 3 - len(read_stop_codon_seq)
-                final_pos = isoform['CDS end'] - cumulative_transcript_length_old
+                final_pos = isoform['CDS_end'] - cumulative_transcript_length_old
                 read_stop_codon_seq += exon['sequence'][final_pos - read_codon_len:final_pos]
                 #                import pdb; pdb.set_trace()
                 if check_codon("stop", read_stop_codon_seq):
@@ -705,58 +701,58 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
                     logging.debug(read_codon_len)
                     logging.debug(final_pos)
                     logging.debug(cumulative_transcript_length_old)
-                    logging.debug(isoform['CDS end'])
+                    logging.debug(isoform['CDS_end'])
                     logging.debug(cumulative_transcript_length)
                     logging.debug(pprint.pformat(exon))
                     logging.debug(pprint.pformat(isoform))
                     logging.debug(pprint.pformat(isoform_id))
-            elif cumulative_transcript_length_old < (isoform['CDS end'] - 2) <= cumulative_transcript_length:
+            elif cumulative_transcript_length_old < (isoform['CDS_end'] - 2) <= cumulative_transcript_length:
                 # exon contains the first character, but not the last of the stop codon
-                read_codon_len = cumulative_transcript_length - (isoform['CDS end'] - 3)
+                read_codon_len = cumulative_transcript_length - (isoform['CDS_end'] - 3)
                 read_stop_codon_seq += exon['sequence'][-read_codon_len:]
-            elif cumulative_transcript_length_old < (isoform['CDS end'] - 1) <= cumulative_transcript_length:
+            elif cumulative_transcript_length_old < (isoform['CDS_end'] - 1) <= cumulative_transcript_length:
                 # exon contains only the second character of the stop codon
                 read_codon_len = 1
                 read_stop_codon_seq += exon['sequence'][0]
             if read_codon_len > 0:
                 if strand == '+':
-                    exon['genome stop codon start'] = exon['chromosome end'] - exon['3utr length'] - read_codon_len + 1
-                    exon['genome stop codon end'] = exon['chromosome end'] - exon['3utr length']
+                    exon['stop_codon_absolute_start'] = exon['absolute_end'] - exon['3UTR_length'] - read_codon_len + 1
+                    exon['stop_codon_absolute_end'] = exon['absolute_end'] - exon['3UTR_length']
                 else:
-                    exon['genome stop codon start'] = exon['chromosome start'] + exon['3utr length']
-                    exon['genome stop codon end'] = exon['chromosome start'] + exon['3utr length'] + read_codon_len - 1
+                    exon['stop_codon_absolute_start'] = exon['absolute_start'] + exon['3UTR_length']
+                    exon['stop_codon_absolute_end'] = exon['absolute_start'] + exon['3UTR_length'] + read_codon_len - 1
 
-            if cumulative_transcript_length >= isoform['CDS start'] and cumulative_transcript_length_old < isoform['CDS end'] - 3:
+            if cumulative_transcript_length >= isoform['CDS_start'] and cumulative_transcript_length_old < isoform['CDS_end'] - 3:
                 # exon contains at least a portion of the CDS
-                exon['genome CDS start'] = exon['chromosome start'] + exon['5utr length'] if strand == '+' else exon['chromosome end'] - exon['5utr length']
-                if 'genome stop codon start' in exon:
-                    exon['genome CDS end'] = exon['genome stop codon start'] - 1 if strand == '+' else exon['genome stop codon end'] + 1
+                exon['CDS_absolute_start'] = exon['absolute_start'] + exon['5UTR_length'] if strand == '+' else exon['absolute_end'] - exon['5UTR_length']
+                if 'stop_codon_absolute_start' in exon:
+                    exon['CDS_absolute_end'] = exon['stop_codon_absolute_start'] - 1 if strand == '+' else exon['stop_codon_absolute_end'] + 1
                 else:
-                    exon['genome CDS end'] = exon['chromosome end'] if strand == '+' else exon['chromosome start']
+                    exon['CDS_absolute_end'] = exon['absolute_end'] if strand == '+' else exon['absolute_start']
 
     #Now we can determine the frames
     for isoform_id, isoform in gene["isoforms"].items():
-        if not isoform["annotated CDS?"]:
+        if not isoform["annotated_CDS?"]:
             continue
         if strand == '+':
-            exons = range(isoform["number exons"])
+            exons = range(isoform["number_of_exons"])
         else:
-            exons = range(isoform["number exons"] - 1, 0, -1)
+            exons = range(isoform["number_of_exons"] - 1, 0, -1)
         cumulative_transcript_length = 0
         cumulative_stop_codon_length = 0
         #        import pdb; pdb.set_trace()
         # logging.debug(exons)
-        for exon_id in range(isoform["number exons"]):
+        for exon_id in range(isoform["number_of_exons"]):
             frame = (3 - ((cumulative_transcript_length) % 3)) % 3
             exon = isoform['exons'][exon_id]
-            if 'genome start codon end' in exon:
-                exon['frame start codon'] = frame
-            if 'genome CDS end' in exon:
-                exon['frame CDS'] = frame
-                cumulative_transcript_length += abs(exon['genome CDS end'] - exon['genome CDS start']) + 1
-            if 'genome stop codon end' in exon:
-                exon['frame stop codon'] = cumulative_stop_codon_length
-                cumulative_stop_codon_length += abs(exon['genome stop codon end'] - exon['genome stop codon start']) + 1
+            if 'start_codon_absolute_end' in exon:
+                exon['start_codon_frame'] = frame
+            if 'CDS_absolute_end' in exon:
+                exon['CDS_frame'] = frame
+                cumulative_transcript_length += abs(exon['CDS_absolute_end'] - exon['CDS_absolute_start']) + 1
+            if 'stop_codon_absolute_end' in exon:
+                exon['stop_codon_frame'] = cumulative_stop_codon_length
+                cumulative_stop_codon_length += abs(exon['stop_codon_absolute_end'] - exon['stop_codon_absolute_start']) + 1
 
     # import pdb; pdb.set_trace()
     # Clean up the data structure and write the json file
