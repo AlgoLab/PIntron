@@ -16,6 +16,14 @@ always upgrade to the latest version.
 Anyway, older versions are also
 [available](https://github.com/AlgoLab/PIntron/tags).
 
+Notice that, since version **1.3.0**, the JSON schema of PIntron
+main output file and some of its program options have slightly changed!  
+The on-line documentation reflects such changes.
+We encourage all users to migrate to the new (improved) schema, but, if
+it is not possible, please use version
+[*1.2.59*](https://github.com/AlgoLab/PIntron/releases/tag/v1.2.59).
+
+
 ## Requirements
 
 PIntron requires the following free software:
@@ -24,10 +32,6 @@ PIntron requires the following free software:
   recommended
 - Perl (tested on Perl v5.10.1 but it should work also with older
   versions)
-- The JSON Perl module (available from CPAN). On most platforms, this
-  module can be installed by using the command `cpan JSON` with
-  administrator/superuser privileges (e.g., by using the command `sudo
-  cpan JSON` on MacOS X)
 - A recent version of the standard GNU toolchain (gcc, make).
 
 ## Compilation and Installation

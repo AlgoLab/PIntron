@@ -6,24 +6,19 @@ Please refer to [this example](example.html) for a basic introduction.
 
 ## Input file formats
 
-The genomic sequence file is a FASTA file whose header should adhere to the
-following structure
+The genomic sequence file is a FASTA file whose header must adhere to the
+following structure:
 
       >chrZZ:start:end:strand
 
 where:
 
 - `ZZ` specifies the chromosome
-- `start` and `end` specify the starting and ending positions of the genomic sequence
-on the reference chromosome.
-- `strand` specifies the strand of the genomic sequence and it must be +1 (5'3' direction)
-or -1 (3'5' direction).
+- `start` and `end` specify the starting and ending positions of the genomic sequence on the reference chromosome.
+- `strand` specifies the strand of the genomic sequence and it must be +1 (5'3' direction) or -1 (3'5' direction).
 
 The provided nucleotide sequence must be on the direction specified by *strand* in the header
 FASTA.
-The genomic sequence file may have a FASTA header whose format is
-different from the above standard *but*, in this case, rare prediction
-errors might arise.
 
 The file of transcripts is a multiFASTA file containing all the transcript sequences (ESTs and
 mRNAs). The header of each sequence must contain the following field:
@@ -34,48 +29,44 @@ and it should contain the following field:
 
     /clone_end=YY
 
-where `XXXXXX` is the GenBank accession number (or in any case a unique identifier within the input
-  transcript file) and `YY` is the strand which the transcript has been read from. `YY` can
-  be either `3'` (for direction 5'3', or strand +1)
-  or `5'` (for direction 3'5', or strand -1).
-  By default, when the `/clone_end` field is not specified, the transcript is
-  considered on strand +1. Furthermore, a transcript
-  sequence, that is also a RefSeq sequence, is forced on strand +1.
+where `XXXXXX` is the GenBank accession number (or in any case a unique
+identifier within the input transcript file) and `YY` is the strand
+which the transcript has been read from. `YY` can be either `3'` (for
+direction 5'3', or strand +1) or `5'` (for direction 3'5', or strand
+-1).
+By default, when the `/clone_end` field is not specified, the transcript
+is considered on strand +1. Furthermore, any input RefSeq transcript
+sequence is assumed to be always on strand +1.
 
 
 ## List of command-line parameters
 
 PIntron can be run with the following options:
 
-* `-g`	`--genomic=FILE`		FILE containing the genomic sequence (*default=*genomic.txt)
-* `-s`	`--est=FILE`            FILE containing the transcript sequences (*default=*ests.txt)
-* `-o`	`--output=FILE`	output JSON FILE with ... (*default=*pintron-full-output.json)
+* `-g` `--genomic=FILE`           FILE containing the genomic sequence (*default=*genomic.txt)
+* `-s` `--est=FILE`               FILE containing the transcript sequences (*default=*ests.txt)
+* `-o` `--output=FILE`            output FILE with all the details of the predictions in JSON format (*default=*pintron-full-output.json)
+* `-t` `--gtf=FILE`               output FILE with the predicted isoforms in GTF format (*default=*pintron-all-isoforms.gtf)
+*      `--strict-GTF-compliance`  if specified the output GTF FILE will describe only the predicted isoforms which have a CDS annotation, otherwise will describe all the predicted isoforms (*default=*no)
+* `-l`	`--logfile=FILE`	  output FILE containing the log of each step of the pipeline (*default=*pintron-pipeline-log.txt)
+*       `--general-logfile=FILE` output FILE containing the log of the script which manages the pipeline (*default=*pintron-log.txt)
+* `-n`	`--organism=NAME`	NAME of the organism originating the input transcript sequences (*default=*unknown)
+* `-e`	`--gene=NAME`	NAME of the gene originating the input transcript sequences (*default=*unknown)
+* `-b`	`--bin-dir=DIRECTORY`	DIRECTORY containing the executable programs (*default=*system PATH)
 * `-z`	`--compress`	compress output (*default=*no)
-* `-l`	`--logfile=FILE`	output FILE containing a log of the whole pipeline (*default=*pintron-pipeline-log.txt)
-*       `--general-logfile=pintron-log.txt` output FILE containing a
-        log (*default=*pintron-log.txt)
-* `-c`	`--do-not-continue`	do not resume a previously interrupted computation (*default=*no)
-* `-b`	`--bin-dir=DIRECTORY`	DIRECTORY containing the programs (*default=*system PATH)
-* `-n`	`--organism=NAME`	NAME of the organism originating the transcript sequences (*default=*unknown)
-* `-e`	`--gene=NAME`	NAME of the gene originating the transcript sequences (*default=*unknown)
 * `-k`	`--keep-intermediate-files`	keep all intermediate or temporary files  (*default=*no)
-* `-t`  `--gtf=FILE` output GTF FILE with the isoforms that have a CDS annotation (*default=*pintron-cds-annotated-isoforms.gtf)
-*       `--extended-gtf=pintron-all-isoforms.gtf` output extended GTF
-        FILE with the all isoforms (*default=*pintron-all-isoforms.gtf)
-* `--extended-gtf=FILE`	output GTF FILE with all the predicted isoforms (*default=*pintron-all-isoforms.gtf)
-* `-a`	`--alignments`	output also the alignment of ESTs and genomic sequence. The alignments are stored in `est-alignments.sam` using a [SAM](http://samtools.sourceforge.net/) format  (*default=*no)
 
 A typical invocation of PIntron is:
 
-    pintron --genomic=genomic.txt --est=ests.txt -z --output=pintron-full-output.json --logfile=pintron-log.txt
+    pintron --genomic=genomic.txt --est=ests.txt --output=pintron-full-output.json --logfile=pintron-log.txt
 
 or, equivalently:
 
-    pintron -g genomic.txt -s ests.txt -z -o pintron-full-output.json -l pintron-log.txt
+    pintron -g genomic.txt -s ests.txt -o pintron-full-output.json -l pintron-log.txt
 
 
 
-### Advanced customization for experienced users
+### Advanced options
 
 Some parameters can determine how much time can be spent in some
 phases. Default values should be fine in almost all the cases.
@@ -88,11 +79,10 @@ the intron agreement step (*default=*30)
 
 Another parameter can influence the alignments computed.
 
-* `--pas-tolerance=INT` Maximum allowed difference on the exon final
-  coordinate to identify a PAS (*default=*30)
+* `--pas-tolerance=INT` Maximum allowed difference on the exon final coordinate to identify a PAS (*default=*30)
 
 The user can choose the parameters to be used in the spliced alignment step, by providing an
-optional config file (that must be named *config.ini*) in the current working directory.
+optional configuration file (that must be named *config.ini*) in the current working directory.
 The option *-k* allows keeping the dump file *config-dump.ini* of all the parameters actually used
 in the spliced alignment step. Both files are composed of rows in the following format:
 
@@ -111,47 +101,88 @@ Some significant parameters that the user can provide are:
 
 * `min-factor-length` The length (nt) of the minimum common transcript-genome factor (*default=*15)
 * `min-intron-length` The minimum length (nt) allowed for an intron (*default=*60)
-* `max-intron-length`  The maximum length (nt) allowed for an intron (*default=*0, this parameter is ignored)
+* `max-intron-length`  The maximum length (nt) allowed for an intron (*default=*0, 0 means no maximum length)
 * `max-prefix-discarded` The maximum length (nt) of a transcript prefix that can be discarded. (*default=*50)
 * `max-suffix-discarded` The maximum length (nt) of a transcript suffix that can be discarded. (*default=*50)
-* `retain-externals` If *false*, discard the first (and the last, if a polyA chain has not been found) factors of
-a spliced alignment. (*default=*true)
+* `retain-externals` If *false*, discard the first (and the last, if a polyA chain has not been found) factors of a spliced alignment. (*default=*true)
+
+
 
 ## Output
 
 
-
-
 ### JSON Output
 
-The output file specified with the `--output` option is a JSON file, containing informations
-  on the gene structure, the isoforms and the exons. Since JSON is mainly a
-  (key, value) dictionary, we have chosen keys that are as self-explaining as
-  possible. We have exploited the nesting nature of JSON files to
-encode a set of gene where each gene has a set of isoforms and a set of
-  introns.
+The output file specified with the `--output` option is a JSON file,
+containing information on the gene structure, the isoforms and the
+exons. Since JSON is mainly a (key, value) dictionary, we have chosen
+keys that are as self-explaining as possible. We have exploited the
+nesting nature of JSON files to encode a set of gene where each gene has
+a set of isoforms and a set of introns.
 
-Each gene has keys  "length_genomic_sequence",
-  "version",  "number_isoforms", "isoforms" (a hash where a progressive ID is
-  the only key and each value is a single isoform), "introns" (a list).
+The current JSON schema (version **5**, produced since version **1.3.0** of PIntron) has a dictionary as top-level element with the following keys:
 
-Each isoform has keys "canonical start codon?",
-  "canonical end codon?", "NMD flag", "polyA?", "annotated CDS?", "start", "PAS?"
-  "end", "number exons", "Type", "length", "coding length", "reference?", "from RefSeq?",
-  "exons" (a list of exons).
+* `program_version`: version of PIntron that produced the current JSON file
+* `file_format_version`: the version of the JSON schema (currently is version **5**)
+* `genome`: a dictionary describing the input genomic sequence. It contains the following elements:
+  - `sequence_id`: the sequence identifier obtained through the FASTA header in the input genomic file (without the symbol ">")
+  - `strand`: the gene strand, which is "+" if the input gene is on the plus (5'3') strand, otherwise it is "-"
+  - `length`: the sequence length
+* `number_of_processed_transcripts`: the number of input transcripts which have been successfully aligned to the input genome
+* `number_of_predicted_isoforms`: the number of isoforms that have been predicted
+* `introns`: a dictionary of the predicted introns, whose keys are the progressive identifiers and values are dictionaries with the following entries:
+  - the (1-based) start position of the intron both on the input genomic sequence (*key=*`relative_start`) and on the reference chromosome (*key=*`absolute_start`)
+  - the (1-based) end position of the intron both on the input genomic sequence (*key=*`relative_end`) and on the reference chromosome (*key=*`absolute_end`)
+  - the intron length (*key=*`length`)
+  - the 15bp-long suffix of the donor exon (*key=*`donor_exon_suffix`) and the 15bp-long prefix of the acceptor exon (*key=*`acceptor_exon_prefix`), flanking the intron
+  - the 20bp-long prefix (*key=*`prefix`) and the 20bp-long suffix (*key=*`suffix`) of the intron
+  - the average transcript-genome alignment error at the donor (*key=*`donor_alignment_error`) and at the acceptor (*key=*`acceptor_alignment_error`) splice sites (computed on a 15bp-long suffix of the donor exon and on a 15bp-long prefix of the acceptor exon, respectively)
+  - the intron type (*key=*`type`): a value of 0 means a U12 intron, a value of 1 means a U2 intron, while 2 denotes an unclassified intron
+  - the score (*key=*`BPS_score`) and the position (*key=*`BPS_position`) of the Branch Point Sequence (BPS) from the donor splice site; if the BPS does not exist, then the score is 0, and the key `BPS_position` is not present
+  - the splice site scores in donor (*key=*`donor_score`) and acceptor (*key=*`acceptor_score`)
+  - the intron pattern (*key=*`pattern`), given by the first and the last dinucleotides concatenated into a unique string (the string 'GTAG' denotes a canonical intron)
+  - when present, the repeat sequence (*key=*`repeat_sequence`), that is the sequence giving ambiguities at the intron splice sites
+  - the number of input transcripts supporting the intron (*key=*`number_of_supporting_transcripts`) and their characteristics (*key=*`supporting_transcripts`). The latter is a dictionary whose keys are the GenBank identifiers of the supporting transcripts and values are dictionaries representing the characteristics of input transcript supporting the current intron:
+    + the 15bp-long suffix (*key=*`donor_factor_suffix`) of the transcript factor aligned to the donor exon
+    + the 15bp-long prefix (*key=*`acceptor_factor_prefix`) of the transcript factor aligned to the acceptor exon
+    + the (1-based) start (*key=*`donor_factor_start`) and end (*key=*`donor_factor_end`) positions of the transcript factor aligned to the donor exon; these endpoints are given over the transcript itself
+    + the (1-based) start (*key=*`acceptor_factor_start`) and end (*key=*`acceptor_factor_end`) positions of the transcript factor aligned to the acceptor exon; these endpoints are given over the transcript itself
+* `isoforms`: a dictionary of the predicted introns, whose keys are the progressive identifiers and values are dictionaries with the following entries:
+  - the sequence (*key=*`sequence`) of the isoform and its length (*key=*`length`)
+  - if the isoform is a RefSeq mRNA (*key=*`from_RefSeq?`); if that is true, then its GenBank identifier is also given (*key=*`RefSeqID`)
+  - if the isoform is to be considered as a reference (*key=*`reference?`) against which all splicing events are described. The reference isoform must be unique in the set of the predicted isoforms.
+  - a string describing the splicing variants with respect to the reference isoform (*key=*`variant_type`). When the isoform itself is the reference, then this string is "_RefSeqID_ (Reference TR)", where _RefSeqID_ is the value (eventually the null string) of the key `RefSeqID`
+  - if the coding sequence (CDS) has been annotated on the isoform (*key=*`annotated_CDS?`); if that is true, then the following data are also given:
+    + the length of the coding sequence (*key=*`CDS_length`) and its (1-based) start (*key=*`CDS_start`) and end (*key=*`CDS_end`) positions on the isoform (stop codon not included)
+    + if the CDS starts with the ATG codon (*key=*`start_codon?`) (a false value denotes an incomplete CDS)
+    + if the CDS ends with a stop codon (*key=*`stop_codon?`) (a false value denotes an incomplete CDS)
+    + if the start ATG codon, referred to the genome, is conserved with respect to the start ATG codon of the reference isoform (*key=*`reference_start_codon?`).
+    + if the stop codon, referred to the genome, is conserved with respect to the stop codon of the reference isoform (*key=*`reference_stop_codon?`).
+    + the length of the CDS translation (*key=*`protein_length`)
+    + if the CDS translation is incomplete (*key=*`protein_incomplete?`)
+    + if the CDS is in frame (*key=*`reference_frame?`) with respect to the CDS of the reference isoform
+  - if a PolyAdenilation Signal (*key=*`PAS?`) and a polyA tail (*key=*`polyA?`) have been detected on the isoform
+  - the introns composing the isoform (*key=*`introns`), as a list of progressive identifiers related to the keys of the dictionary `introns`
+  - the Nonsense-Mediated Decay flag (*key=*`NMD_flag`): a value of 1 means that the CDS has been annotated, the exon containing the stop codon is not the last one, and its 3'UTR suffix is longer than 50bp. Otherwise (that is, the stop codon is not on the last exon, or the 3'UTR exon suffix is at most 50bp), the value is 0. When the CDS has not been annotated or the stop codon is missing, then the NMD flag is set to -1.
+  - the number of exons composing the isoform (*key=*`number_of_exons`)
+  - the set of exons composing the isoform (*key=*`exons`), as a list of exons represented each one by a dictionary giving the following data:
+    + the (1-based) start (*key=*`relative_start`) and end (*key=*`relative_end`) positions on the input genomic sequence
+    + the (1-based) start (*key=*`absolute_start`) and end (*key=*`absolute_end`) positions on the reference chromosome
+    + the length of the exon on the genome (*key=*`length`) and on the transcript (*key=*`length_on_transcript`)
+    + the exon sequence (*key=*`sequence`), which is considered on the genome, when the isoform is not a RefSeq mRNA, otherwise the sequence is considered on the transcript. In the latter case, the length on the transcript (*key=*`length_on_transcript`) is the actual exon length
+    + the length (*key=*`5UTR_length`) of the 5'UTR exon prefix (that is, the exon prefix belonging to the 5'UTR region). A value greater than 0 means that the exon has a prefix that belongs to the 5'UTR region. In that case, it is also given the start (*key=*`absolute_5UTR_start`) and the end (*key=*`absolute_5UTR_end`) positions on the reference chromosome of the 5'UTR exon prefix
+    + the length (*key=*`3UTR_length`) of the 3'UTR exon suffix (that is, the exon suffix belonging to the 3'UTR region). A value greater than 0 means that the exon has a suffix that belongs to the 3'UTR region. In that case, it is also given the start (*key=*`absolute_3UTR_start`) and the end (*key=*`absolute_3UTR_end`) positions on the reference chromosome of the 3'UTR exon suffix
+    + the cumulative length considered on the genome (*key=*`cumulative_length`) and considered on the transcript (*key=*`cumulative_length_on_transcript`)
+    + the start (*key=*`start_codon_absolute_start`) and the end (*key=*`start_codon_absolute_end`) positions, on the reference chromosome, of the portion of the start codon (possibly the whole feature) belonging to the exon. This value exists only if the exon contains the start codon or a portion of it. In that case, the frame of the start codon (*key=*`start_codon_frame`) is also given, and is the number of the leading start codon bases that are located in the previous exon(s) of the isoform
+    + the start (*key=*`stop_codon_absolute_start`) and the end (*key=*`stop_codon_absolute_end`) positions, on the reference chromosome, of the portion of the stop codon (possibly the whole feature) belonging to the exon. This value exists only if the exon contains the stop codon or a portion of it. In that case, the frame of the stop codon (*key=*`stop_codon_frame`) is also given, and is the number of leading stop codon bases that are located in the previous exon(s) of the isoform.
+    + the start (*key=*`CDS_absolute_start`) and the end (*key=*`CDS_absolute_end`) positions, on the reference chromosome, of the portion of the coding sequence (possibly the whole feature) belonging to the exon. This value exists only if the exon contains the coding sequence or a portion of it. In that case, the frame of the coding sequence (*key=*`CDS_frame`) is also given, and is the number of the leading CDS bases that are located in the previous exon(s) of the isoform
 
-Each exon has keys  "sequence", "relative start", "relative end",
-  "chromosome start", "chromosome end" (absolute coordinates), "3utr length",
-  "5utr length".
 
-Each intron has keys "relative start", "relative end", "chromosome start",
-"chromosome end", "length", "number supporting EST", "EST_list" (a list of EST
-IDs), "donor alignment average error", "acceptor alignment average error", "donor score",
-"acceptor score", "BPS score", "BPS position", "type", "pattern",
-"repeat sequence", "donor suffix", "prefix", "suffix",
-"acceptor prefix"
 
 ### GTF Output
 
-* specified with the `--gtf` option is a standard GTF file, containing the isoforms that have a CDS annotation.
-* specified with the `--extended-gtf` option is a GTF file, containing all the predicted isoforms.
+The GTF file specified with the `--gtf` option is a
+[standard GTF file](http://mblab.wustl.edu/GTF22.html) describing all
+the predicted isoforms, unless option `--strict-GTF-compliance` has been
+specified. In this case only the isoforms with a CDS-annotation are
+reported.

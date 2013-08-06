@@ -42,3 +42,16 @@ div#tocBlock #toc ul li {
     margin-left: 5px !important;
     padding: 0 !important;
 }
+
+p+ul {
+    margin-top: 0em;
+}
+
+li>p {
+    margin: 0.2em;
+}
+
+li {
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
