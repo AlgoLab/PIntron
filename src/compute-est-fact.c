@@ -132,10 +132,15 @@ build_meg(pEST_info est,
 	 too_complex= too_complex || is_too_complex(*pV, config);
 	 config->min_factor_len -= *pt_inc_pairing_len;
 	 if (too_complex) {
-		++(*pt_inc_pairing_len);
-		EA_destroy(*pV, (delete_function)vi_destroy);
-		INFO("MEG too much complex. Re-trying with min-factor-len= %zd.",
-			  config->min_factor_len+(*pt_inc_pairing_len));
+           if (config->min_factor_len+(*pt_inc_pairing_len)+1+2 < EA_size(*pV)) {
+             ++(*pt_inc_pairing_len);
+             EA_destroy(*pV, (delete_function)vi_destroy);
+             INFO("MEG too much complex. Re-trying with min-factor-len= %zd.",
+                  config->min_factor_len+(*pt_inc_pairing_len));
+           } else {
+             INFO("The MEG seems complex but min-factor-len cannot be further increased.");
+             too_complex= false;
+           }
 	 }
 	 MYTIME_stop(pt_meg);
   } while(too_complex);

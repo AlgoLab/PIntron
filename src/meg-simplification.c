@@ -113,6 +113,9 @@ is_too_complex(pext_array V, pconfiguration config) {
   DEBUG("The shortest pairings have length %4d, "
 		  "they appear %8zd times over %8zd total pairings.",
 		  min_len, freq_min_len, tot_pairings);
+  // Small graphs are always accepted
+  if ((tot_pairings < 5) || (tot_edges < 4))
+    return false;
   if ((config->max_pairings_in_MEG!=0) &&
 		(tot_pairings > config->max_pairings_in_MEG) &&
 		(freq_min_len >
