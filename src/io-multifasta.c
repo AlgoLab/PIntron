@@ -221,20 +221,17 @@ void write_multifasta_output(pEST_info gen, pEST est, FILE* output_file, char re
 		  unsigned int r_index=(retain_externals == 0)?((est->info->suff_polyA_length == -1)?(list_size(factorization)):(list_size(factorization)+1)):(list_size(factorization)+1);
 
 		  while(listit_has_next(factor_it)){
-			 pfactor factor=(pfactor)listit_next(factor_it);
-			 if(counter > l_index && counter < r_index){
-				fprintf(output_file, "%d %d %d %d ", factor->EST_start+1, factor->EST_end+1, factor->GEN_start+1, factor->GEN_end+1);
-				int i;
-				for(i=factor->EST_start; i<=factor->EST_end; i++){
-				  fprintf(output_file, "%c", est->info->original_EST_seq[i]);
-				}
-				fprintf(output_file, " ");
-				for(i=factor->GEN_start; i<=factor->GEN_end; i++){
-				  fprintf(output_file, "%c", gen->original_EST_seq[i]);
-				}
-				fprintf(output_file, "\n");
-			 }
-			 counter++;
+                    pfactor factor=(pfactor)listit_next(factor_it);
+                    if(counter > l_index && counter < r_index){
+                      fprintf(output_file, "%d %d %d %d %.*s %.*s\n",
+                              factor->EST_start + 1, factor->EST_end + 1,
+                              gen->pref_N_length + factor->GEN_start + 1, gen->pref_N_length + factor->GEN_end + 1,
+                              factor->EST_end + 1 - factor->EST_start,
+                              est->info->original_EST_seq + factor->EST_start,
+                              factor->GEN_end + 1 - factor->GEN_start,
+                              gen->original_EST_seq + gen->pref_N_length + factor->GEN_start);
+                    }
+                    counter++;
 		  }
 		  listit_destroy(factor_it);
 		}
