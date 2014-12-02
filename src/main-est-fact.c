@@ -78,6 +78,7 @@ pEST_info copy_and_reverse(pEST_info est) {
   rev_est->EST_strand_as_read=
 	 create_and_copy(est->EST_strand_as_read);
   rev_est->EST_strand= - est->EST_strand;
+  rev_est->fixed_strand= est->fixed_strand;
   rev_est->pref_polyA_length= est->suff_polyT_length;
   rev_est->suff_polyA_length= est->pref_polyT_length;
   rev_est->pref_polyT_length= est->suff_polyA_length;
@@ -197,13 +198,17 @@ int main(int argc, char** argv) {
 	 DEBUG("Set the EST strand and RC");
 	 set_EST_Strand_and_RC(est, gen);
 
-	 pEST_info rev_est= copy_and_reverse(est);
 	 list_add_to_tail(new_est_list, est);
-	 list_add_to_tail(new_est_list, rev_est);
 
 	 DEBUG("Replace polyA/T with fake characters");
 	 polyAT_substitution(est);
-	 polyAT_substitution(rev_est);
+
+        if (!est->fixed_strand) {
+          DEBUG("Strand is not fixed. Adding also its reverse and complement.");
+          pEST_info rev_est= copy_and_reverse(est);
+          list_add_to_tail(new_est_list, rev_est);
+          polyAT_substitution(rev_est);
+        }
   }
   listit_destroy(estit);
 
@@ -239,37 +244,50 @@ int main(int argc, char** argv) {
 
   size_t id_p= 1;
   estit= list_first(est_list);
+  bool reversed= false;
 
   while (listit_has_next(estit)) {
-	 pEST_info est= (pEST_info)listit_next(estit);
-	 pEST factorized_est=
-		compute_est_fact(gen, est, tree, pg,
-							  floginfo, fmeg, fpmeg, ftmeg,
-							  fintronic,
-							  pt_alg, pt_comp, pt_io, config);
+    pEST_info est= (pEST_info)listit_next(estit);
+    pEST factorized_est=
+      compute_est_fact(gen, est, tree, pg,
+                       floginfo, fmeg, fpmeg, ftmeg,
+                       fintronic,
+                       pt_alg, pt_comp, pt_io, config);
 
-	 if(!list_is_empty(factorized_est->factorizations)) {
-		MYTIME_start(pt_io);
-		write_multifasta_output(gen, factorized_est, f_multif_out, config->retain_externals);
-		write_single_EST_info(est_multif_out, factorized_est->info);
-		MYTIME_stop(pt_io);
-		if(id_p % 2 == 1){
-		  listit_next(estit);
-		  ++id_p;
-		}
-	 } else {
-		if(id_p % 2 == 1){
-		  INFO("...the strand from the input file may be wrong!");
-		} else {
-		  INFO("...the EST %s has no alignment!", est->EST_gb);
-		}
-	 }
+    if (!list_is_empty(factorized_est->factorizations)) {
+      // Found valid factorizations
+      INFO("Found valid factorization(s) for EST %s on the %s strand of the genomic.",
+           est->EST_gb,
+           ((est->EST_strand==1)?"same":"opposite"));
+      MYTIME_start(pt_io);
+      write_multifasta_output(gen, factorized_est, f_multif_out, config->retain_externals);
+      write_single_EST_info(est_multif_out, factorized_est->info);
+      MYTIME_stop(pt_io);
+      // Skip next sequence if it is the reverse of this one
+      if (!est->fixed_strand && !reversed) {
+        listit_next(estit);
+        ++id_p;
+      }
+      reversed= false; // Next sequence is "original"
+    } else {
+      // No valid factorization found
+      if (reversed || est->fixed_strand) {
+        // It is already the rev&compl sequence or it cannot be rev&complement
+        INFO("...the EST %s has no alignment! (Fixed strand? %s)",
+             est->EST_gb, (est->fixed_strand ? "true" : "false"));
+        reversed= false; // Next sequence is "original"
+      } else {
+        // !reversed && !fixed_strand
+        INFO("...the strand from the input file may be wrong (read: '%s')!", est->EST_strand_as_read);
+        reversed= true; // Next sequence is reversed
+      }
+    }
 
-	 EST_destroy_just_factorizations(factorized_est);
+    EST_destroy_just_factorizations(factorized_est);
 
-	 ++id_p;
+    ++id_p;
 
-	 log_info(floginfo, "est-processing-end");
+    log_info(floginfo, "est-processing-end");
   }
 
   DEBUG("Destroying the GST additional informations");

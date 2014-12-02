@@ -425,7 +425,6 @@ void parse_genomic_header(pEST_info gen) {
   }
 }
 
-
 void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
   my_assert(EST_info != NULL);
   my_assert(EST_info->EST_id != NULL);
@@ -436,8 +435,10 @@ void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
   if (EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[1] == 'M') {
     strcpy(EST_info->EST_strand_as_read, "1");
     EST_info->EST_strand= 1;
+    EST_info->fixed_strand= true;
     DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
   } else {
+    bool valid_strand= false;
     char* p=strstr(EST_info->EST_id, "/clone_end=");
     if (p == NULL) {
       p=strstr(EST_info->EST_id, "/CLONE_END=");
@@ -457,11 +458,30 @@ void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
 
       if (!strcmp(EST_info->EST_strand_as_read, "3")) {
         EST_info->EST_strand= 1;
+        valid_strand= true;
       } else if (!strcmp(EST_info->EST_strand_as_read, "5")) {
         EST_info->EST_strand= -1;
+        valid_strand= true;
       } else {
         WARN("Failed to interpret the strand. Setting to '1' by default. Read: '%s'", EST_info->EST_strand_as_read);
         EST_info->EST_strand= 1;
+      }
+      if (valid_strand) {
+        p= strstr(EST_info->EST_id, "/fixed_strand=");
+        if (p == NULL) {
+          p= strstr(EST_info->EST_id, "/FIXED_STRAND=");
+        }
+        if (p != NULL) {
+          p+= 14;
+          if (*p == '0') {
+            EST_info->fixed_strand= false;
+          } else if (*p == '1') {
+            EST_info->fixed_strand= true;
+          } else {
+            WARN("Failed to interpret if the strand is fixed. Setting to 'FALSE' by default. Read: '%c'", *p);
+            EST_info->fixed_strand= false;
+          }
+        }
       }
     } else {
       WARN("Failed to find a strand. Setting to '1' by default.");

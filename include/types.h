@@ -145,9 +145,18 @@ struct _EST_info
   char* EST_gb;					//GB id della EST estratto dall'header
 										//Unigene (/gb=AA11111)
   char* EST_chr;				//Numero del cromosoma (solo per la genomica)
-  char* EST_strand_as_read;				//Strand (per genomica ed EST, 1
-													//per 5'3' e -1 per 3'5')
+  char* EST_strand_as_read;
+             // Strand estratto dall'header.
+             // Per genomica:  "+1/1" per 5'3' e "-1" per 3'5'
+             // Per ESTs:      "3" -> concorde con strand genomica,
+             //                "5" -> discorde con strand genomica
   int EST_strand;
+             // Strand interpretato (o settato di default se mancante dall'header).
+             // Per genomica:  1 per 5'3' e -1 per 3'5'
+             // Per ESTs:      +1 -> concorde con strand genomica,
+             //                -1 -> discorde con strand genomica
+  bool fixed_strand;
+             // Se true, non cercare di allinearne il reverse & complement
 
   int abs_start;				//Start rispetto al cromosoma (per genomica)
   int abs_end;					//End rispetto al cromosoma (per genomica)
