@@ -31,12 +31,21 @@ and it should contain the following field:
 
 where `XXXXXX` is the GenBank accession number (or in any case a unique
 identifier within the input transcript file) and `YY` is the strand
-which the transcript has been read from. `YY` can be either `3'` (for
-direction 5'3', or strand +1) or `5'` (for direction 3'5', or strand
--1).
+which the transcript has been read from. `YY` can be either `3'` (for sequences cloned from the same strand of the
+gene, i.e., direction 5'3') or `5'` (for sequences cloned from the opposite strand of that of the gene, i.e.,
+direction 3'5').
 By default, when the `/clone_end` field is not specified, the transcript
-is considered on strand +1. Furthermore, any input RefSeq transcript
-sequence is assumed to be always on strand +1.
+is considered on the same strand of the gene. Furthermore, any input RefSeq transcript
+sequence is assumed to be always on same strand of the gene.
+
+If the `/clone_end` field is specified, then the header of each sequence might contain the following field:
+
+    /fixed_strand=Z
+
+where `0` (default) means that PIntron can try to find an alignment on the opposite strand with respect to
+that specified (i.e., `YY`) if it is not able to find a valid alignment on strand `YY`, while `1` means that
+a valid alignment (if any) must be found on strand `YY`.
+
 
 
 ## List of command-line parameters
