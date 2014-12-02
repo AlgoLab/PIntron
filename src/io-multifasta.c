@@ -433,51 +433,47 @@ void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
 
   EST_info->EST_strand_as_read= c_palloc(LEN_STRAND_ARRAY+1);
 
-  if(EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[1] == 'M'){
-	 strcpy(EST_info->EST_strand_as_read, "1");
-	 EST_info->EST_strand= 1;
-	 DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
+  if (EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[1] == 'M') {
+    strcpy(EST_info->EST_strand_as_read, "1");
+    EST_info->EST_strand= 1;
+    DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
   } else {
-	 char* p=strstr(EST_info->EST_id, "/clone_end=");
-	 if(p == NULL){
-		p=strstr(EST_info->EST_id, "/CLONE_END=");
-	 }
-	 if(p != NULL){
-		p+=11;
-		int i=0;
-		while((i<LEN_STRAND_ARRAY) &&
-				(*p != '\0') &&
-				(*p != '\'')){
-		  EST_info->EST_strand_as_read[i]= *p;
-		  p++;
-		  i++;
-		}
-		EST_info->EST_strand_as_read[i]='\0';
-		DEBUG("STRAND ==> %s", EST_info->EST_strand_as_read);
+    char* p=strstr(EST_info->EST_id, "/clone_end=");
+    if (p == NULL) {
+      p=strstr(EST_info->EST_id, "/CLONE_END=");
+    }
+    if (p != NULL) {
+      p+=11;
+      int i=0;
+      while ((i<LEN_STRAND_ARRAY) &&
+            (*p != '\0') &&
+            (*p != '\'')){
+        EST_info->EST_strand_as_read[i]= *p;
+        p++;
+        i++;
+      }
+      EST_info->EST_strand_as_read[i]='\0';
+      DEBUG("STRAND as read ==> %s", EST_info->EST_strand_as_read);
 
-		if(!strcmp(gen->EST_strand_as_read, "1") || !strcmp(gen->EST_strand_as_read, "+1")){
-		  if(!strcmp(EST_info->EST_strand_as_read, "3"))
-			 EST_info->EST_strand= 1;
-		  else
-			 EST_info->EST_strand= -1;
-		}
-		else{
-		  if(!strcmp(EST_info->EST_strand_as_read, "5"))
-			 EST_info->EST_strand= 1;
-		  else
-			 EST_info->EST_strand= -1;
-		}
-	 }
-	 else{
-		EST_info->EST_strand= 1;
-		EST_info->EST_strand_as_read[0]= '\0';
-	 }
+      if (!strcmp(EST_info->EST_strand_as_read, "3")) {
+        EST_info->EST_strand= 1;
+      } else if (!strcmp(EST_info->EST_strand_as_read, "5")) {
+        EST_info->EST_strand= -1;
+      } else {
+        WARN("Failed to interpret the strand. Setting to '1' by default. Read: '%s'", EST_info->EST_strand_as_read);
+        EST_info->EST_strand= 1;
+      }
+    } else {
+      WARN("Failed to find a strand. Setting to '1' by default.");
+      EST_info->EST_strand= 1;
+      EST_info->EST_strand_as_read[0]= '\0';
+    }
   }
 
   DEBUG("Interpreted strand ==> %d", EST_info->EST_strand);
 
   if (EST_info->EST_strand == -1) {
-	 reverse_and_complement(EST_info);
+    reverse_and_complement(EST_info);
   }
 }
 
