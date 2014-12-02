@@ -768,8 +768,9 @@ def exec_system_command(command, error_comment, logfile, cmd_label,
 
     try:
         retcode = subprocess.call(command + " 2>> " + logfile, shell=True)
-        if retcode < 0:
-            print(error_comment, -retcode, file=sys.stderr)
+        if retcode != 0:
+            print(error_comment, retcode, file=sys.stderr)
+            raise PIntronError(error_comment)
         if os.path.exists("gmon.out"):
             try:
                 os.rename("gmon.out", cmd_label+".gmon.out")

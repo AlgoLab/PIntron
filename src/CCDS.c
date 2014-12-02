@@ -529,7 +529,7 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error3!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
 //Lettura delle prime due righe
@@ -608,19 +608,19 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
          trs[i].tr_to=(int *)malloc(trs[i].exons*sizeof(int));
          if(trs[i].tr_from == NULL || trs[i].tr_to == NULL){
                 fprintf(stderr, "Error5!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
 
          trs[i].temp_sequences=(char **)malloc(trs[i].exons*sizeof(char *));
          if(trs[i].temp_sequences == NULL){
                 fprintf(stderr, "Error51!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
          for(j=0; j<trs[i].exons; j++){
                 trs[i].temp_sequences[j]=(char *)malloc(MAX_NLD*sizeof(char));
                 if(trs[i].temp_sequences[j] == NULL){
                   fprintf(stderr, "Error511!\n");
-                  exit(0);
+                  exit(EXIT_FAILURE);
                 }
          }
 
@@ -699,7 +699,7 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
   FILE *in_gen=fopen(temp, "r");
   if(in_gen == NULL){
          fprintf(stderr, "Error genomic file!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
   
   char *tmp_line= NULL;
@@ -873,7 +873,7 @@ void GetIntronList(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error6!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   number_of_introns=0;
@@ -893,13 +893,13 @@ void GetIntronList(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error6!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   introns=(struct intron *)calloc(number_of_introns,sizeof(struct intron));
   if(introns == NULL){
          fprintf(stderr, "Error7!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
@@ -915,7 +915,7 @@ void GetIntronList(char *fileName){
          introns[counter].IDs=(char **)malloc(conf_EST*sizeof(char *));
          if(introns[counter].IDs == NULL){
                 fprintf(stderr, "Error8!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
 
          i=0;
@@ -932,7 +932,7 @@ void GetIntronList(char *fileName){
                   introns[counter].IDs[ID_counter]=(char *)malloc(strlen(temp_ID)+1*sizeof(char));
                   if(introns[counter].IDs[ID_counter] == NULL){
                          fprintf(stderr, "Error9!\n");
-                         exit(0);
+                         exit(EXIT_FAILURE);
                   }
                   strcpy(introns[counter].IDs[ID_counter], temp_ID);
                   ID_counter++;
@@ -971,7 +971,7 @@ void GetCDSAnnotations(char *fileName){
    a_cds=(struct annotated_cds *)malloc(number_of_cds*sizeof(struct annotated_cds));
   if(a_cds == NULL){
          fprintf(stderr, "Error1 in memory allocation GetCDSAnnotations!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
@@ -981,7 +981,7 @@ void GetCDSAnnotations(char *fileName){
 		a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
 		if (a_cds == NULL) {
 		  fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
-		  exit(0);
+		  exit(EXIT_FAILURE);
 		}
 
 		DEBUG("Reading RefSeq no. %d...", counter+1);
@@ -1307,7 +1307,7 @@ void MarkIntronType(){
                 introns[i].RefSeq=(char **)malloc(refseqnum*sizeof(char *));
                 if(introns[i].RefSeq == NULL){
                   fprintf(stderr, "Error in MarkIntronType!\n");
-                  exit(0);
+                  exit(EXIT_FAILURE);
                 }
                 j=0;
                 refseqnum=0;
@@ -1316,7 +1316,7 @@ void MarkIntronType(){
                          introns[i].RefSeq[refseqnum]=(char *)malloc((strlen(introns[i].IDs[j])+1)*sizeof(char));
                          if(introns[i].RefSeq[refseqnum] == NULL){
                                 fprintf(stderr, "Error in MarkIntronType!\n");
-                                exit(0);
+                                exit(EXIT_FAILURE);
                          }
                          strcpy(introns[i].RefSeq[refseqnum], introns[i].IDs[j]);
                          refseqnum++;
@@ -3159,7 +3159,7 @@ i=0;
   DEBUG("Index %d", index);
   if(index == -1 && number_of_transcripts != 0){
 	 fprintf(stderr, "Error!\n");
-	 exit(0);
+	 exit(EXIT_FAILURE);
   }
 
 #ifndef EXON_LONGEST_REF
@@ -3195,7 +3195,7 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
 
                   if(cds_for_gene->cds_from == NULL || cds_for_gene->cds_to == NULL){
                          fprintf(stderr, "Error2 here1!\n");
-                         exit(0);
+                         exit(EXIT_FAILURE);
                   }
 
                   counter=0;
@@ -3285,7 +3285,7 @@ void ComputeAlignment(char *EST_exon, char *genomic_exon){
          Mdir[i]=(char *)malloc((m+1)*sizeof(char));
          if(Mdir[i] == NULL){
                 fprintf(stderr, "Error in ComputeAlignment\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
   }
 
@@ -3316,14 +3316,14 @@ void ComputeAlignMatrix(char *EST_exon, char *genomic_exon, int n, int m, char *
   M=(int **)malloc((n+1)*sizeof(int *));
   if(M == NULL){
          fprintf(stderr, "Error in ComputeAlignMatrix\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   for(i=0; i<n+1; i++){
          M[i]=(int *)malloc((m+1)*sizeof(int));
          if(M[i] == NULL){
                 fprintf(stderr, "Error2 in ComputeAlignMatrix\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
   }
 
@@ -3480,7 +3480,7 @@ void GetGenomicExons(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error11!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
