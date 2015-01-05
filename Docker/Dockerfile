@@ -5,8 +5,6 @@ ENV HOME /root
 
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
-#   Build system
-RUN /build/utilities.sh
 
 # PIntron requisites
 COPY pre-pintron.sh /build/
@@ -25,8 +23,8 @@ USER pintron
 RUN /build/build-pintron.sh
 WORKDIR /home/app/pintron
 
-USER root
 # Add configuration to nginx:
+USER root
 RUN rm /etc/nginx/sites-enabled/default
 COPY config/nginx-pintron.conf /etc/nginx/sites-enabled/pintron.conf
 # TODO: better configuration

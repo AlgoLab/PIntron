@@ -11,3 +11,6 @@ Input files are placed into the /home/app/input dir, while the results are
 stored into /home/app/results.
 
 # Customization
+
+If you want to track a version of PIntron different from stable (master), put
+the desired version into ```config/pintron_version```.

@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source /build/buildconfig
 set -x
 
 export LC_ALL=C
