@@ -26,20 +26,12 @@
 # Copyright (c) 2013-2014 Phusion
 #
 ####
+
 set -x
 
-# allow ssh to root
-test -f /root/config/root_key.pub && cat /root/config/root_key.pub >> /root/.ssh/authorized_keys
+export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
 
-
-# Create the user
-adduser --disabled-password --gecos "PIntron" pintron
-usermod -L pintron
-mkdir -p /home/pintron/.ssh
-chmod 700 /home/pintron/.ssh
-mkdir -p /home/pintron/input
-mkdir -p /home/pintron/results
-# Get the web servers public keys
-test -f /root/config/web_keys.pub && cp /root/config/web_keys.pub /home/pintron/.ssh/authorized_keys
-test -f config/web_keys_url && curl -L $(cat config/web_keys_url) >>  /home/pintron/.ssh/authorized_keys
-chown --recursive pintron:pintron /home/pintron/
+apt-get update
+apt-get dist-upgrade -y
+apt-get install -y git-core build-essential python3 nginx ssh gengetopt
