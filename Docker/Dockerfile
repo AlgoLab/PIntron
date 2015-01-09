@@ -42,14 +42,6 @@ COPY pre-pintron.sh /build/
 COPY config/* /root/config/
 RUN /build/pre-pintron.sh
 
-# Enable nginx
-USER root
-RUN mkdir /etc/service/nginx
-COPY runit-nginx /etc/service/nginx/run
-# Add configuration to nginx:
-RUN rm /etc/nginx/sites-enabled/default
-COPY config/nginx-pintron.conf /etc/nginx/sites-enabled/pintron.conf
-
 # Periodically check if we can update pintron
 RUN echo "27 * * * *	pintron test -x ~/pintron/Docker/build-pintron.sh &&  ~/pintron/Docker/build-pintron.sh" >> /etc/crontab
 
@@ -61,7 +53,4 @@ ENV HOME /home/pintron
 WORKDIR /home/pintron
 RUN /build/build-pintron.sh
 
-# Clean up APT when done.
-USER root
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-EXPOSE 80 22
+EXPOSE 22
