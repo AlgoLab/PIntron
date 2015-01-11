@@ -21,7 +21,6 @@
 # along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
 #
 ####
-set -e
 
 # This script can also be used to update pintron
 

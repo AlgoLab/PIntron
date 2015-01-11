@@ -26,25 +26,41 @@
 #
 ####
 FROM phusion/baseimage
-
+USER root
 # Set correct environment variables.
 ENV HOME /root
+ENV LC_ALL C
+ENV DEBIAN_FRONTEND noninteractive
 
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
 
-# Update and install packages
-COPY apt-get.sh /build/
-RUN /build/apt-get.sh
-
-# PIntron requisites
-COPY pre-pintron.sh /build/
+#PIntron requisites
+COPY config/root_key.pub /root/.ssh/authorized_keys
 COPY config/* /root/config/
-RUN /build/pre-pintron.sh
+RUN apt-get update
+RUN apt-get -y dist-upgrade
+RUN apt-get install -y git-core build-essential python3 ssh gengetopt
+
+# Create the PIntron user
+RUN adduser --disabled-password --gecos "PIntron" pintron
+RUN usermod -L pintron
+RUN mkdir -p /home/pintron/.ssh
+RUN chmod 700 /home/pintron/.ssh
+RUN mkdir -p /home/pintron/input
+RUN mkdir -p /home/pintron/results
+# Get the web servers public keys
+RUN test -f /root/config/web_keys.pub && cp /root/config/web_keys.pub /home/pintron/.ssh/authorized_keys || echo "No frontends configured"
+RUN test -f config/web_keys_url && curl -L $(cat config/web_keys_url) >>  /home/pintron/.ssh/authorized_keys || echo "No frontends configured"
+RUN chown --recursive pintron:pintron /home/pintron/
+
 
 # Periodically check if we can update pintron
 RUN echo "27 * * * *	pintron test -x ~/pintron/Docker/build-pintron.sh &&  ~/pintron/Docker/build-pintron.sh" >> /etc/crontab
 
+RUN echo "unattended-upgrades	unattended-upgrades/enable_auto_updates	boolean	true" > /tmp/debconf.tmp
+RUN debconf-set-selections /tmp/debconf.tmp
+RUN rm -f /tmp/debconf.tmp
 
 # Get and build PIntron
 COPY build-pintron.sh /build/
@@ -53,4 +69,6 @@ ENV HOME /home/pintron
 WORKDIR /home/pintron
 RUN /build/build-pintron.sh
 
+USER root
+ENV HOME /root
 EXPOSE 22
