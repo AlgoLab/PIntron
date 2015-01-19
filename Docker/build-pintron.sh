@@ -22,6 +22,14 @@
 #
 ####
 
+# Check if we can add some ssh public keys
+cd /home/pintron/.ssh/
+test -f /config/web_keys.pub && cp /config/web_keys.pub new_keys
+test -f /config/web_keys_url && curl -L $(cat config/web_keys_url) > new_url_keys
+cat new_keys new_url_keys | sort -u > authorized_keys
+
+
+
 # This script can also be used to update pintron
 
 VERSION=${pintron_version:master}

@@ -35,39 +35,40 @@ ENV DEBIAN_FRONTEND noninteractive
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
 
-#PIntron requisites
-COPY config/root_key.pub /root/.ssh/authorized_keys
-COPY config/* /root/config/
+# Update the system
 RUN apt-get update
 RUN apt-get -y dist-upgrade
 RUN apt-get install -y git-core build-essential python3 ssh gengetopt
-
-# Create the PIntron user
-RUN adduser --disabled-password --gecos "PIntron" pintron
-RUN usermod -L pintron
-RUN mkdir -p /home/pintron/.ssh
-RUN chmod 700 /home/pintron/.ssh
-RUN mkdir -p /home/pintron/input
-RUN mkdir -p /home/pintron/results
-# Get the web servers public keys
-RUN test -f /root/config/web_keys.pub && cp /root/config/web_keys.pub /home/pintron/.ssh/authorized_keys || echo "No frontends configured"
-RUN test -f config/web_keys_url && curl -L $(cat config/web_keys_url) >>  /home/pintron/.ssh/authorized_keys || echo "No frontends configured"
-RUN chown --recursive pintron:pintron /home/pintron/
-
-
-# Periodically check if we can update pintron
-RUN echo "27 * * * *	pintron test -x ~/pintron/Docker/build-pintron.sh &&  ~/pintron/Docker/build-pintron.sh" >> /etc/crontab
-
 RUN echo "unattended-upgrades	unattended-upgrades/enable_auto_updates	boolean	true" > /tmp/debconf.tmp
 RUN debconf-set-selections /tmp/debconf.tmp
 RUN rm -f /tmp/debconf.tmp
 
-# Get and build PIntron
+# Set the ssh key for root
+COPY config/root_key.pub /root/.ssh/authorized_keys
+
+# Create the PIntron user
+RUN adduser --disabled-password --gecos "PIntron" pintron
+RUN usermod -L pintron
+RUN mkdir /config
+RUN chmod 777 /config
+RUN chown pintron:pintron /config
+
 COPY build-pintron.sh /build/
+
 USER pintron
 ENV HOME /home/pintron
 WORKDIR /home/pintron
+RUN ssh-keygen -q -f /home/pintron/.ssh/id_rsa -N ""
+RUN mkdir -p /home/pintron/input
+RUN mkdir -p /home/pintron/results
+# Build pintron and get the web servers public keys
 RUN /build/build-pintron.sh
+# Periodically check if we can update pintron
+RUN echo 'MAILTO=""' | crontab -
+RUN echo '27 * * * * test -x ~/pintron/Docker/build-pintron.sh && ~/pintron/Docker/build-pintron.sh' | crontab -
+RUN crontab -l
+COPY config/web_keys.pub /config/authorized_keys
+RUN ln -s /config/web_keys.pub /home/pintron/.ssh/authorized_keys
 
 USER root
 ENV HOME /root
