@@ -126,7 +126,7 @@ static char* getData(char *buffer, size_t n, FILE *f_in, int* lenght){
 	 ind = ind + strlen(tmp);
   }
   res[ind] = '\0';
-  list_destroy(l, (delete_function)pfree);
+  list_destroy(l, (delete_function)pfree_function);
   listit_destroy(li);
   FINETRACE("the concatenated string is |%s|", res);
   return res;
@@ -221,20 +221,17 @@ void write_multifasta_output(pEST_info gen, pEST est, FILE* output_file, char re
 		  unsigned int r_index=(retain_externals == 0)?((est->info->suff_polyA_length == -1)?(list_size(factorization)):(list_size(factorization)+1)):(list_size(factorization)+1);
 
 		  while(listit_has_next(factor_it)){
-			 pfactor factor=(pfactor)listit_next(factor_it);
-			 if(counter > l_index && counter < r_index){
-				fprintf(output_file, "%d %d %d %d ", factor->EST_start+1, factor->EST_end+1, factor->GEN_start+1, factor->GEN_end+1);
-				int i;
-				for(i=factor->EST_start; i<=factor->EST_end; i++){
-				  fprintf(output_file, "%c", est->info->original_EST_seq[i]);
-				}
-				fprintf(output_file, " ");
-				for(i=factor->GEN_start; i<=factor->GEN_end; i++){
-				  fprintf(output_file, "%c", gen->original_EST_seq[i]);
-				}
-				fprintf(output_file, "\n");
-			 }
-			 counter++;
+                    pfactor factor=(pfactor)listit_next(factor_it);
+                    if(counter > l_index && counter < r_index){
+                      fprintf(output_file, "%d %d %d %d %.*s %.*s\n",
+                              factor->EST_start + 1, factor->EST_end + 1,
+                              gen->pref_N_length + factor->GEN_start + 1, gen->pref_N_length + factor->GEN_end + 1,
+                              factor->EST_end + 1 - factor->EST_start,
+                              est->info->original_EST_seq + factor->EST_start,
+                              factor->GEN_end + 1 - factor->GEN_start,
+                              gen->original_EST_seq + gen->pref_N_length + factor->GEN_start);
+                    }
+                    counter++;
 		  }
 		  listit_destroy(factor_it);
 		}
@@ -315,32 +312,57 @@ parse_genomic_header_standard(pEST_info gen) {
 // >chrNN:NNNNN:NNNN:+-1
 // return true if successful
   char* header= strdup(gen->EST_id);
+  char* bakheader= header;
   if (header == NULL) return false;
 
   char* chr= strsep(&header, ":");
-  if (chr == NULL) return false;
+  if (chr == NULL) {
+	 free(bakheader);
+	 return false;
+  }
   chr= strdup(chr);
 
   char* start= strsep(&header, ":");
-  if (start == NULL) return false;
+  if (start == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
 
   char* end= strsep(&header, ":");
-  if (end == NULL) return false;
+  if (end == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
 
   char* strand= strsep(&header, ":");
-  if (strand == NULL) return false;
+  if (strand == NULL) {
+	 free(bakheader);
+	 free(chr);
+	 return false;
+  }
   strand= strdup(strand);
 
   char* last= strsep(&header, ":");
-  if (last != NULL) return false;
+  if (last != NULL) {
+	 free(bakheader);
+	 free(chr);
+	 free(strand);
+	 return false;
+  }
 
 // Check that everything is correct
   int abs_start= atoi(start);
   int abs_end= atoi(end);
   int EST_strand= atoi(strand);
   if ((abs_start < 1) || (abs_end < 1) ||
-		((EST_strand != -1) && (EST_strand != +1)))
+		((EST_strand != -1) && (EST_strand != +1))) {
+	 free(bakheader);
+	 free(chr);
+	 free(strand);
 	 return false;
+  }
 
   INFO("Genomic chromosome: %s", chr);
   INFO("Genomic abs start:  %d", abs_start);
@@ -353,6 +375,7 @@ parse_genomic_header_standard(pEST_info gen) {
   gen->EST_strand= EST_strand;
   gen->EST_strand_as_read= strand;
 
+  free(bakheader);
   return true;
 }
 
@@ -402,7 +425,6 @@ void parse_genomic_header(pEST_info gen) {
   }
 }
 
-
 void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
   my_assert(EST_info != NULL);
   my_assert(EST_info->EST_id != NULL);
@@ -410,51 +432,68 @@ void set_EST_Strand_and_RC(pEST_info EST_info, pEST_info gen){
 
   EST_info->EST_strand_as_read= c_palloc(LEN_STRAND_ARRAY+1);
 
-  if(EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[0] == 'M'){
-	 strcpy(EST_info->EST_strand_as_read, "1");
-	 EST_info->EST_strand= 1;
-	 DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
+  if (EST_info->EST_gb != NULL && EST_info->EST_gb[0] == 'N' && EST_info->EST_gb[1] == 'M') {
+    strcpy(EST_info->EST_strand_as_read, "1");
+    EST_info->EST_strand= 1;
+    EST_info->fixed_strand= true;
+    DEBUG("STRAND RefSeq==> %s", EST_info->EST_strand_as_read);
   } else {
-	 char* p=strstr(EST_info->EST_id, "/clone_end=");
-	 if(p == NULL){
-		p=strstr(EST_info->EST_id, "/CLONE_END=");
-	 }
-	 if(p != NULL){
-		p+=11;
-		int i=0;
-		while((i<LEN_STRAND_ARRAY) &&
-				(*p != '\0') &&
-				(*p != '\'')){
-		  EST_info->EST_strand_as_read[i]= *p;
-		  p++;
-		  i++;
-		}
-		EST_info->EST_strand_as_read[i]='\0';
-		DEBUG("STRAND ==> %s", EST_info->EST_strand_as_read);
+    bool valid_strand= false;
+    char* p=strstr(EST_info->EST_id, "/clone_end=");
+    if (p == NULL) {
+      p=strstr(EST_info->EST_id, "/CLONE_END=");
+    }
+    if (p != NULL) {
+      p+=11;
+      int i=0;
+      while ((i<LEN_STRAND_ARRAY) &&
+            (*p != '\0') &&
+            (*p != '\'')){
+        EST_info->EST_strand_as_read[i]= *p;
+        p++;
+        i++;
+      }
+      EST_info->EST_strand_as_read[i]='\0';
+      DEBUG("STRAND as read ==> %s", EST_info->EST_strand_as_read);
 
-		if(!strcmp(gen->EST_strand_as_read, "1") || !strcmp(gen->EST_strand_as_read, "+1")){
-		  if(!strcmp(EST_info->EST_strand_as_read, "3"))
-			 EST_info->EST_strand= 1;
-		  else
-			 EST_info->EST_strand= -1;
-		}
-		else{
-		  if(!strcmp(EST_info->EST_strand_as_read, "5"))
-			 EST_info->EST_strand= 1;
-		  else
-			 EST_info->EST_strand= -1;
-		}
-	 }
-	 else{
-		EST_info->EST_strand= 1;
-		EST_info->EST_strand_as_read[0]= '\0';
-	 }
+      if (!strcmp(EST_info->EST_strand_as_read, "3")) {
+        EST_info->EST_strand= 1;
+        valid_strand= true;
+      } else if (!strcmp(EST_info->EST_strand_as_read, "5")) {
+        EST_info->EST_strand= -1;
+        valid_strand= true;
+      } else {
+        WARN("Failed to interpret the strand. Setting to '1' by default. Read: '%s'", EST_info->EST_strand_as_read);
+        EST_info->EST_strand= 1;
+      }
+      if (valid_strand) {
+        p= strstr(EST_info->EST_id, "/fixed_strand=");
+        if (p == NULL) {
+          p= strstr(EST_info->EST_id, "/FIXED_STRAND=");
+        }
+        if (p != NULL) {
+          p+= 14;
+          if (*p == '0') {
+            EST_info->fixed_strand= false;
+          } else if (*p == '1') {
+            EST_info->fixed_strand= true;
+          } else {
+            WARN("Failed to interpret if the strand is fixed. Setting to 'FALSE' by default. Read: '%c'", *p);
+            EST_info->fixed_strand= false;
+          }
+        }
+      }
+    } else {
+      WARN("Failed to find a strand. Setting to '1' by default.");
+      EST_info->EST_strand= 1;
+      EST_info->EST_strand_as_read[0]= '\0';
+    }
   }
 
   DEBUG("Interpreted strand ==> %d", EST_info->EST_strand);
 
   if (EST_info->EST_strand == -1) {
-	 reverse_and_complement(EST_info);
+    reverse_and_complement(EST_info);
   }
 }
 
@@ -478,7 +517,7 @@ void reverse_and_complement(pEST_info EST_info) {
 }
 
 
-void polyAT_substitution(pEST_info EST_info) {
+static void old_polyAT_substitution(pEST_info EST_info) {
   my_assert(EST_info != NULL);
   my_assert(EST_info->EST_seq != NULL);
 
@@ -615,6 +654,172 @@ void polyAT_substitution(pEST_info EST_info) {
   }
 }
 
+void polyAT_substitution(pEST_info EST_info) {
+  my_assert(EST_info != NULL);
+  my_assert(EST_info->EST_seq != NULL);
+
+  char c;
+  size_t i;
+  const size_t est_len= strlen(EST_info->EST_seq);
+
+  my_assert(est_len>0);
+
+  EST_info->pref_polyA_length=-1;
+  EST_info->suff_polyA_length=-1;
+  EST_info->pref_polyT_length=-1;
+  EST_info->suff_polyT_length=-1;
+
+  if (est_len<_POLYA_MIN_LEN) {
+	 return;
+  }
+
+// Check the beginning
+// Look for a sequence of at least
+// POLYA_MIN_LEN characters, otherwise it does not consider
+// it as a polyAT
+  size_t count_A= 0;
+  size_t count_T= 0;
+  size_t running_count_A= 0;
+  size_t running_count_T= 0;
+  size_t last_A= 0;
+  size_t last_T= 0;
+  size_t last_A_count= 0;
+  size_t last_T_count= 0;
+  for (i= 0;
+		 i<_POLYA_MIN_LEN &&
+			i<est_len;
+		 ++i) {
+	 if (EST_info->EST_seq[i]=='A') {
+		++count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[i]=='T') {
+		++count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+  }
+  DEBUG("Found %zu A and %zu T at the beginning of the sequence.", count_A, count_T);
+  running_count_A= count_A;
+  running_count_T= count_T;
+  while ((i<est_len) &&
+			((running_count_A>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)) ||
+			 (running_count_T>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)))) {
+	 if (EST_info->EST_seq[i-_POLYA_MIN_LEN]=='A') {
+		--running_count_A;
+	 }
+	 if (EST_info->EST_seq[i-_POLYA_MIN_LEN]=='T') {
+		--running_count_T;
+	 }
+	 if (EST_info->EST_seq[i]=='A') {
+		++count_A;
+		++running_count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[i]=='T') {
+		++count_T;
+		++running_count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+	 ++i;
+  }
+  last_A= (last_A<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_A;
+  last_T= (last_T<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_T;
+  if ((last_A_count>=(_POLYA_MIN_FRACTION*(last_A+1))) ||
+		(last_T_count>=(_POLYA_MIN_FRACTION*(last_T+1)))) {
+	 if ((((double)last_A_count)/(last_A+1))>=(((double)last_T_count)/(last_T+1)))
+		c= 'A';
+	 else
+		c= 'T';
+// A polyA/T has been found
+	 char sc= (c=='A')?_POLYA_CHR:_POLYT_CHR;
+	 size_t mlen= ((c=='A')?last_A+1:last_T+1);
+	 INFO("Found a %zubp long initial poly%c.", mlen, c);
+	 for (i= 0; i<mlen; ++i)
+		EST_info->EST_seq[i]= sc;
+	 if(c=='A'){
+		EST_info->pref_polyA_length=mlen;
+	 } else {
+		EST_info->pref_polyT_length=mlen;
+	 }
+  } else {
+	 DEBUG("No polyA/T has been found at the beginning of the sequence.");
+  }
+
+// Check the end
+  count_A= 0;
+  count_T= 0;
+  last_A= 0;
+  last_T= 0;
+  last_A_count= 0;
+  last_T_count= 0;
+  for (i= 0;
+		 i<_POLYA_MIN_LEN &&
+			i<est_len;
+		 ++i) {
+	 if (EST_info->EST_seq[est_len-i-1]=='A') {
+		++count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='T') {
+		++count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+  }
+  DEBUG("Found %zu A and %zu T at the end of the sequence.", count_A, count_T);
+  running_count_A= count_A;
+  running_count_T= count_T;
+  while ((i<est_len) &&
+			((running_count_A>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)) ||
+			 (running_count_T>=(_POLYA_MIN_FRACTION*_POLYA_MIN_LEN)))) {
+	 if (EST_info->EST_seq[est_len-i-1+_POLYA_MIN_LEN]=='A') {
+		--running_count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1+_POLYA_MIN_LEN]=='T') {
+		--running_count_T;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='A') {
+		++count_A;
+		++running_count_A;
+		last_A= i;
+		last_A_count= count_A;
+	 }
+	 if (EST_info->EST_seq[est_len-i-1]=='T') {
+		++count_T;
+		++running_count_T;
+		last_T= i;
+		last_T_count= count_T;
+	 }
+	 ++i;
+  }
+  last_A= (last_A<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_A;
+  last_T= (last_T<_POLYA_MIN_LEN-1)?_POLYA_MIN_LEN-1:last_T;
+  if ((last_A_count>=(_POLYA_MIN_FRACTION*(last_A+1))) ||
+		(last_T_count>=(_POLYA_MIN_FRACTION*(last_T+1)))) {
+	 if ((((double)last_A_count)/(last_A+1))>=(((double)last_T_count)/(last_T+1)))
+		c= 'A';
+	 else
+		c= 'T';
+// A polyA/T has been found
+	 char sc= (c=='A')?_POLYA_CHR:_POLYT_CHR;
+	 size_t mlen= ((c=='A')?last_A+1:last_T+1);
+	 INFO("Found a %zubp long final poly%c.", mlen, c);
+	 for (i= 0; i<mlen; ++i)
+		EST_info->EST_seq[est_len-i-1]= sc;
+	 if(c=='A'){
+		EST_info->suff_polyA_length=mlen;
+	 } else {
+		EST_info->suff_polyT_length=mlen;
+	 }
+  } else {
+	 DEBUG("No polyA/T has been found at the end of the sequence.");
+  }
+}
 
 void Ntails_removal(pEST_info EST_info) {
   int pref= 0;

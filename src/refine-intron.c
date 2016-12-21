@@ -115,34 +115,33 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	int gen_cut_right=0;
 
 	plist alignments=compute_gap_alignment(sequence_on_est, sequence_on_gen, true, gen_cut, gen_cut_left, gen_cut_right);
-
  	pgap_alignment alignment=(pgap_alignment)list_head(alignments);
 
   	TRACE("\tAlignment matrix on gen: %s", alignment->GEN_gap_alignment);
  	TRACE("\tAlignment matrix on est: %s", alignment->EST_gap_alignment);
-
+ 	
 	alignment->new_acceptor_factor_left=donor_suffix_left_on_est+alignment->factor_cut;
 	alignment->new_donor_right_on_gen=donor_suffix_left_on_gen+alignment->intron_start-1;
 	alignment->new_acceptor_left_on_gen=donor_suffix_left_on_gen+alignment->intron_end+deleted_intron_dim+1;
 
 	if(alignment->new_acceptor_factor_left == donor->EST_start){
-		DEBUG("\tThe donor exon should be attached to the acceptor exon in the gap alignment!");
-		if(first_intron == true){
-			DEBUG("\t...and the donor exon has been attached to the acceptor exon in the gap alignment, since it is not the first one!");
+		DEBUG("     The donor exon should be attached to the acceptor exon in the gap alignment!");
+		if(first_intron){
+			DEBUG("     ...and the donor exon has been attached to the acceptor exon in the gap alignment, since it is not the first one!");
 			acceptor->EST_start=alignment->new_acceptor_factor_left;
 			acceptor->GEN_start=alignment->new_acceptor_left_on_gen;
 			gap_alignments_destroy(alignments);
 			return true;
 		}
 		else{
-			DEBUG("\t...but the intron is not the first one. The intron will not be refined!");
+			DEBUG("     ...but the intron is not the first one. The intron will not be refined!");
 			gap_alignments_destroy(alignments);
 			return false;
 		}
 	}
 
 	if(alignment->new_acceptor_left_on_gen-alignment->new_donor_right_on_gen < config->min_intron_length){
-		DEBUG("\tThe intron may be too small and the intron will not be refined!");
+		DEBUG("     The intron may be too small and the intron will not be refined!");
 		gap_alignments_destroy(alignments);
 		return false;
 	}
@@ -150,7 +149,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	int donor_right_shift=(alignment->new_donor_right_on_gen > donor->GEN_end)?(alignment->new_donor_right_on_gen-donor->GEN_end):(donor->GEN_end-alignment->new_donor_right_on_gen);
 	int acceptor_left_shift=(alignment->new_acceptor_left_on_gen > acceptor->GEN_start)?(alignment->new_acceptor_left_on_gen-acceptor->GEN_start):(acceptor->GEN_start-alignment->new_acceptor_left_on_gen);
 	if(donor_right_shift > 20 || acceptor_left_shift > 20){
-		DEBUG("\tThe donor/acceptor shift may be too big and the intron will not be refined!");
+		DEBUG("     The donor/acceptor shift may be too big and the intron will not be refined!");
 		gap_alignments_destroy(alignments);
 		return false;
 	}
@@ -188,7 +187,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	int shiftedlr_donor_right_on_gen_gc=0, shiftedlr_acceptor_left_on_gen_gc=0, shiftedlr_acceptor_factor_left_gc=0;
 
 	if(left_genomic_cut_dim == 0 && right_genomic_cut_dim == 0){
-		DEBUG("\tThe intron is already canonical");
+		DEBUG("     The intron is already canonical");
 		//Il taglio e' rimasto invariato perche' e' gia' gt-ag
 		final_new_donor_right_on_gen=alignment->new_donor_right_on_gen;
 		final_new_acceptor_left_on_gen=alignment->new_acceptor_left_on_gen;
@@ -197,7 +196,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	else{
 		bool error_shift_gt=Shift_right_to_left_1(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shifted_donor_right_on_gen_gt, &shifted_acceptor_left_on_gen_gt, &shifted_acceptor_factor_left_gt, "GT");
 		if(error_shift_gt){
-			DEBUG("\t...successfull 3' to 5' shifting for GT-AG!");
+			DEBUG("     ...successful 3' to 5' shifting for GT-AG!");
 			shifted_donor_right_on_gen=shifted_donor_right_on_gen_gt;
 			shifted_acceptor_left_on_gen=shifted_acceptor_left_on_gen_gt;
 			shifted_acceptor_factor_left=shifted_acceptor_factor_left_gt;
@@ -205,15 +204,15 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 		else{
 			error_shift_gt=Shift_left_to_right_1(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shiftedlr_donor_right_on_gen_gt, &shiftedlr_acceptor_left_on_gen_gt, &shiftedlr_acceptor_factor_left_gt, "GT");
 			if(error_shift_gt){
-				DEBUG("\t...successfull 5' to 3' shifting for GT-AG!");
+				DEBUG("     ...successful 5' to 3' shifting for GT-AG!");
 				shifted_donor_right_on_gen=shiftedlr_donor_right_on_gen_gt;
 				shifted_acceptor_left_on_gen=shiftedlr_acceptor_left_on_gen_gt;
 				shifted_acceptor_factor_left=shiftedlr_acceptor_factor_left_gt;
 			}
-			else{
+			else{				
 				bool error_shift_gc=Shift_right_to_left_2(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shifted_donor_right_on_gen_gc, &shifted_acceptor_left_on_gen_gc, &shifted_acceptor_factor_left_gc, "GC");
 				if(error_shift_gc){
-					DEBUG("\t...successfull 3' to 5' shifting for GC-AG!");
+					DEBUG("     ...successfull 3' to 5' shifting for GC-AG!");
 					shifted_donor_right_on_gen=shifted_donor_right_on_gen_gc;
 					shifted_acceptor_left_on_gen=shifted_acceptor_left_on_gen_gc;
 					shifted_acceptor_factor_left=shifted_acceptor_factor_left_gc;
@@ -221,7 +220,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 				else{
 					error_shift_gc=Shift_left_to_right_2(est_info->EST_seq, gen_info->EST_seq, 2, alignment, &shiftedlr_donor_right_on_gen_gc, &shiftedlr_acceptor_left_on_gen_gc, &shiftedlr_acceptor_factor_left_gc, "GC");
 					if(error_shift_gc){
-						DEBUG("\t...successfull 5' to 3' shifting for GC-AG!");
+						DEBUG("     ...successfull 5' to 3' shifting for GC-AG!");
 						shifted_donor_right_on_gen=shiftedlr_donor_right_on_gen_gc;
 						shifted_acceptor_left_on_gen=shiftedlr_acceptor_left_on_gen_gc;
 						shifted_acceptor_factor_left=shiftedlr_acceptor_factor_left_gc;
@@ -230,7 +229,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 						int burset_acceptor_factor_left=alignment->new_acceptor_factor_left;
 						int burset_donor_right_on_gen=alignment->new_donor_right_on_gen;
 						int burset_acceptor_left_on_gen=alignment->new_acceptor_left_on_gen;
-						Try_Burset_after_match(est_info->EST_seq, gen_info->EST_seq, &burset_acceptor_factor_left, &burset_donor_right_on_gen, &burset_acceptor_left_on_gen);
+						Try_Burset_after_match(est_info->EST_seq, gen_info->EST_seq, &burset_acceptor_factor_left, &burset_donor_right_on_gen, &burset_acceptor_left_on_gen, donor->EST_start, acceptor->EST_end);
 						shifted_donor_right_on_gen=burset_donor_right_on_gen;
 						shifted_acceptor_left_on_gen=burset_acceptor_left_on_gen;
 						shifted_acceptor_factor_left=burset_acceptor_factor_left;
@@ -244,7 +243,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 		final_new_acceptor_factor_left=shifted_acceptor_factor_left;
 
 		if(final_new_acceptor_left_on_gen > acceptor->GEN_end || final_new_donor_right_on_gen < donor->GEN_start){
-			DEBUG("\tCan't refine intron!");
+			DEBUG("     Cannot refine intron!");
 			pfree(sequence_on_est);
 			pfree(sequence_on_gen);
 			gap_alignments_destroy(alignments);
@@ -265,7 +264,7 @@ bool refine_intron(pconfiguration config, pEST_info gen_info, pEST_info est_info
 	return true;
 }
 
-int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acceptor_factor_left, int *donor_right_on_gen, int *acceptor_left_on_gen){
+int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acceptor_factor_left, int *donor_right_on_gen, int *acceptor_left_on_gen, int shifting_donor_factor_left, int shifting_acceptor_factor_right){
 	int shifting_acceptor_factor_left=*acceptor_factor_left;
 	int shifting_acceptor_left_on_gen=*acceptor_left_on_gen;
 	int shifting_donor_right_on_gen=*donor_right_on_gen;
@@ -283,8 +282,8 @@ int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acce
 
 	bool stop=false;
 	//Provo da sinistra a destra
-	while(stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_acceptor_left_on_gen]){
-		TRACE("\t...character %c (%d) of est in 5' matches to character %c (%d) of genomic in 3'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_donor_right_on_gen], shifting_acceptor_left_on_gen);
+	while((stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_acceptor_left_on_gen]) && shifting_acceptor_factor_left > shifting_donor_factor_left+1){
+		TRACE("\t...character %c (%d) of est in 5' matches to character %c (%d) of genomic in 3'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_acceptor_left_on_gen], shifting_acceptor_left_on_gen);
 		if(shifting_acceptor_factor_left == 0 || shifting_donor_right_on_gen == -1){
 			TRACE("\t...the first est/genomic character is reached!");
 			stop=true;
@@ -310,7 +309,7 @@ int Try_Burset_after_match(char *est_sequence, char *genomic_sequence, int *acce
 
 	stop=false;
 	//Provo da destra a sinistra
-	while(stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_donor_right_on_gen]){
+	while((stop == false && est_sequence[shifting_acceptor_factor_left] == genomic_sequence[shifting_donor_right_on_gen]) && shifting_acceptor_factor_left < shifting_acceptor_factor_right){
 		TRACE("\t...character %c of est in 3' (%d) matches to character %c (%d) of genomic in 5'", est_sequence[shifting_acceptor_factor_left], shifting_acceptor_factor_left, genomic_sequence[shifting_donor_right_on_gen], shifting_donor_right_on_gen);
 		if((unsigned int)shifting_acceptor_factor_left == strlen(est_sequence) || (unsigned int)shifting_acceptor_left_on_gen == strlen(genomic_sequence)){
 			TRACE("\t...the last est/genomic character is reached!");
@@ -358,6 +357,20 @@ int Check_Burset_patterns(char *genomic_sequence, int donor_left_on_gen, int acc
 	pfree(acceptor_pt);
 
 	return frequency;
+}
+
+int getBursetFrequency_adaptor(const char* const t,
+										 const size_t cut1, const size_t cut2) {
+  if (cut2<2)
+	 return 0;
+  char donor[3], acceptor[3];
+  donor[2]= acceptor[2]= '\0';
+  donor[0]= t[cut1];
+  donor[1]= t[cut1+1];
+  acceptor[0]= t[cut2-2];
+  acceptor[1]= t[cut2-1];
+  TRACE("Get Burset frequency of intron %s-%s.", donor, acceptor);
+  return getBursetFrequency(donor, acceptor);
 }
 
 int getBursetFrequency(char *donor_pt, char *acceptor_pt){
@@ -942,9 +955,13 @@ void Find_ACCEPTOR_before_on_the_left(pgap_alignment alignment, int init, int *c
 		char acceptor_pt[3];
 		acceptor_pt[1]=alignment->GEN_gap_alignment[index];
 		index--;
-		while(alignment->GEN_gap_alignment[index] == '-')
+		while(index>=0 && alignment->GEN_gap_alignment[index] == '-')
 			index--;
-		acceptor_pt[0]=alignment->GEN_gap_alignment[index];
+		if (index < 0) {
+		  acceptor_pt[0]= '\0';
+		} else {
+		  acceptor_pt[0]=alignment->GEN_gap_alignment[index];
+		}
 		acceptor_pt[2]='\0';
 		char acceptor_cmp=strcmp(acceptor_pt, acceptor_str);
 		if(acceptor_cmp == 0)
@@ -980,6 +997,12 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	int *genomic_cut_dim=NULL, *EST_cut_dim=NULL, *genomic_substr_dim=NULL;
 	char **cut_factor=NULL, **match_str=NULL, **prev_match_str=NULL;
 
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char **ext_cut_factor=NULL, **ext_match_str=NULL;
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	int ext_error=-1;
+
 	genomic_cut_dim=NPALLOC(int, cycle);
 	my_assert(genomic_cut_dim != NULL);
 
@@ -995,23 +1018,63 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	match_str=NPALLOC(char*, cycle);
 	my_assert(match_str != NULL);
 
+	//Per gene PKM2, lista 4916, gb=BE908023
+	ext_cut_factor=NPALLOC(char*, cycle);
+	my_assert(ext_cut_factor != NULL);
+	ext_match_str=NPALLOC(char*, cycle);
+	my_assert(ext_match_str != NULL);
+
 	prev_match_str=NPALLOC(char*, cycle);
 	my_assert(prev_match_str != NULL);
 
-	DEBUG("\tTry shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char *ext_est_substr=NULL;
+	char *ext_gen_substr=NULL;
+	int l_substr=8;
+	int start_substr=alignment->intron_start_on_align-l_substr;
+	if(start_substr < 0){
+		l_substr=l_substr-start_substr;
+		start_substr=0;
+	}
+	ext_est_substr=Get_est_substring_from_alignment(alignment, start_substr, l_substr, &ext_error);
+	ext_gen_substr=Get_genomic_substring_from_alignment(alignment, start_substr, l_substr, &ext_error);
 
 	int i;
-	for(i=0; i < cycle; i++){
+	for(i=0; i < cycle; i++){		
 		Find_AG_after_on_the_right(alignment, init_right, &cut_on_align, genomic_cut_dim+i, EST_cut_dim+i);
 
 		if(EST_cut_dim[i] > -1){
 			prev_match_str[i]=real_substring(alignment->new_acceptor_left_on_gen, genomic_cut_dim[i], genseq);
 			cut_factor[i]=real_substring(alignment->new_acceptor_factor_left, EST_cut_dim[i], estseq);
 			init_right=cut_on_align+1;
+			
+			//Estensione di match_str[i] su un suffisso dell'esone in 5' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_est_substr != NULL){
+					ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+strlen(ext_est_substr)+1);
+					strcpy(ext_cut_factor[i], ext_est_substr);
+					strcat(ext_cut_factor[i], cut_factor[i]);
+				}
+				else{
+					/*ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);*/
+					ext_cut_factor[i]=NULL;			
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_cut_factor[i]=NULL;
+			}
 		}
 		else{
 			prev_match_str[i]=NULL;
 			cut_factor[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_cut_factor[i]=NULL;
 		}
 
 		Find_ACCEPTOR_after_on_the_left(alignment, init_left, genomic_substr_dim+i, acceptor_str);
@@ -1019,15 +1082,53 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 		if(genomic_substr_dim[i] > -1){
 			match_str[i]=real_substring(alignment->new_donor_right_on_gen+1, genomic_substr_dim[i], genseq);
 			init_left=alignment->intron_start_on_align+genomic_substr_dim[i]+1;
+			
+			//Estensione di match_str[i] su un suffisso dell'esone in 5' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_gen_substr != NULL){
+					ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+strlen(ext_gen_substr)+1);
+					strcpy(ext_match_str[i], ext_gen_substr);
+					strcat(ext_match_str[i], match_str[i]);
+				}
+				else{
+					/*ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+1);
+					strcpy(ext_match_str[i], match_str[i]);*/
+					ext_match_str[i]=NULL;			
+				}
+			}
+			else{ //Per gene PKM2, lista 4916, gb=BE908023
+				ext_match_str[i]=NULL;
+			}
 		}
-		else
+		else{
 			match_str[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_match_str[i]=NULL;
+		}
 
 		TRACE("\tcycle %d:", i+1);
 		TRACE("\t\t3' genomic cut: %s", prev_match_str[i]);
 		TRACE("\t\t3' est cut: %s", cut_factor[i]);
-		TRACE("\t\t5' genomic matching: %s", match_str[i]);
+
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			TRACE("\t\t5' extended est cut: %s", ext_cut_factor[i]);
+
+		TRACE("\t\t3' genomic matching: %s", match_str[i]);
+		
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_match_str[i] != NULL)
+		 	TRACE("\t\t5' extended genomic matching: %s", ext_match_str[i]);
 	}
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	if(ext_est_substr != NULL)
+		pfree(ext_est_substr);
+	if(ext_gen_substr != NULL)
+		pfree(ext_gen_substr);
 
 	unsigned int error=1000;
 	unsigned int edit_prev=1000;
@@ -1043,11 +1144,20 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 				unsigned int* M=edit_distance(cut_factor[i], l1, prev_match_str[i], l2);
 				edit_prev=M[(l1+1)*(l2+1)-1];
 				pfree(M);
-				if(edit_prev <= 5){
-					l1=strlen(cut_factor[i]);
-					l2=strlen(match_str[j]);
-					M=edit_distance(cut_factor[i], l1, match_str[j], l2);
-					error=M[(l1+1)*(l2+1)-1]-edit_prev;
+				if(edit_prev <= 5){					
+					//Per gene PKM2, lista 4916, gb=BE908023
+					if(ext_cut_factor[i] != NULL && ext_match_str[j] != NULL){
+						l1=strlen(ext_cut_factor[i]);
+						l2=strlen(ext_match_str[j]);					
+						M=edit_distance(ext_cut_factor[i], l1, ext_match_str[j], l2);					
+						error=M[(l1+1)*(l2+1)-1]-edit_prev-ext_error;
+					}
+					else{
+						l1=strlen(cut_factor[i]);
+						l2=strlen(match_str[j]);					
+						M=edit_distance(cut_factor[i], l1, match_str[j], l2);
+						error=M[(l1+1)*(l2+1)-1]-edit_prev;
+					}				
 					pfree(M);
 				}
 			}
@@ -1071,6 +1181,13 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	for(i=0; i < cycle; i++){
 		if(cut_factor[i] != NULL)
 			pfree(cut_factor[i]);
+		
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			pfree(ext_cut_factor[i]);
+		if(ext_match_str[i] != NULL)
+			pfree(ext_match_str[i]);
+			
 		if(match_str[i] != NULL)
 			pfree(match_str[i]);
 		if(prev_match_str[i] != NULL)
@@ -1079,6 +1196,11 @@ bool Shift_right_to_left_1(char *estseq, char *genseq, int cycle, pgap_alignment
 
 	pfree(cut_factor);
 	pfree(match_str);
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	pfree(ext_cut_factor);
+	pfree(ext_match_str);
+
 	pfree(prev_match_str);
 	pfree(genomic_cut_dim);
 	pfree(EST_cut_dim);
@@ -1097,6 +1219,12 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	int *genomic_cut_dim=NULL, *EST_cut_dim=NULL, *genomic_substr_dim=NULL;
 	char **cut_factor=NULL, **match_str=NULL;
 
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char **ext_cut_factor=NULL, **ext_match_str=NULL;
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	int ext_error=-1;
+
 	genomic_cut_dim=NPALLOC(int, cycle);
 	EST_cut_dim=NPALLOC(int, cycle);
 	genomic_substr_dim=NPALLOC(int, cycle);
@@ -1104,9 +1232,28 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 
 	cut_factor=NPALLOC(char*, cycle);
 	match_str=NPALLOC(char*, cycle);
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	ext_cut_factor=NPALLOC(char*, cycle);
+	my_assert(ext_cut_factor != NULL);
+	ext_match_str=NPALLOC(char*, cycle);
+	my_assert(ext_match_str != NULL);
+
 	my_assert(cut_factor != NULL && match_str != NULL);
 
-	DEBUG("\tTry shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 3' to 5' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char *ext_est_substr=NULL;
+	char *ext_gen_substr=NULL;
+	int l_substr=8;
+	int start_substr=alignment->intron_start_on_align-l_substr;
+	if(start_substr < 0){
+		l_substr=l_substr-start_substr;
+		start_substr=0;
+	}
+	ext_est_substr=Get_est_substring_from_alignment(alignment, start_substr, l_substr, &ext_error);
+	ext_gen_substr=Get_genomic_substring_from_alignment(alignment, start_substr, l_substr, &ext_error);
 
 	int i;
 	for(i=0; i < cycle; i++){
@@ -1115,23 +1262,85 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 		if(EST_cut_dim[i] > -1){
 			cut_factor[i]=real_substring(alignment->new_acceptor_factor_left, EST_cut_dim[i], estseq);
 			init_right=cut_on_align+1;
+			
+			//Estensione di match_str[i] su un suffisso dell'esone in 5' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_est_substr != NULL){
+					ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+strlen(ext_est_substr)+1);
+					strcpy(ext_cut_factor[i], ext_est_substr);
+					strcat(ext_cut_factor[i], cut_factor[i]);
+				}
+				else{
+					/*ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);*/		
+					ext_cut_factor[i]=NULL;		
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_cut_factor[i]=NULL;
+			}
 		}
-		else
+		else{
 			cut_factor[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_cut_factor[i]=NULL;
+		}
 
 		Find_ACCEPTOR_after_on_the_left(alignment, init_left, genomic_substr_dim+i, acceptor_str);
 
 		if(genomic_substr_dim[i] > -1){
 			match_str[i]=real_substring(alignment->new_donor_right_on_gen+1, genomic_substr_dim[i], genseq);
 			init_left=alignment->intron_start_on_align+genomic_substr_dim[i]+1;
+			
+			//Estensione di match_str[i] su un suffisso dell'esone in 5' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_gen_substr != NULL){
+					ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+strlen(ext_gen_substr)+1);
+					strcpy(ext_match_str[i], ext_gen_substr);
+					strcat(ext_match_str[i], match_str[i]);
+				}
+				else{
+					/*ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+1);
+					strcpy(ext_match_str[i], match_str[i]);*/
+					ext_match_str[i]=NULL;				
+				}
+			}
+			else{ //Per gene PKM2, lista 4916, gb=BE908023
+				ext_match_str[i]=NULL;
+			}
 		}
-		else
+		else{ 
 			match_str[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_match_str[i]=NULL;
+		}
 
 		TRACE("\tcycle %d:", i+1);
+		TRACE("\t\t3' genomic cut: %s", prev_match_str[i]);
 		TRACE("\t\t3' est cut: %s", cut_factor[i]);
-		TRACE("\t\t5' genomic matching: %s", match_str[i]);
+
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			TRACE("\t\t5' extended est cut: %s", ext_cut_factor[i]);
+
+		TRACE("\t\t3' genomic matching: %s", match_str[i]);
+		
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_match_str[i] != NULL)
+		 	TRACE("\t\t5' extended genomic matching: %s", ext_match_str[i]);
 	}
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	if(ext_est_substr != NULL)
+		pfree(ext_est_substr);
+	if(ext_gen_substr != NULL)
+		pfree(ext_gen_substr);
 
 	i=0;
 	int j;
@@ -1140,15 +1349,34 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	while(i < cycle && !stop){
 		j=0;
 		while(j < cycle && !stop){
-			if(cut_factor[i] != NULL && match_str[j] != NULL){
+			//Per gene PKM2, lista 4916, gb=BE908023
+			/*if(cut_factor[i] != NULL && match_str[j] != NULL){
 				size_t l1=strlen(cut_factor[i]);
 				size_t l2=strlen(match_str[j]);
-				unsigned int* M=edit_distance(cut_factor[i], l1, match_str[j], l2);
+				unsigned int *M=edit_distance(cut_factor[i], l1, match_str[j], l2);
 				edit=M[(l1+1)*(l2+1)-1];
 				pfree(M);
 			}
 			else
-				edit=1000;
+				edit=1000;*/
+			if(ext_cut_factor[i] != NULL && ext_match_str[j] != NULL){
+				size_t l1=strlen(ext_cut_factor[i]);
+				size_t l2=strlen(ext_match_str[j]);
+				unsigned int *M=edit_distance(ext_cut_factor[i], l1, ext_match_str[j], l2);
+				edit=M[(l1+1)*(l2+1)-1]-ext_error;
+				pfree(M);
+			}
+			else{
+				if(cut_factor[i] != NULL && match_str[j] != NULL){
+					size_t l1=strlen(cut_factor[i]);
+					size_t l2=strlen(match_str[j]);
+					unsigned int *M=edit_distance(cut_factor[i], l1, match_str[j], l2);
+					edit=M[(l1+1)*(l2+1)-1];
+					pfree(M);
+				}
+				else
+					edit=1000;
+			}
 
 			if(edit < error){
 				TRACE("\t3' good est cut: %d", EST_cut_dim[i]);
@@ -1173,12 +1401,24 @@ bool Shift_right_to_left_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	for(i=0; i < cycle; i++){
 		if(cut_factor[i] != NULL)
 			pfree(cut_factor[i]);
+			
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			pfree(ext_cut_factor[i]);
+		if(ext_match_str[i] != NULL)
+			pfree(ext_match_str[i]);
+
 		if(match_str[i] != NULL)
 			pfree(match_str[i]);
 	}
 
 	pfree(cut_factor);
 	pfree(match_str);
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	pfree(ext_cut_factor);
+	pfree(ext_match_str);
+
 	pfree(genomic_cut_dim);
 	pfree(EST_cut_dim);
 	pfree(genomic_substr_dim);
@@ -1193,6 +1433,12 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	int cut_on_align=0;
 	int *genomic_cut_dim=NULL, *EST_cut_dim=NULL, *genomic_substr_dim=NULL;
 	char **cut_factor=NULL, **match_str=NULL, **prev_match_str=NULL;
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char **ext_cut_factor=NULL, **ext_match_str=NULL;
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	int ext_error=-1;
 
 	genomic_cut_dim=NPALLOC(int, cycle);
 	my_assert(genomic_cut_dim != NULL);
@@ -1208,24 +1454,58 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 
 	match_str=NPALLOC(char*, cycle);
 	my_assert(match_str != NULL);
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	ext_cut_factor=NPALLOC(char*, cycle);
+	my_assert(ext_cut_factor != NULL);
+	ext_match_str=NPALLOC(char*, cycle);
+	my_assert(ext_match_str != NULL);
 
 	prev_match_str=NPALLOC(char*, cycle);
 	my_assert(prev_match_str != NULL);
 
-	DEBUG("\tTry shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
 
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char *ext_est_substr=NULL;
+	char *ext_gen_substr=NULL;
+	ext_est_substr=Get_est_substring_from_alignment(alignment, alignment->intron_end_on_align+1, 8, &ext_error);
+	ext_gen_substr=Get_genomic_substring_from_alignment(alignment, alignment->intron_end_on_align+1, 8, &ext_error);
+	
 	int i;
-	for(i=0; i < cycle; i++){
+	for(i=0; i < cycle; i++){		
 		Find_ACCEPTOR_before_on_the_left(alignment, init_left, &cut_on_align, genomic_cut_dim+i, EST_cut_dim+i, acceptor_str);
 
 		if(EST_cut_dim[i] > -1){
 			prev_match_str[i]=real_substring(alignment->new_donor_right_on_gen-genomic_cut_dim[i]+1, genomic_cut_dim[i], genseq);
 			cut_factor[i]=real_substring(alignment->new_acceptor_factor_left-EST_cut_dim[i], EST_cut_dim[i], estseq);
 			init_left=cut_on_align-1;
+
+			//Estensione di match_str[i] su un prefisso dell'esone in 3' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_est_substr != NULL){
+					ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+strlen(ext_est_substr)+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);
+					strcat(ext_cut_factor[i], ext_est_substr);
+				}
+				else{
+					/*ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);*/
+					ext_cut_factor[i]=NULL;			
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_cut_factor[i]=NULL;
+			}
 		}
 		else{
 			prev_match_str[i]=NULL;
 			cut_factor[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_cut_factor[i]=NULL;
 		}
 
 		Find_AG_before_on_the_right(alignment, init_right, genomic_substr_dim+i);
@@ -1233,16 +1513,53 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 		if(genomic_substr_dim[i] > -1){
 			match_str[i]=real_substring(alignment->new_acceptor_left_on_gen-genomic_substr_dim[i], genomic_substr_dim[i], genseq);
 			init_right=alignment->intron_end_on_align-genomic_substr_dim[i]-1;
+			
+			//Estensione di match_str[i] su un prefisso dell'esone in 3' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_gen_substr != NULL){
+					ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+strlen(ext_gen_substr)+1);
+					strcpy(ext_match_str[i], match_str[i]);
+					strcat(ext_match_str[i], ext_gen_substr);
+				}
+				else{
+					/*ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+1);
+					strcpy(ext_match_str[i], match_str[i]);*/
+					ext_match_str[i]=NULL;		
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_match_str[i]=NULL;
+			}
 		}
-		else
+		else{
 			match_str[i]=NULL;
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_match_str[i]=NULL;
+		}
 
 		TRACE("\tcycle %d:", i+1);
 		TRACE("\t\t5' genomic cut: %s", prev_match_str[i]);
 		TRACE("\t\t5' est cut: %s", cut_factor[i]);
-		TRACE("\t\t3' genomic matching: %s", match_str[i]);
-	}
 
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			TRACE("\t\t5' extended est cut: %s", ext_cut_factor[i]);
+
+		TRACE("\t\t3' genomic matching: %s", match_str[i]);
+		
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_match_str[i] != NULL)
+			TRACE("\t\t5' extended genomic matching: %s", ext_match_str[i]);
+	}
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	if(ext_est_substr != NULL)
+		pfree(ext_est_substr);
+	if(ext_gen_substr != NULL)
+		pfree(ext_gen_substr);
+	
 	int j;
 	i=0;
 	unsigned int error=1000;
@@ -1251,17 +1568,27 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 	while(i < cycle && !stop){
 		j=0;
 		while(j < cycle && !stop){
-			if(cut_factor[i] != NULL && match_str[j] != NULL){
+			if(cut_factor[i] != NULL && match_str[j] != NULL){				
 				size_t l1=strlen(cut_factor[i]);
 				size_t l2=strlen(prev_match_str[i]);
 				unsigned int *M=edit_distance(cut_factor[i], l1, prev_match_str[i], l2);
 				edit_prev=M[(l1+1)*(l2+1)-1];
 				pfree(M);
 				if(edit_prev <= 5){
-					l1=strlen(cut_factor[i]);
-					l2=strlen(match_str[j]);
-					M=edit_distance(cut_factor[i], l1, match_str[j], l2);
-					error=M[(l1+1)*(l2+1)-1]-edit_prev;
+					//Per gene PKM2, lista 4916, gb=BE908023
+					if(ext_cut_factor[i] != NULL && ext_match_str[j] != NULL){
+						l1=strlen(ext_cut_factor[i]);
+						l2=strlen(ext_match_str[j]);					
+						M=edit_distance(ext_cut_factor[i], l1, ext_match_str[j], l2);					
+						error=M[(l1+1)*(l2+1)-1]-edit_prev-ext_error;
+					}
+					else{
+						l1=strlen(cut_factor[i]);
+						l2=strlen(match_str[j]);					
+						M=edit_distance(cut_factor[i], l1, match_str[j], l2);
+						error=M[(l1+1)*(l2+1)-1]-edit_prev;
+					}
+				
 					pfree(M);
 				}
 			}
@@ -1281,16 +1608,29 @@ bool Shift_left_to_right_1(char *estseq, char *genseq, int cycle, pgap_alignment
 		}
 		i++;
 	}
-
+	
 	for(i=0; i < cycle; i++){
 		if(cut_factor[i] != NULL)
 			pfree(cut_factor[i]);
+			
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			pfree(ext_cut_factor[i]);
+		if(ext_match_str[i] != NULL)
+			pfree(ext_match_str[i]);
+			
 		if(match_str[i] != NULL)
 			pfree(match_str[i]);
 		if(prev_match_str[i] != NULL)
 			pfree(prev_match_str[i]);
 	}
+	
 	pfree(cut_factor);
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	pfree(ext_cut_factor);
+	pfree(ext_match_str);
+
 	pfree(match_str);
 	pfree(prev_match_str);
 	pfree(genomic_cut_dim);
@@ -1309,17 +1649,35 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	int cut_on_align=0;
 	int *genomic_cut_dim=NULL, *EST_cut_dim=NULL, *genomic_substr_dim=NULL;
 	char **cut_factor=NULL, **match_str=NULL;
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char **ext_cut_factor=NULL, **ext_match_str=NULL;
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	int ext_error=-1;
 
 	genomic_cut_dim=NPALLOC(int, cycle);
 	EST_cut_dim=NPALLOC(int, cycle);
 	genomic_substr_dim=NPALLOC(int, cycle);
 	my_assert(genomic_cut_dim != NULL && EST_cut_dim != NULL && genomic_substr_dim != NULL);
 
+	//Per gene PKM2, lista 4916, gb=BE908023
+	ext_cut_factor=NPALLOC(char*, cycle);
+	my_assert(ext_cut_factor != NULL);
+	ext_match_str=NPALLOC(char*, cycle);
+	my_assert(ext_match_str != NULL);
+
 	cut_factor=NPALLOC(char*, cycle);
 	match_str=NPALLOC(char*, cycle);
 	my_assert(cut_factor != NULL && match_str != NULL);
 
-	DEBUG("\tTry shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+	DEBUG("     Try shifting from 5' to 3' for searching %s-AG pattern (%d cycle(s))", acceptor_str, cycle);
+
+	//Per gene PKM2, lista 4916, gb=BE908023
+	char *ext_est_substr=NULL;
+	char *ext_gen_substr=NULL;
+	ext_est_substr=Get_est_substring_from_alignment(alignment, alignment->intron_end_on_align+1, 8, &ext_error);
+	ext_gen_substr=Get_genomic_substring_from_alignment(alignment, alignment->intron_end_on_align+1, 8, &ext_error);
 
 	int i;
 	for(i=0; i < cycle; i++){
@@ -1328,23 +1686,85 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 		if(EST_cut_dim[i] > -1){
 			cut_factor[i]=real_substring(alignment->new_acceptor_factor_left-EST_cut_dim[i], EST_cut_dim[i], estseq);
 			init_left=cut_on_align-1;
+			
+			//Estensione di match_str[i] su un prefisso dell'esone in 3' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_est_substr != NULL){
+					ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+strlen(ext_est_substr)+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);
+					strcat(ext_cut_factor[i], ext_est_substr);
+				}
+				else{
+					/*ext_cut_factor[i]=NPALLOC(char, strlen(cut_factor[i])+1);
+					strcpy(ext_cut_factor[i], cut_factor[i]);*/
+					ext_cut_factor[i]=NULL;				
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_cut_factor[i]=NULL;
+			}
 		}
-		else
+		else{
 			cut_factor[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_cut_factor[i]=NULL;
+		}
 
 		Find_AG_before_on_the_right(alignment, init_right, genomic_substr_dim+i);
 
 		if(genomic_substr_dim[i] > -1){
 			match_str[i]=real_substring(alignment->new_acceptor_left_on_gen-genomic_substr_dim[i], genomic_substr_dim[i], genseq);
 			init_right=alignment->intron_end_on_align-genomic_substr_dim[i]-1;
+			
+			//Estensione di match_str[i] su un prefisso dell'esone in 3' per risolvere il problema dovuto al fatto che non si
+			//considerano tutti i gap alignments
+			//ottimo ma se ne ricostruisce uno solo (vedi gene PKM2, lista 4916, gb=BE908023)
+			if(cut_factor[i] != NULL && ext_error > 0){
+				if(ext_gen_substr != NULL){
+					ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+strlen(ext_gen_substr)+1);
+					strcpy(ext_match_str[i], match_str[i]);
+					strcat(ext_match_str[i], ext_gen_substr);
+				}
+				else{
+					/*ext_match_str[i]=NPALLOC(char, strlen(match_str[i])+1);
+					strcpy(ext_match_str[i], match_str[i]);*/
+					ext_match_str[i]=NULL;				
+				}
+			} //Per gene PKM2, lista 4916, gb=BE908023
+			else{
+				ext_match_str[i]=NULL;
+			}
 		}
-		else
+		else{
 			match_str[i]=NULL;
+			
+			//Per gene PKM2, lista 4916, gb=BE908023
+			ext_match_str[i]=NULL;
+		}
 
 		TRACE("\tcycle %d:", i+1);
+		TRACE("\t\t5' genomic cut: %s", prev_match_str[i]);
 		TRACE("\t\t5' est cut: %s", cut_factor[i]);
+
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			TRACE("\t\t5' extended est cut: %s", ext_cut_factor[i]);
+
 		TRACE("\t\t3' genomic matching: %s", match_str[i]);
+		
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_match_str[i] != NULL)
+			TRACE("\t\t5' extended genomic matching: %s", ext_match_str[i]);
 	}
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	if(ext_est_substr != NULL)
+		pfree(ext_est_substr);
+	if(ext_gen_substr != NULL)
+		pfree(ext_gen_substr);
 
 	i=0;
 	int j;
@@ -1353,7 +1773,8 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	while(i < cycle && !stop){
 		j=0;
 		while(j < cycle && !stop){
-			if(cut_factor[i] != NULL && match_str[j] != NULL){
+			//Per gene PKM2, lista 4916, gb=BE908023
+			/*if(cut_factor[i] != NULL && match_str[j] != NULL){
 				size_t l1=strlen(cut_factor[i]);
 				size_t l2=strlen(match_str[j]);
 				unsigned int *M=edit_distance(cut_factor[i], l1, match_str[j], l2);
@@ -1361,7 +1782,25 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 				pfree(M);
 			}
 			else
-				edit=1000;
+				edit=1000;*/
+			if(ext_cut_factor[i] != NULL && ext_match_str[j] != NULL){
+				size_t l1=strlen(ext_cut_factor[i]);
+				size_t l2=strlen(ext_match_str[j]);
+				unsigned int *M=edit_distance(ext_cut_factor[i], l1, ext_match_str[j], l2);
+				edit=M[(l1+1)*(l2+1)-1]-ext_error;
+				pfree(M);
+			}
+			else{
+				if(cut_factor[i] != NULL && match_str[j] != NULL){
+					size_t l1=strlen(cut_factor[i]);
+					size_t l2=strlen(match_str[j]);
+					unsigned int *M=edit_distance(cut_factor[i], l1, match_str[j], l2);
+					edit=M[(l1+1)*(l2+1)-1];
+					pfree(M);
+				}
+				else
+					edit=1000;
+			}
 
 			if(edit < error){
 				TRACE("\t5' good est cut: %d", EST_cut_dim[i]);
@@ -1386,9 +1825,20 @@ bool Shift_left_to_right_2(char *estseq, char *genseq, int cycle, pgap_alignment
 	for(i=0; i < cycle; i++){
 		if(cut_factor[i] != NULL)
 			pfree(cut_factor[i]);
+			
+		//Per gene PKM2, lista 4916, gb=BE908023
+		if(ext_cut_factor[i] != NULL)
+			pfree(ext_cut_factor[i]);
+		if(ext_match_str[i] != NULL)
+			pfree(ext_match_str[i]);
+
 		if(match_str[i] != NULL)
 			pfree(match_str[i]);
 	}
+	
+	//Per gene PKM2, lista 4916, gb=BE908023
+	pfree(ext_cut_factor);
+	pfree(ext_match_str);
 
 	pfree(cut_factor);
 	pfree(match_str);
@@ -1421,6 +1871,80 @@ void Find_ACCEPTOR_after_on_the_left(pgap_alignment alignment, int init, int *ge
 		return;
 
 	*genomic_substr_dim=index-alignment->intron_start_on_align-1;
+}
+
+//Per gene PKM2, lista 4916, EST BE908023
+//From the gap alignment, this procedure extracts a genomic susbtring from an alignment substring e counts the error number
+char *Get_genomic_substring_from_alignment(pgap_alignment alignment, int init, int length, int* error){
+	
+	int index=init;
+	int h_error=0;
+	if(init < 0 || init >= strlen(alignment->GEN_gap_alignment))
+		return NULL;
+
+	int actual_length=(strlen(alignment->GEN_gap_alignment)-init < length)?(strlen(alignment->GEN_gap_alignment)-init):(length);
+
+	char *gen_substr=NPALLOC(char, actual_length+1);
+	char *est_substr=NPALLOC(char, actual_length+1);
+	
+	int i=0, j=0;
+	while(index < init+actual_length){
+		if(alignment->GEN_gap_alignment[index] != '-'){
+			gen_substr[i]=alignment->GEN_gap_alignment[index];
+			i++;
+		}
+		if(alignment->EST_gap_alignment[index] != '-'){
+			est_substr[j]=alignment->EST_gap_alignment[index];
+			j++;
+		}
+
+		if(alignment->GEN_gap_alignment[index] != alignment->EST_gap_alignment[index]){
+			h_error++;
+		}
+		
+		index++;
+	}
+	
+	*error=h_error;
+	
+	gen_substr[i]='\0';
+	est_substr[j]='\0';
+	
+	return gen_substr;
+}
+
+//Per gene PKM2, lista 4916, EST BE908023
+//From the gap alignment, this procedure extracts a est susbtring from an alignment substring e counts the error number
+char *Get_est_substring_from_alignment(pgap_alignment alignment, int init, int length, int* error){
+	
+	int index=init;
+	int h_error=0;
+	if(init < 0 || init >= strlen(alignment->GEN_gap_alignment))
+		return NULL;
+
+	int actual_length=(strlen(alignment->EST_gap_alignment)-init < length)?(strlen(alignment->EST_gap_alignment)-init):(length);
+
+	char *est_substr=NPALLOC(char, actual_length+1);
+	
+	int i=0;
+	while(index < init+actual_length){
+		if(alignment->EST_gap_alignment[index] != '-'){
+			est_substr[i]=alignment->EST_gap_alignment[index];
+			i++;
+		}
+
+		if(alignment->GEN_gap_alignment[index] != alignment->EST_gap_alignment[index]){
+			h_error++;
+		}
+		
+		index++;
+	}
+	
+	*error=h_error;
+	
+	est_substr[i]='\0';
+	
+	return est_substr;
 }
 
 void Find_AG_before_on_the_right(pgap_alignment alignment, int init, int *genomic_substr_dim){

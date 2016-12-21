@@ -36,7 +36,7 @@ DEFAULT_CHECKS_production=no
 DEFAULT_LOG_GRAPHS=no
 DEFAULT_FORCE_32BIT=no
 DEFAULT_USE_COLOR=no
-DEFAULT_USE_PAR=yes
+DEFAULT_USE_PAR=no
 
 PROG_DIR=/usr/local/bin
 
@@ -182,6 +182,15 @@ endif
 #####################
 
 
+#####################
+# TCMalloc detection
+# TCMalloc is a (generally faster) drop-in replacement for the standard malloc
+# See: http://code.google.com/p/gperftools/
+#
+HAS_TCMALLOC:=/$(shell echo "void main() {}" | $(CC) -x c -o /tmp/test - -ltcmalloc_minimal 2> /dev/null && echo yes || echo no)/
+#####################
+
+
 
 #####################
 # Common compiler options
@@ -198,9 +207,9 @@ endif
 #
 ifeq ($(STATUS), production)
 ifeq ($(CC), icc)
-OPTP=-O2 -xHost -ip -ipo -vec-report1 -fomit-frame-pointer
+OPTP=-O2 -xHost -ip -ipo -vec-report1
 else
-OPTP=-O2 -fomit-frame-pointer
+OPTP=-O2
 endif
 LOG_LEVEL=INFO
 else
@@ -235,6 +244,9 @@ OPTPROF=-pg -fprofile-arcs
 endif
 else
 OPTPROF=
+ifeq ($(STATUS), production)
+OPTP+=-fomit-frame-pointer
+endif
 endif
 #####################
 
@@ -266,6 +278,13 @@ COMPFLAGS=$(ARCH_DEP) $(WLBIT) $(OPTB) $(OPTP) $(OPTD) $(OPTPROF)
 INCLUDE=-I. -I$(INCLUDE_DIR)/ -I$(STREE_DIR)/
 
 LIBS=-lm #-lgsl -lgslcblas #-lefence
+
+ifeq ($(STATUS), production)
+ifeq ($(HAS_TCMALLOC), /yes/)
+$(warning Using TCMalloc)
+LIBS+=-ltcmalloc_minimal
+endif
+endif
 
 override ADD_DFLAGS:=$(patsubst %,-%,$(subst :, ,$(PERS_DEFINE)))
 
@@ -304,6 +323,7 @@ ALL_DIR= $(BIN_DIR) $(SRC_DIR) $(OBJ_DIR)
 ##
 base_SOURCE= \
 	$(SRC_DIR)/options.c \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/double_list.c \
 	$(SRC_DIR)/int_list.c \
 	$(SRC_DIR)/bool_list.c \
@@ -319,7 +339,6 @@ base_SOURCE= \
 	$(SRC_DIR)/bit_vector.c\
 	$(SRC_DIR)/io-meg.c\
 	$(SRC_DIR)/io-gen-ests.c\
-	$(SRC_DIR)/est-factorizations.c \
 	$(SRC_DIR)/refine-intron.c \
 	$(SRC_DIR)/refine.c \
 	$(SRC_DIR)/compute-alignments.c \
@@ -333,6 +352,7 @@ base_SOURCE= \
 ##
 base_OBJ= \
 	$(OBJ_DIR)/options.o \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/double_list.o \
 	$(OBJ_DIR)/int_list.o \
 	$(OBJ_DIR)/bool_list.o \
@@ -348,7 +368,6 @@ base_OBJ= \
 	$(OBJ_DIR)/bit_vector.o\
 	$(OBJ_DIR)/io-meg.o\
 	$(OBJ_DIR)/io-gen-ests.o\
-	$(OBJ_DIR)/est-factorizations.o \
 	$(OBJ_DIR)/refine-intron.o \
 	$(OBJ_DIR)/refine.o \
 	$(OBJ_DIR)/compute-alignments.o \
@@ -367,15 +386,25 @@ stree_OBJ= \
 
 
 est_fact_SOURCE= \
+	$(SRC_DIR)/classify-intron.c \
+	$(SRC_DIR)/est-factorizations.c \
+	$(SRC_DIR)/factorization-util.c \
+	$(SRC_DIR)/factorization-refinement.c \
 	$(SRC_DIR)/max-emb-graph.c \
 	$(SRC_DIR)/aug_suffix_tree.c \
 	$(SRC_DIR)/meg-simplification.c \
+	$(SRC_DIR)/compute-est-fact.c \
 	$(SRC_DIR)/main-est-fact.c
 
 est_fact_OBJ= \
+	$(OBJ_DIR)/classify-intron.o \
+	$(OBJ_DIR)/est-factorizations.o \
+	$(OBJ_DIR)/factorization-util.o \
+	$(OBJ_DIR)/factorization-refinement.o \
 	$(OBJ_DIR)/max-emb-graph.o \
 	$(OBJ_DIR)/aug_suffix_tree.o \
 	$(OBJ_DIR)/meg-simplification.o \
+	$(OBJ_DIR)/compute-est-fact.o \
 	$(OBJ_DIR)/main-est-fact.o
 
 est_fact_PROG=$(BIN_DIR)/est-fact
@@ -393,15 +422,15 @@ test_data_create_PROG= \
 min_factorization_SOURCE= \
 	$(SRC_DIR)/min_factorization.c\
 	$(SRC_DIR)/color_matrix.c\
-	$(SRC_DIR)/semplify_matrix.c\
-	$(SRC_DIR)/sempl_info.c \
+	$(SRC_DIR)/simplify_matrix.c\
+	$(SRC_DIR)/simpl_info.c \
 	$(SRC_DIR)/main-min-factorization.c
 
 min_factorization_OBJ= \
 	$(OBJ_DIR)/min_factorization.o\
 	$(OBJ_DIR)/color_matrix.o\
-	$(OBJ_DIR)/semplify_matrix.o\
-	$(OBJ_DIR)/sempl_info.o \
+	$(OBJ_DIR)/simplify_matrix.o\
+	$(OBJ_DIR)/simpl_info.o \
 	$(OBJ_DIR)/main-min-factorization.o
 
 min_factorization_PROG=\
@@ -421,11 +450,13 @@ intron_agreement_PROG=\
 	$(BIN_DIR)/intron-agreement
 
 max_transcr_SOURCE= \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/util.c \
 	$(SRC_DIR)/my_time.c \
 	$(SRC_DIR)/MaximalTranscripts.c
 
 max_transcr_OBJ= \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/util.o \
 	$(OBJ_DIR)/my_time.o \
 	$(OBJ_DIR)/MaximalTranscripts.o
@@ -448,11 +479,13 @@ max_transcr_PROG= \
 
 
 cds_annotation_SOURCE= \
+	$(SRC_DIR)/log.c \
 	$(SRC_DIR)/util.c \
 	$(SRC_DIR)/my_time.c \
 	$(SRC_DIR)/CCDS.c
 
 cds_annotation_OBJ= \
+	$(OBJ_DIR)/log.o \
 	$(OBJ_DIR)/util.o \
 	$(OBJ_DIR)/my_time.o \
 	$(OBJ_DIR)/CCDS.o

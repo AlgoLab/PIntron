@@ -42,15 +42,15 @@
 #include "ext_array.h"
 #include "int_list.h"
 #include "configuration.h"
+#include "my_time.h"
 
 //Include
 
 //Computa per data una EST tutte le fattorizzazioni ammissibili a partire
 //dal grafo degli embedding massimali (pext_array)
 //pEST get_EST_factorizations(pconfiguration, pEST_info, pext_array);
-pEST get_EST_factorizations(pEST_info, pext_array, pconfiguration, pEST_info);
-
-char* real_substring(const int, const int, char*);
+pEST get_EST_factorizations(pEST_info, pext_array, pconfiguration, pEST_info,
+									 pmytime_timeout);
 
 void print_split_string_on_stderr(const int, char*);
 
@@ -58,7 +58,7 @@ void print_split_string_on_stderr(const int, char*);
  * Discards low complexity exons from a factorization and retains the best part
  */
 plist clean_low_complexity_exons(plist, char *, char *);
-plist clean_low_complexity_exons_2(plist, char *, char *);
+plist clean_low_complexity_exons_2(plist, char *, char *, pconfiguration);
 
 plist clean_external_exons(plist, char *, char *);
 

@@ -44,17 +44,17 @@
 pbit_vect BV_create(const unsigned int n)
 {
   my_assert(n>0u);
-  const unsigned int ncelle= (n/_LBTYPE)+1;
-  pbit_vect bv= (pbit_vect)calloc(1, sizeof(struct _bit_vect)+sizeof(_BTYPE)*ncelle);
+  const unsigned int ncells= (n/_LBTYPE)+1;
+  pbit_vect bv= (pbit_vect)calloc(1, sizeof(struct _bit_vect)+sizeof(_BTYPE)*ncells);
   bv->n= n;
-  bv->ncelle= ncelle;
+  bv->ncells= ncells;
   bv->arr= (_BTYPE*)(bv+1);
   return bv;
 }
 
 void BV_clear(pbit_vect bv) {
   _ASSERT_VALID_BV(bv);
-  for (unsigned int i= 0; i<bv->ncelle; ++i) {
+  for (unsigned int i= 0; i<bv->ncells; ++i) {
 	 bv->arr[i]= (_BTYPE)0;
   }
 }
@@ -63,7 +63,7 @@ void BV_or(pbit_vect bv1, pbit_vect bv2) {
   _ASSERT_VALID_BV(bv1);
   _ASSERT_VALID_BV(bv2);
   my_assert(bv1->n == bv2->n);
-  for (unsigned int i= 0; i<bv1->ncelle; ++i) {
+  for (unsigned int i= 0; i<bv1->ncells; ++i) {
 	 bv1->arr[i]= bv1->arr[i] | bv2->arr[i];
   }
 }
@@ -190,30 +190,39 @@ pbit_vect BV_clone(pbit_vect bv)
 {
   pbit_vect ris= PALLOC(struct _bit_vect);
   ris->n= bv->n;
-  ris->ncelle= bv->ncelle;
-  ris->arr= NPALLOC(_BTYPE, bv->ncelle);
-  memcpy(ris->arr, bv->arr, bv->ncelle*sizeof(_BTYPE));
+  ris->ncells= bv->ncells;
+  ris->arr= NPALLOC(_BTYPE, bv->ncells);
+  memcpy(ris->arr, bv->arr, bv->ncells*sizeof(_BTYPE));
   return ris;
 }
 
 void BV_copy(pbit_vect ris, pbit_vect bv)
 {
-  memcpy(ris->arr, bv->arr, bv->ncelle*sizeof(_BTYPE));
+  memcpy(ris->arr, bv->arr, bv->ncells*sizeof(_BTYPE));
 }
 
-bool contained(pbit_vect A, pbit_vect F)
+bool BV_contained(pbit_vect bv1, pbit_vect bv2)
 {
   _BTYPE r=0L;
   unsigned int i=0;
 
-  while(i<(A->n)){
+  while(i<(bv1->n)){
 
-	 _BTYPE f=BV_get_block(F,i);
-	 _BTYPE a=BV_get_block(A,i);
+	 _BTYPE bbv1=BV_get_block(bv1,i);
+	 _BTYPE bbv2=BV_get_block(bv2,i);
 
-	 r=(~f)&a;
-	 if(r!=0){ return false;}
+	 r=~((~bbv1)|bbv2);
+	 if(r!=0){ return false; }
 	 i+=_LBTYPE;
+  }
+  return true;
+}
+
+bool BV_all_true(pbit_vect bv)
+{
+  for (unsigned int i=0; i<bv->n; ++i){
+	 if (!BV_get(bv,i))
+		return false;
   }
   return true;
 }

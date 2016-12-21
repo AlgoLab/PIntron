@@ -30,14 +30,13 @@
 #include "min_factorization.h"
 #include "color_matrix.h"
 #include "list.h"
-#include "log.h"
-#include "bit_vector.h"
 #include <assert.h>
-#include "sempl_info.h"
+#include <stdint.h>
 
-bool valuate_list(pbit_vect comb, plist p)
+static bool
+evaluate_list(pbit_vect comb, plist p)
 {
-  my_assert(p!=NULL);
+  NOT_NULL(p);
 
   pbit_vect bv;
   plistit list_it_fact;
@@ -46,22 +45,20 @@ bool valuate_list(pbit_vect comb, plist p)
 
   while(listit_has_next(list_it_fact)){
 	 bv=listit_next(list_it_fact);
-	 if(contained(bv,comb))
-		{
-
-		  listit_destroy(list_it_fact);
-		  return true;
-		}
+	 if(BV_contained(bv,comb)) {
+		listit_destroy(list_it_fact);
+		return true;
+	 }
   }
   listit_destroy(list_it_fact);
   return false;
 }
 
 
-bool valuate_combination(pbit_vect comb,plist color_matrix)
-{
+static bool
+evaluate_combination(pbit_vect comb, plist color_matrix) {
 
-  my_assert(color_matrix!=NULL);
+  NOT_NULL(color_matrix);
 
   bool factorized=true;
   pEST p;
@@ -72,27 +69,28 @@ bool valuate_combination(pbit_vect comb,plist color_matrix)
   while(listit_has_next(list_it_est)){
 	 p=listit_next(list_it_est);
 
-	 factorized=valuate_list(comb,p->bin_factorizations);
+	 factorized=evaluate_list(comb,p->bin_factorizations);
 
-	 if(factorized==false){
+	 if(!factorized){
 		listit_destroy(list_it_est);
 		return false;
 	 }
   }
   listit_destroy(list_it_est);
-  DEBUG("*** Combinazione trovata!! ***");
+  DEBUG("Combination found!");
   return true;
 }
 
-int set_bin_value( pbit_vect test,psempl ps,int pos,bool value)
+int set_bin_value( pbit_vect test,psimpl ps,int pos,bool value)
 {
   int i=-1;
-  do{
+  do {
 	 i=i+1;
-	 if((BV_get(ps->factors_used,i)==false)&&(BV_get(ps->factors_not_used,i)==false)){
-		pos=pos-1;
+	 if (!(BV_get(ps->factors_used,i))&&
+		  !(BV_get(ps->factors_not_used,i))) {
+		--pos;
 	 }
-  }while(pos!=-1);
+  } while(pos!=-1);
   BV_set(test,i,value);
   return i;
 }
@@ -110,8 +108,8 @@ bool create_combinations(int s, int k,pbit_vect comb,plist color_matrix)
 
 		BV_set(comb,cont,true);
 
-		factorized=valuate_combination(comb,color_matrix);
-		if(factorized==true){return true;}
+		factorized=evaluate_combination(comb,color_matrix);
+		if(factorized){return true;}
 
 		BV_set(comb,cont,false);
 	 }
@@ -132,23 +130,8 @@ bool create_combinations(int s, int k,pbit_vect comb,plist color_matrix)
 }
 
 
-
-bool all_false(pbit_vect bv)
-{
-  for(unsigned int i=0;i<bv->n;i++){
-	 if (BV_get(bv,i)) return false;
-  }
-  return true;
-}
-
-void set_all_false(pbit_vect bv)
-{
-  for(unsigned int i=0;i<bv->n;i++){
-	 BV_set(bv,i,false);
-  }
-}
-
-int count_true(pbit_vect bv)
+static int
+count_true(pbit_vect bv)
 {
   int cont=0;
   for(unsigned int i=0;i<bv->n;i++){
@@ -159,8 +142,7 @@ int count_true(pbit_vect bv)
   return cont;
 }
 
-int min_number_of_factor(plist bin_factorizations)
-{
+int min_number_of_factors(plist bin_factorizations) {
   int min=0;
   int n_fact;
   plistit list_it;
@@ -181,9 +163,8 @@ int min_number_of_factor(plist bin_factorizations)
 }
 
 
-
-int max_of_min(plist color_matrix)
-{
+static int
+max_of_min(plist color_matrix) {
   int max=0;
   pEST est;
   plistit list_it;
@@ -194,7 +175,9 @@ int max_of_min(plist color_matrix)
 
 	 est=listit_next(list_it);
 
-	 if(min_number_of_factor(est->bin_factorizations)>max) max=min_number_of_factor(est->bin_factorizations);
+	 if (min_number_of_factors(est->bin_factorizations)>max) {
+		max= min_number_of_factors(est->bin_factorizations);
+	 }
   }
   listit_destroy(list_it);
 
@@ -210,7 +193,7 @@ void print_min_fact(pbit_vect bv, plist list_of_unique_fact)
   plistit list_it;
   pfactor pf;
 
-  DEBUG("Stampa del minimo numero di fattori necessari alla fattorizzazione di ogni EST");
+  DEBUG("Printing a minimum-cardinality set of factors needed to factorize every EST...");
 
   list_it=list_first(list_of_unique_fact);
 
@@ -220,8 +203,11 @@ void print_min_fact(pbit_vect bv, plist list_of_unique_fact)
 
 	 if(BV_get(bv,cont)){
 		 printf("%d)\t %d\t %d\t %d\t %d\n",cont+1,
-				pf->EST_start, pf->EST_end,
-				pf->GEN_start,pf->GEN_end);
+				  pf->EST_start, pf->EST_end,
+				  pf->GEN_start,pf->GEN_end);
+		 DEBUG("%d)\t %d\t %d\t %d\t %d\n",cont+1,
+				 pf->EST_start, pf->EST_end,
+				 pf->GEN_start,pf->GEN_end);
 	 }
   }
   listit_destroy(list_it);
@@ -230,7 +216,7 @@ void print_min_fact(pbit_vect bv, plist list_of_unique_fact)
 
 //Ingloba il risultato nel vettore dei fattori certi
 
-void inglobe(pbit_vect result,psempl p)
+void inglobe(pbit_vect result,psimpl p)
 {
   int cont=0;
 // int size=(int)p->factors_used->n;
@@ -314,20 +300,39 @@ void print_n_factorization_complete(pEST est,int n)
 	 }
   }
   listit_destroy(plist_it_factorizations);
+  boollistit_destroy(pboollist_it_polya);
+  boollistit_destroy(pboollist_it_polyadenil);
 }
 
-void print_factorizations_result(pbit_vect min_factors, plist p, plist list_of_unique_fact,psempl psemp)
+// See issue #7
+static void
+compute_coverage_and_exons(pfactorization pfact,
+									size_t * coverage, size_t * n_exons) {
+  *coverage= 0;
+  *n_exons= 0;
+  pfactor pf;
+  plistit plist_it_factor;
+  plist_it_factor= list_first(pfact);
+  while(listit_has_next(plist_it_factor)) {
+	 pf= listit_next(plist_it_factor);
+	 *coverage= (*coverage) + (pf->EST_end + 1 - pf->EST_start);
+	 *n_exons= *n_exons + 1;
+  }
+  listit_destroy(plist_it_factor);
+}
+
+
+// See issue #7
+void print_factorizations_result(pbit_vect min_factors, plist p,
+											plist list_of_unique_fact, psimpl psimp)
 {
-  plistit list_it_est,list_it_bin;
-  plistit list_it;
+  pfactorization pfact;
+  plistit list_it_est, list_it_bin, list_it_fact;
   pEST est;
   pbit_vect bv;
-  pfactor pf;
-  int cont,num_fact;
-  bool contain;
   int count_est;
 
-  if(min_factors!=NULL)inglobe(min_factors,psemp);
+  if(min_factors!=NULL)inglobe(min_factors,psimp);
 
   list_it_est=list_first(p);
 
@@ -335,75 +340,61 @@ void print_factorizations_result(pbit_vect min_factors, plist p, plist list_of_u
   while(listit_has_next(list_it_est)){
 	 est=listit_next(list_it_est);
 
-	 list_it_bin=list_first(est->bin_factorizations);
-	 contain=false;
+	 size_t best_factorization= 0;
+	 size_t best_coverage= 0;
+	 size_t best_n_exons= SIZE_MAX;
+	 size_t current_factorization= 0;
 
-	 int fattorizzazione=0; //ora
+	 list_it_bin= list_first(est->bin_factorizations);
+	 list_it_fact= list_first(est->factorizations);
 
-	 while(listit_has_next(list_it_bin)&&(contain==false)){
-		fattorizzazione=fattorizzazione+1; //ora
+	 while (listit_has_next(list_it_bin)){
+		my_assert(listit_has_next(list_it_fact));
 
-		bv=listit_next(list_it_bin);
+		current_factorization= current_factorization+1;
 
-		if(contained(bv,psemp->factors_used)){
-			//Raffa ==> modifica per fare in modo che vengano stampate tutte le fattorizzazioni
-			//spiegate dall'insieme risultato
-		  //contain=true;
-
-		  printf(">%s\n",est->info->EST_id);
-
-		  //fprintf(stdout, "Ok %d\n", BV_get(psemp->ests_ok,count_est));
-
-		  //print_n_factorization(est->factorizations,fattorizzazione);
-		  print_n_factorization_complete(est,fattorizzazione);
+		bv= listit_next(list_it_bin);
+		pfact= listit_next(list_it_fact);
+		if (BV_contained(bv, psimp->factors_used)){
+		  size_t current_coverage= 0;
+		  size_t current_n_exons= SIZE_MAX;
+		  compute_coverage_and_exons(pfact, &current_coverage, &current_n_exons);
+		  if ((best_coverage < current_coverage) ||
+				((best_coverage == current_coverage) &&
+				 (best_n_exons > current_n_exons))) {
+			 DEBUG("Found a better factorization. Currently: coverage %zunt, no. of exons %zu.",
+					 current_coverage, current_n_exons);
+			 best_coverage= current_coverage;
+			 best_n_exons= current_n_exons;
+			 best_factorization= current_factorization;
+		  }
 		}
 	 }
 	 listit_destroy(list_it_bin);
+	 listit_destroy(list_it_fact);
+
+// Print the "best" factorization of the current EST
+	 INFO("Saving factorization %zu (coverage: %zunt, no. of exons: %zu) for EST '%s'",
+			best_factorization, best_coverage, best_n_exons, est->info->EST_id);
+	 printf(">%s\n",est->info->EST_id);
+	 print_n_factorization_complete(est, best_factorization);
 	 count_est++;
   }
   listit_destroy(list_it_est);
 }
 
 
-bool all_true(pbit_vect bv)
-{
-  for(unsigned int i=0;i<bv->n;i++){
-	 if (BV_get(bv,i)==0) return false;
-  }
-  return true;
-}
-
-/* Semplificazione ulteriore della matrice colorata*/
-//*******************************************************************
-
-void color_matrix_semplified_destroy(plist p)
-{
-  plistit list_it;
-  pEST est;
-  list_it=list_first(p);
-
-  while(listit_has_next(list_it)){
-		est=listit_next(list_it);
-		list_destroy(est->bin_factorizations,(delete_function)BV_destroy);
-  }
- pfree(est);
-//  pfree(p);
-  listit_destroy(list_it);
-}
-
-
-
-void addFactoriz(pbit_vect bv,plist bin_fact,psempl psemp)
+void add_factorization(pbit_vect bv,plist bin_fact,psimpl psimp)
 {
   int dim=(int)bv->n;
 
-  pbit_vect bin=BV_create(abs(dim-count_true(psemp->factors_used)-count_true(psemp->factors_not_used)));
+  pbit_vect bin=BV_create(abs(dim-count_true(psimp->factors_used)-count_true(psimp->factors_not_used)));
 
   int pos=0;
 
   for(int i=0;i<dim;i++){
 
-	 if((!BV_get(psemp->factors_used,i))&&(!BV_get(psemp->factors_not_used,i))){
+	 if((!BV_get(psimp->factors_used,i))&&(!BV_get(psimp->factors_not_used,i))){
 		BV_set(bin,pos,BV_get(bv,i));
 		pos=pos+1;
 	 }
@@ -411,7 +402,8 @@ void addFactoriz(pbit_vect bv,plist bin_fact,psempl psemp)
   list_add_to_tail(bin_fact,bin);
 }
 
-void addEST(pEST p,plist col_mat_semp,psempl psemp)
+static void
+add_EST(pEST p,plist col_mat_simp,psimpl psimp)
 {
 
   plistit list_it;
@@ -429,16 +421,16 @@ void addEST(pEST p,plist col_mat_semp,psempl psemp)
   while(listit_has_next(list_it)){
 
 	 bv=listit_next(list_it);
-	 addFactoriz(bv,bin_fact,psemp);
+	 add_factorization(bv,bin_fact,psimp);
   }
 
   est->bin_factorizations=bin_fact;
 
-  list_add_to_tail(col_mat_semp,est);
+  list_add_to_tail(col_mat_simp,est);
   listit_destroy(list_it);
 }
 
-plist color_matrix_semplified_create(plist ests_factorizations,psempl psemp)
+plist color_matrix_simplified_create(plist ests_factorizations,psimpl psimp)
 {
 
   my_assert(ests_factorizations!=NULL);
@@ -447,29 +439,42 @@ plist color_matrix_semplified_create(plist ests_factorizations,psempl psemp)
   plistit plist_it_id;
   int cont=0;
 
-  plist col_mat_semp=list_create();
+  plist col_mat_simp=list_create();
   plist_it_id=list_first(ests_factorizations);
 
   while(listit_has_next(plist_it_id)){
 	 p= listit_next(plist_it_id);
 
-	 if(!BV_get(psemp->ests_ok,cont)){addEST(p,col_mat_semp,psemp);}
+	 if(!BV_get(psimp->ests_ok,cont)){add_EST(p,col_mat_simp,psimp);}
 	 cont=cont+1;
   }
   listit_destroy(plist_it_id);
-  return col_mat_semp;
+  return col_mat_simp;
 }
+
+void color_matrix_simplified_destroy(plist p)
+{
+  plistit list_it;
+  pEST est;
+  list_it=list_first(p);
+
+  while(listit_has_next(list_it)){
+		est=listit_next(list_it);
+		est->info= NULL;
+		EST_destroy(est);
+  }
+  listit_destroy(list_it);
+  list_destroy(p,(delete_function)noop_free);
+}
+
+
 
 /*****************************************************************************
 *******************************************************************************/
 
-pbit_vect min_fact(plist color_matrix)
-{
-  my_assert(color_matrix!=NULL);
-  int result;
+pbit_vect min_fact(plist color_matrix) {
 
-  int k=max_of_min(color_matrix);
-  int start=0;
+  NOT_NULL(color_matrix);
 
   bool factorized=false;
 
@@ -477,16 +482,20 @@ pbit_vect min_fact(plist color_matrix)
   pbit_vect bv=list_head(e->bin_factorizations);
 
   pbit_vect test=BV_create(bv->n);
-  start=k;
 
-  int size=(int)bv->n;
-  while(factorized==false){
+  size_t start= max_of_min(color_matrix);
 
-	 INFO("Combinazione di %d fattori",start);
+  INFO("Starting search of an optimal solution...");
+  while (!factorized) {
+
+	 INFO("Trying with %zu factors...", start);
 	 factorized=create_combinations(0,start,test,color_matrix);
+	 if (factorized) {
+		INFO("A solution with %zu factors has been found!", start);
+	 }
 	 start=start+1;
   }
-  INFO("*** ricerca del numero minimo di fattori terminata ***");
+  INFO("Search of an optimal solution terminated!");
   return test;
 }
 

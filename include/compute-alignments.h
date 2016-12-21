@@ -55,7 +55,25 @@ ComputeAlignMatrix(const char * const EST_seq,
 						 const size_t genomic_len,
 						 char * const Mdir);
 
-void TracebackAlignment(size_t, palignment, char *, char *, char *, int, int);
+void TracebackAlignment(const size_t m, palignment alignment, const char * const EST_seq, const char * const genomic_seq, const char * const Mdir, int i, int j);
+
+size_t*
+edit_distance_matrix(const char* const s1, const size_t l1,
+							const char* const s2, const size_t l2);
+
+size_t
+compute_edit_distance(const char* const s1, const size_t l1,
+							 const char* const s2, const size_t l2);
+
+size_t //edit distance
+compute_best_suffix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2);
+
+size_t //edit distance
+compute_best_prefix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2);
 
 bool K_band_edit_distance(char *, char *, unsigned int, unsigned int *);
 

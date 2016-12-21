@@ -28,6 +28,7 @@
  *
  **/
 #include <stdlib.h>
+#include <math.h>
 #include "est-factorizations.h"
 #include "list.h"
 #include "types.h"
@@ -39,21 +40,27 @@
 #include "exon-complexity.h"
 #include "compute-alignments.h"
 #include "detect-polya.h"
-
-#include "log.h"
+#include "util.h"
 
 //#define LOG_THRESHOLD LOG_LEVEL_TRACE
+#include "log.h"
+#include "max-emb-graph.h"
+
+#include "factorization-util.h"
+
 
 //Computa per un dato subtree
 //di un grafo degli embedding (GEM) gli embeddings e restituisce una lista di ppairing
-static plist get_subtree_embeddings(int, ppairing, pconfiguration);
+static plist get_subtree_embeddings(const int counter, ppairing root, pconfiguration config,
+												pmytime_timeout ptt, const char* const GEN_seq);
 
 //Prende in input una lista di embeddings (lista di liste di ppairing) e fornisce in output una
 //lista di fattorizzazioni (eliminando eventualmente embedding non buoni)
 static plist get_factorizations_from_embeddings(plist, pconfiguration, pEST_info, int);
 
 //Aggiorna l'embedding con il nuovo nodo (solo se e' compatibile)
-static plist update_embedding(plist, ppairing, pconfiguration);
+static plist update_embedding(plist embedding, ppairing node,
+										const char* const GEN_seq, pconfiguration config);
 
 static pfactor create_and_set_factor(int donor_EST_start, int donor_EST_end, int donor_GEN_start, int donor_GEN_end);
 
@@ -62,15 +69,11 @@ static psubtree_embeddings create_and_set_subtree_embeddings(ppairing, plist);
 static plist get_computed_subtree_embeddings(ppairing);
 
 //Funzione per copiare liste di pfactor
-static pfactor copy_pfactor(pfactor);
+//static pfactor copy_pfactor(pfactor);
 
 //Funzione per copiare liste di pfactor
 static ppairing copy_ppairing(ppairing);
 
-//Funzione di stampa di una lista di fattorizzazioni
-static void print_factorizations(plist);
-//Funzione di stampa di una fattorizzazione (lista di fattori pfactor)
-static void print_factorization(plist);
 
 //Funzione di stampa di una lista di embeddings
 static void print_embeddings(plist);
@@ -83,25 +86,20 @@ static void print_embedding(plist);
 //L'argomento deve essere una lista di embeddings (lista di liste di pairing)
 static void embedding_list_destroy(plist);
 
-//Funzione di stampa di una lista di fattorizzazioni
-static void print_factorizations_for_info(plist);
-//Funzione di stampa di una fattorizzazione (lista di fattori pfactor)
-static void print_factorization_for_info(plist);
-
 //Funzione di stampa di una lista di embeddings
-static void print_embeddings_for_info(plist);
+//static void print_embeddings_for_info(plist);
 //Funzione di stampa di una fattorizzazione (lista di fattori ppairing)
-static void print_embedding_for_info(plist);
+//static void print_embedding_for_info(plist);
 
 //Controlla che la fattorizzazione passata come input non tagli un suffisso/prefisso eccessivo
 //factorization deve essere una lista di pfactor
-static bool test_prefix_suffix(plist, int, pconfiguration, pEST_info);
+//static bool test_prefix_suffix(plist, int, pconfiguration, pEST_info);
 
 //Comparator per confrontare due fattori (pfactor)
-static int factor_compare(const pfactor*, const pfactor*);
+//static int factor_compare(const pfactor*, const pfactor*);
 
 //Comparator per confrontare due pairing (ppairing)
-static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2);
+//static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2);
 
 //Comparator per confrontare liste di fattori (pfactor)
 //Due fattori sono uguali se hanno gli estremi (su EST e GEN) che differiscono di pochi nt)
@@ -125,7 +123,8 @@ plist list_of_subtree_embeddings;
 
 //Computa per una data EST tutte le fattorizzazioni ammissibili a partire
 //dal grafo degli embedding massimali (pext_array)
-pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration config, pEST_info gen_info)
+pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration config,
+									 pEST_info gen_info, pmytime_timeout ptt)
 {
   unsigned int i, pext_size;
   pEST est;
@@ -184,9 +183,14 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
 		  counter=1;
 
-		  DEBUG("\t\t%d) Path rooted in pairing (%d, %d, %d)", counter, next_pairing->p, next_pairing->t, next_pairing->l);
+		  DEBUG("\t\t%d) Path rooted in pairing (%d, %d, %d)",
+				  counter, next_pairing->p, next_pairing->t, next_pairing->l);
 
-		  subtree_embedding_list=get_subtree_embeddings(counter, next_pairing, config);
+		  subtree_embedding_list= get_subtree_embeddings(counter, next_pairing, config, ptt, gen_info->EST_seq);
+
+		  if (subtree_embedding_list == NULL) {
+			 return NULL;
+		  }
 
 		  DEBUG("\t\t...ALL THE EMBEDDINGS FOR THE PATH ARE OBTAINED!");
 		  print_embeddings(subtree_embedding_list);
@@ -198,7 +202,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 		  //printf("...ALL THE FACTORIZATIONS FOR THE PATH ARE OBTAINED %zu!\n", list_size(subtree_fact_list));
 
 		  DEBUG("\t\t...ALL THE FACTORIZATIONS FOR THE PATH ARE OBTAINED!");
-		  print_factorizations(subtree_fact_list);
+		  print_factorizations_on_log(LOG_LEVEL_TRACE, subtree_fact_list);
 
 		  plistit add_it=list_first(subtree_fact_list);
 		  int counter_add=1;
@@ -222,8 +226,9 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 					 is_ok=false;
 			 }
 
+
 			 if(is_ok){
-				 add_f=clean_low_complexity_exons_2(add_f, gen_info->EST_seq, est->info->EST_seq);
+				 add_f=clean_low_complexity_exons_2(add_f, gen_info->EST_seq, est->info->EST_seq, config);
 				 if(list_is_empty(add_f))
 					 is_ok=false;
 			 }
@@ -238,6 +243,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 				 is_ok=check_est_coverage(add_f, est->info->EST_seq);
 			 }
 
+
 			 if(is_ok){
 				 bool check_adding;
 				 factorization_list=add_if_not_exists(add_f, factorization_list, config, &check_adding);
@@ -247,6 +253,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			 }
 			 else
 				 list_remove_at_iterator(add_it, (delete_function) factorization_destroy);
+
 
 			 counter_add++;
 		  }
@@ -303,7 +310,7 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	 plist add_factorization=(plist)listit_next(plist_add_factorization);
 	 double coverage=(double)doublelistit_next(d_it);
 	 DEBUG("\t\tThe factorization number %d", count_f);
-	 print_factorization(add_factorization);
+	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
 	 if(coverage == -1.0 || max_coverage-coverage > config->max_coverage_diff){
 		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
@@ -350,11 +357,11 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 	 plist add_factorization=(plist)listit_next(plist_add_factorization);
 	 int exonNUM=(int)intlistit_next(i_it);
 	 DEBUG("\t\tThe factorization number %d", count_f);
-	 print_factorization(add_factorization);
+	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
 	 if ((config->max_exonNUM_diff != -1) && (exonNUM-min_exonNUM > config->max_exonNUM_diff)){
 		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
-		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
 		DEBUG("\t\t\t...has been discarded!");
 	 }
 	 count_f++;
@@ -393,11 +400,11 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
  	 plist add_factorization=(plist)listit_next(plist_add_factorization);
  	 int gapLength=(int)intlistit_next(i2_it);
  	 DEBUG("\t\tThe factorization number %d", count_f);
- 	 print_factorization(add_factorization);
+ 	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
 
  	 if ((config->max_gapLength_diff != -1) && (gapLength-min_gapLength > config->max_gapLength_diff)) {
  		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
-		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
  		DEBUG("\t\t\t...has been discarded!");
  	 }
  	 count_f++;
@@ -415,18 +422,18 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
      while(listit_has_next(plist_add_factorization)){
   	 plist add_factorization=(plist)listit_next(plist_add_factorization);
   	 DEBUG("\t\tThe factorization number %d", count_f);
-  	 print_factorization(add_factorization);
+  	 print_factorization_on_log(LOG_LEVEL_TRACE, add_factorization);
   	 if(!check_gap_errors(add_factorization, est->info->EST_seq, gen_info->EST_seq, config)){
   		list_remove_at_iterator(plist_add_factorization, (delete_function)factorization_destroy);
- 		print_factorizations(factorization_list);
+		print_factorizations_on_log(LOG_LEVEL_TRACE, factorization_list);
  		DEBUG("\t\t\t...has been discarded!");
   	 }
   	 count_f++;
     }
     listit_destroy(plist_add_factorization);
 
-  INFO("Factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
-  print_factorizations_for_info(factorization_list);
+  DEBUG("Preliminary factorizations of EST %s => %zd", est->info->EST_id, list_size(factorization_list));
+  print_factorizations_on_log_full(LOG_LEVEL_DEBUG, factorization_list, gen_info->EST_seq);
 
   if(config->max_number_of_factorizations != 0 && ((int) list_size(factorization_list)) > config->max_number_of_factorizations){
 	 INFO("\tbut it is an artifact! There are too many factorizations!");
@@ -435,24 +442,32 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
   }
 
   //Refine factorizations
+  DEBUG("Refine factorizations...");
   plistit plist_fact_to_be_refined=list_first(factorization_list);
   while(listit_has_next(plist_fact_to_be_refined)){
 	 plist fact_to_be_refined=(plist)listit_next(plist_fact_to_be_refined);
 	 if(!list_is_empty(fact_to_be_refined)){
+		 DEBUG("New factorization to be refined:");
+		 print_factorization_on_log_full(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 		 plistit plist_f_t_r=list_first(fact_to_be_refined);
 		 pfactor donor=(pfactor)listit_next(plist_f_t_r);
 		 bool first_intron=true;
 		 while(listit_has_next(plist_f_t_r)){
 			 pfactor acceptor=(pfactor)listit_next(plist_f_t_r);
 
-			 DEBUG("Refining intron %d-%d (%c%c-%c%c) (EST cut %d)", donor->GEN_end+1, acceptor->GEN_start-1, gen_info->EST_seq[donor->GEN_end+1], gen_info->EST_seq[donor->GEN_end+2], gen_info->EST_seq[acceptor->GEN_start-2], gen_info->EST_seq[acceptor->GEN_start-1], acceptor->EST_start);
+			 DEBUG(" - Refining intron:  gen. coord.=[%7d-%7d],  pattern=[ %.2s - %.2s],  EST cut=%6d",
+					 donor->GEN_end+1, acceptor->GEN_start-1,
+					 gen_info->EST_seq+donor->GEN_end+1, gen_info->EST_seq+acceptor->GEN_start-2,
+					 acceptor->EST_start);
 
 			 refine_intron(config, gen_info, pest_info, donor, acceptor, first_intron);
 
 			 first_intron=false;
 
-			 DEBUG("\tRefined intron: %d-%d", donor->GEN_end+1, acceptor->GEN_start-1);
-			 DEBUG("\tRefined intron pattern ==> %c%c-%c%c", gen_info->EST_seq[donor->GEN_end+1], gen_info->EST_seq[donor->GEN_end+2], gen_info->EST_seq[acceptor->GEN_start-2], gen_info->EST_seq[acceptor->GEN_start-1]);
+			 DEBUG("   Resulting intron: gen. coord.=[%7d-%7d],  pattern=[ %.2s - %.2s],  EST cut=%6d",
+					 donor->GEN_end+1, acceptor->GEN_start-1,
+					 gen_info->EST_seq+donor->GEN_end+1, gen_info->EST_seq+acceptor->GEN_start-2,
+					 acceptor->EST_start);
 
 			 donor=acceptor;
 		 }
@@ -469,24 +484,27 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			 }
 		 }
 		 listit_destroy(plist_f_t_r);
+		 DEBUG("Refined factorization:");
+		 print_factorization_on_log_full(LOG_LEVEL_DEBUG, fact_to_be_refined, gen_info->EST_seq);
 	 }
   }
 
   listit_destroy(plist_fact_to_be_refined);
 
-  plist final_factorization_list=list_create();
-  //plist final_factorization_list=factorization_list;
+	plistit plist_fact_to_be_corrected;
 
-  plistit plist_fact_to_be_corrected=list_first(factorization_list);
+  plist final_factorization_list=factorization_list;
+  /*plist final_factorization_list=list_create();
+  plist_fact_to_be_corrected=list_first(factorization_list);
   while(listit_has_next(plist_fact_to_be_corrected)){
 	  plist fact_to_be_corrected=(plist)listit_next(plist_fact_to_be_corrected);
 	  fact_to_be_corrected=clean_noisy_exons(fact_to_be_corrected, gen_info->EST_seq, est->info->EST_seq, false);
 	  fact_to_be_corrected=clean_external_exons(fact_to_be_corrected, gen_info->EST_seq, est->info->EST_seq);
-	  /*bool is_ok=false;
-	  if(!list_is_empty(fact_to_be_corrected))
-		  is_ok=check_exon_start_end(fact_to_be_corrected);*/
+	  //bool is_ok=false;
+	  //if(!list_is_empty(fact_to_be_corrected))
+	 //	  is_ok=check_exon_start_end(fact_to_be_corrected);
 	  //if(is_ok == false || (list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected)))
-	  if(list_is_empty(fact_to_be_corrected) || !check_small_exons(fact_to_be_corrected))
+	  if(list_is_empty(fact_to_be_corrected))// || !check_small_exons(fact_to_be_corrected))
 			list_remove_at_iterator(plist_fact_to_be_corrected, (delete_function)factorization_destroy);
 	  else{
 			bool check_adding;
@@ -496,9 +514,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 			}
 	  }
   }
-
   listit_destroy(plist_fact_to_be_corrected);
-  list_destroy(factorization_list, (delete_function)noop_free);
+  list_destroy(factorization_list, (delete_function)noop_free);*/
 
   /*STAMPA QUALITA' FATTORIZZAZIONI*****************************************/
     /*plistit print_it=list_first(final_factorization_list);
@@ -550,6 +567,8 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
     listit_destroy(print_it);*/
     /*STAMPA QUALITA' FATTORIZZAZIONI*****************************************/
 
+  print_factorizations_on_log_full(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
+
   //Detect polyA signal
   plist_fact_to_be_corrected=list_first(final_factorization_list);
   est->polyA_signals=boollist_create();
@@ -567,11 +586,16 @@ pEST get_EST_factorizations(pEST_info pest_info, pext_array pext, pconfiguration
 
   est->factorizations=final_factorization_list;
 
+  INFO("Refined factorizations of EST %s => %zd",
+		 est->info->EST_id, list_size(final_factorization_list));
+  print_factorizations_on_log_full(LOG_LEVEL_INFO, final_factorization_list, gen_info->EST_seq);
+
   return est;
 }
 
 //Computa per un dato subtree tutti gli embedding e restituisce una lista di liste di ppairing
-static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration config)
+static plist get_subtree_embeddings(const int counter, ppairing root, pconfiguration config,
+												pmytime_timeout ptt, const char* const GEN_seq)
 {
   plist embedding_list; 	//Lista degli embedding
   plist updated_embedding_list;
@@ -585,14 +609,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
   my_assert(root != NULL);
 
-  int i;
-  char tab[10000];
-  for(i=0; i<counter; i++){
-	 tab[i]=' ';
-  }
-  tab[i]='\0';
-
-  DEBUG("\t\t%s->%d) Pairing node (%d, %d, %d)", tab, counter, root->p, root->t, root->l);
+  DEBUG("\t\t%.*s->%d) Pairing node (%d, %d, %d)", counter, SPACE_STRING, counter,
+		  root->p, root->t, root->l);
 
   plist computed_sub_e=get_computed_subtree_embeddings(root);
   if(computed_sub_e != NULL){
@@ -602,7 +620,13 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 	 return computed_sub_e;
   }
-  DEBUG("\t\tThe subtree embeddings are to be computed!\n");
+  DEBUG("\t\t  %.*sThe subtree embeddings are to be computed!",
+		  counter, SPACE_STRING);
+
+// Check timeout
+  if (MYTIME_timeout_expired(ptt)) {
+	 return NULL;
+  }
 
 //Recupero la lista di adiacenza del nodo in input
   adj_list=root->adjs;
@@ -615,7 +639,7 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 
 //Se il nodo root e' una foglia
   if(list_is_empty(adj_list)){
-	 DEBUG("\t\t\t%s...IS A LEAF!", tab);
+	 DEBUG("\t\t\t%.*s...IS A LEAF!", counter, SPACE_STRING);
 
 //Creazione dell'embedding (lista di ppairing vuota)
 	 embedding=list_create();
@@ -640,37 +664,53 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 while(listit_has_next(adj_list_iter)){
 		next_adj_pairing=(ppairing) listit_next(adj_list_iter);
 
-		subtree_embedding_list=get_subtree_embeddings(counter+1, next_adj_pairing, config);
+		subtree_embedding_list= get_subtree_embeddings(counter+1, next_adj_pairing, config, ptt, GEN_seq);
+		if (subtree_embedding_list == NULL) {
+		  return NULL;
+		}
 
-		DEBUG("\t\t\t%sEmbeddings of subtree rooted in (%d, %d, %d) obtained!", tab, next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
+		DEBUG("\t\t\t%.*sEmbeddings of subtree rooted in (%d, %d, %d) obtained!",
+				counter, SPACE_STRING,
+				next_adj_pairing->p, next_adj_pairing->t, next_adj_pairing->l);
 
 		print_embeddings(subtree_embedding_list);
 
 		//Aggiungo (se compatibile) il root node ad ogni embedding in subtree_embedding_list
 		subtree_embedding_iter=list_first(subtree_embedding_list);
 
-		DEBUG("\t\t\t%sAdding the node (%d, %d, %d) to the embeddings above...", tab, root->p, root->t, root->l);
+		DEBUG("\t\t\t%.*sAdding the node (%d, %d, %d) to the embeddings above...",
+				counter, SPACE_STRING, root->p, root->t, root->l);
 
 		int count_f=1;
 
+		unsigned int time_limit_check= 0;
 		while(listit_has_next(subtree_embedding_iter)){
+
 		  next_embedding=(plist)listit_next(subtree_embedding_iter);
 
-		  DEBUG("\t\t\t\t%s...adding the node to the embedding %d...", tab, count_f);
+		  DEBUG("\t\t\t\t%.*s...adding the node to the embedding %d...",
+				  counter, SPACE_STRING, count_f);
 		  print_embedding(next_embedding);
 
 //Adds the root node; ritorna una lista di embedding (attualmente uno solo)
-		  updated_embedding_list=update_embedding(next_embedding, root, config);
+		  updated_embedding_list=update_embedding(next_embedding, root, GEN_seq, config);
 
-		  DEBUG("\t\t\t\t%s...node added!", tab);
+		  DEBUG("\t\t\t\t%.*s...node added!", counter, SPACE_STRING);
 		  print_embeddings(updated_embedding_list);
 
 		  if(!list_is_empty(updated_embedding_list)){
-			 plistit add_it=list_first(updated_embedding_list);
-			 while(listit_has_next(add_it)){
-				plist add_emb=(plist)listit_next(add_it);
+			 listit add_it;
+			 list_first_stack(updated_embedding_list, &add_it);
+			 while(listit_has_next(&add_it)){
 
-				plistit cmp_it=list_first(embedding_list);
+// Check timeout (but not often)
+				if (!time_limit_check && MYTIME_timeout_expired(ptt)) {
+				  return NULL;
+				}
+				time_limit_check += 1;
+				time_limit_check &= 1023u;
+
+				plist add_emb=(plist)listit_next(&add_it);
 
 //Valori di ritorno della funzione maximality_relation(add_emb, cmp_emb):
 //2 ==> add_emb e' massimale
@@ -678,20 +718,21 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 //0 ==> cmp_emb e' massimale
 				char is_maximal=2;
 
-				while(listit_has_next(cmp_it) && is_maximal >= 1){
-				  plist cmp_emb=(plist)listit_next(cmp_it);
+				listit cmp_it;
+				list_first_stack(embedding_list, &cmp_it);
+				while(listit_has_next(&cmp_it) && is_maximal >= 1){
+				  plist cmp_emb=(plist)listit_next(&cmp_it);
 				  is_maximal=maximality_relation(add_emb, cmp_emb);
 
 				  if(is_maximal == 2){
-					 list_remove_at_iterator(cmp_it, (delete_function)pairing_destroy_2);
+					 list_remove_at_iterator(&cmp_it, (delete_function)pairing_destroy_2);
 				  }
 				}
-				listit_destroy(cmp_it);
 
 				if(is_maximal >= 1)
 				  list_add_to_tail(embedding_list, add_emb);
 				else{
-				  list_remove_at_iterator(add_it, (delete_function)pairing_destroy_2);
+				  list_remove_at_iterator(&add_it, (delete_function)pairing_destroy_2);
 				}
 			 }
 
@@ -699,7 +740,6 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 				embedding_list_destroy(updated_embedding_list);
 			 }
 
-			 listit_destroy(add_it);
 		  }
 		  else{
 			 embedding_list_destroy(updated_embedding_list);
@@ -711,7 +751,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 	 }
 	 listit_destroy(adj_list_iter);
 
-	 DEBUG("\t\t\t%s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!", tab, root->p, root->t, root->l);
+	 DEBUG("\t\t\t%.*s...node (%d, %d, %d) added to all the embeddings of all its adjacent nodes!",
+			 counter, SPACE_STRING, root->p, root->t, root->l);
 	 print_embeddings(embedding_list);
   }
 
@@ -721,7 +762,8 @@ static plist get_subtree_embeddings(int counter, ppairing root, pconfiguration c
 }
 
 //Aggiorna l'embedding con il nuovo nodo (solo se e' compatibile)
-static plist update_embedding(plist embedding, ppairing node, pconfiguration config){
+static plist update_embedding(plist embedding, ppairing node,
+										const char* const GEN_seq, pconfiguration config){
   plist copy_embedding;
   plist sink_embedding;
   int node_copy_l;
@@ -749,14 +791,18 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 	 return return_embedding_list;
   }
 
+  TRACE("Adding node (%d, %d, %d) to the embeddings starting with head (%d, %d, %d)",
+		  PAIRING(node), PAIRING(head));
 //Verifico la compatibilita' di node con embedding, cioe' node e' il primo pairing (head) di embedding
 //devono soddisfare gli stessi criteri di linking (node->head) con cui il MEG e' stato costruito
-  int small_delta=(head->p+head->l)-node->p;
-  int big_delta=(head->t+head->l)-node->t;
+  const int small_delta=(head->p+head->l)-node->p;
+  const int big_delta=(head->t+head->l)-node->t;
+  TRACE("Deltas: small=%d, big=%d", small_delta, big_delta);
 
 //L'embedding dei due nodi deve dare fattori di una certa lunghezza minima
-  if(small_delta >= (int)(2*config->min_factor_len) && big_delta >= (int)(2*config->min_factor_len)){
-	 int fl=2*(config->min_factor_len);
+  const int min_fl= (int)config->min_factor_len;
+  const int fl=2*min_fl;
+  if(small_delta >= fl && big_delta >= fl){
 //L'eventuale gap su P tra node e head deve essere limitato
 	 if(small_delta-(node->l+head->l) <= fl){
 //L'embedding dei due nodi non deve aprire un gap su P maggiore di una certa soglia (su T e' libero)
@@ -772,11 +818,8 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 		  }
 //Esiste un overlap o su P o su T o su entrambi
 		  else{
-			 int ref_delta;
-			 if(small_delta >= big_delta)
-				ref_delta=big_delta;
-			 else
-				ref_delta=small_delta;
+			 TRACE("There is an overlap on P and/or T.");
+			 const int ref_delta= MIN(small_delta, big_delta);
 
 			 int temp_length_node=ref_delta/2;
 			 int temp_length_head=ref_delta-temp_length_node;
@@ -796,8 +839,64 @@ static plist update_embedding(plist embedding, ppairing node, pconfiguration con
 			 node_copy_l=temp_length_node;
 		  }
 
-//Controllo del gap (introne minimo) sulla genomica
-		  if((head_copy_t-node->t-node_copy_l-1) <= fl || (config->min_intron_length == 0 || (head_copy_t-node->t-node_copy_l-1) >= config->min_intron_length)){
+		  const bool is_overlap_on_p= ( small_delta < (node->l + head->l) );
+
+		  const int gap_length_on_p= head_copy_p - node->p - node_copy_l - 1;
+		  const int gap_length_on_t= head_copy_t - node->t - node_copy_l - 1;
+		  const int possible_intron_length= gap_length_on_t - MAX(0, gap_length_on_p);
+		  const bool is_intron_on_t= ( (possible_intron_length >= 0) &&
+												 (config->min_intron_length == 0 ||
+												  possible_intron_length >= config->min_intron_length) );
+
+// Ho un introne e avevo un overlap su P, cerco il miglior introne secondo Burset
+		  if (is_overlap_on_p && is_intron_on_t) {
+			 DEBUG("There is an overlap on P and an intron on T. "
+					 "Searching the best cut according Burset...");
+			 int best_burset_freq= -1;
+			 int best_P_cut= 0;
+			 const int min_P_cut= MAX(node->p + min_fl, head->p);
+			 const int max_P_cut= MIN(head->p + head->l - min_fl, node->p + node->l);
+			 TRACE("Trying to cut between %d and %d (inclusive)...", min_P_cut, max_P_cut);
+			 for (int current_P_cut= min_P_cut;
+					current_P_cut <= max_P_cut;
+					++current_P_cut) {
+				TRACE("Trying P cut %d...", current_P_cut);
+				const int current_burset_freq=
+				  getBursetFrequency_adaptor(GEN_seq,
+													  current_P_cut - node->p + node->t,
+													  current_P_cut - head->p + head->t);
+				if (current_burset_freq >= best_burset_freq) {
+				  best_burset_freq= current_burset_freq;
+				  best_P_cut= current_P_cut;
+				}
+			 }
+			 DEBUG("Best intron placement (according to Burset frequency): "
+					 "P cut=%d, Burset frequency=%d.",
+					 best_P_cut, best_burset_freq);
+			 DEBUG("Original pairings on P: [%9d --%10d)   -->   [%9d --%10d)",
+					 node->p, node->p + node->l,
+					 head->p, head->p + head->l);
+			 DEBUG("Original pairings on T: [%9d --%10d)   -->   [%9d --%10d)",
+					 node->t, node->t + node->l,
+					 head->t, head->t + head->l);
+			 const int tmpdeltaH= best_P_cut - head->p;
+			 head_copy_l= head->l - tmpdeltaH;
+			 head_copy_p= head->p + tmpdeltaH;
+			 head_copy_t= head->t + tmpdeltaH;
+			 const int tmpdeltaN= node->p + node->l - best_P_cut;
+			 node_copy_l= node->l - tmpdeltaN;
+			 DEBUG("Refined pairings on P:  [%9d --%10d)   -->   [%9d --%10d)",
+					 node->p, node->p + node_copy_l,
+					 head_copy_p, head_copy_p + head_copy_l);
+			 DEBUG("Refined pairings on T:  [%9d --%10d) %.2s...%.2s [%9d --%10d)",
+					 node->t, node->t + node_copy_l,
+					 GEN_seq+node->t + node_copy_l, GEN_seq+head_copy_t-2,
+					 head_copy_t, head_copy_t + head_copy_l);
+		  }
+
+// Se ( ho un piccolo gap "netto" su T  OR ho un introne di lunghezza >= al minimo )
+//  --> aggiungo
+		  if((gap_length_on_t <= fl) || is_intron_on_t ) {
 			 copy_embedding=list_copy(embedding, (copy_item) copy_ppairing);
 			 ppairing head_copy=(ppairing)list_head(copy_embedding);
 			 head_copy->p=head_copy_p;
@@ -870,6 +969,8 @@ static plist get_computed_subtree_embeddings(ppairing root)
 	 return NULL;
 }
 
+//UNUSED
+/*
 //Funzione per copiare liste di pfactor
 static pfactor copy_pfactor(pfactor arg)
 {
@@ -880,6 +981,7 @@ static pfactor copy_pfactor(pfactor arg)
   return copy;
 
 }
+*/
 
 //Funzione per copiare liste di ppairing
 static ppairing copy_ppairing(ppairing arg)
@@ -890,32 +992,6 @@ static ppairing copy_ppairing(ppairing arg)
 
   return copy;
 
-}
-
-static void print_factorizations(plist factorization_list){
-  plistit plist_it_id;
-
-  TRACE("\t\tFactorizations->");
-
-  plist_it_id=list_first(factorization_list);
-  while(listit_has_next(plist_it_id)){
-	 plist factorization=(plist)listit_next(plist_it_id);
-	 print_factorization(factorization);
-  }
-  listit_destroy(plist_it_id);
-}
-
-static void print_factorization(plist factorization){
-  plistit plist_it_f;
-
-  TRACE("\t\tFactorization->");
-
-  plist_it_f=list_first(factorization);
-  while(listit_has_next(plist_it_f)){
-	 pfactor pfact=listit_next(plist_it_f);
-	 TRACE("\t\t\tE_START=%d E_END=%d G_START=%d G_END=%d", pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end);
-  }
-  listit_destroy(plist_it_f);
 }
 
 static void print_embeddings(plist embedding_list){
@@ -944,32 +1020,8 @@ static void print_embedding(plist embedding){
   listit_destroy(plist_it_e);
 }
 
-static void print_factorizations_for_info(plist factorization_list){
-  plistit plist_it_id;
-
-  INFO("\t\tFactorizations->");
-
-  plist_it_id=list_first(factorization_list);
-  while(listit_has_next(plist_it_id)){
-	 plist factorization=(plist)listit_next(plist_it_id);
-	 print_factorization_for_info(factorization);
-  }
-  listit_destroy(plist_it_id);
-}
-
-static void print_factorization_for_info(plist factorization){
-  plistit plist_it_f;
-
-  INFO("\t\tFactorization-> %zd exon(s)", list_size(factorization));
-
-  plist_it_f=list_first(factorization);
-  while(listit_has_next(plist_it_f)){
-	 pfactor pfact=(pfactor)listit_next(plist_it_f);
-	 INFO("\t\t\tE_START=%d E_END=%d G_START=%d G_END=%d", pfact->EST_start, pfact->EST_end, pfact->GEN_start, pfact->GEN_end);
-  }
-  listit_destroy(plist_it_f);
-}
-
+/*
+//UNUSED
 static void print_embeddings_for_info(plist embedding_list){
   plistit plist_it_id;
 
@@ -995,6 +1047,7 @@ static void print_embedding_for_info(plist embedding){
   }
   listit_destroy(plist_it_e);
 }
+*/
 
 //L'argomento deve essere una lista di fattorizzazioni (lista di liste di fattori)
 /*static void factorization_list_destroy(plist factorization_list){
@@ -1008,6 +1061,8 @@ static void embedding_list_destroy(plist embedding_list){
 	 list_destroy(embedding_list,(delete_function)embedding_destroy);
 }
 
+//UNUSED
+/*
 //Controlla che la fattorizzazione passata come input non tagli un suffisso/prefisso eccessivo
 //factorization deve essere una lista di pfactor
 static bool test_prefix_suffix(plist factorization, int est_length, pconfiguration config, pEST_info info){
@@ -1037,7 +1092,10 @@ static bool test_prefix_suffix(plist factorization, int est_length, pconfigurati
 
   return true;
 }
+*/
 
+//UNUSED
+/*
 //Comparator per confrontare due fattori (pfactor)
 static int factor_compare(const pfactor* pf1, const pfactor* pf2) {
   my_assert(pf1!=NULL);
@@ -1073,6 +1131,7 @@ static int perfect_pairing_compare(const ppairing* pp1, const ppairing* pp2) {
 
   return 1;
 }
+*/
 
 //Comparator per confrontare liste di fattori (pfactor)
 //Due fattori sono uguali se la differenza tra gli ss (solo sulla genomica) e' contenuta in allowed_diff
@@ -1252,7 +1311,7 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 	 actual_cut_suffix=actual_cut_suffix-suff_poly_red;
 	 factorization=list_create();
 	 plistit plist_it_e=list_first(embedding);
-	 pfactor last_factor;
+	 pfactor last_factor= NULL;
 	 bool stop=false;
 	 while(listit_has_next(plist_it_e) && stop == false){
 		ppairing pair=(ppairing)listit_next(plist_it_e);
@@ -1260,28 +1319,28 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 		  last_factor=create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
 		  list_add_to_tail(factorization, last_factor);
 		  DEBUG("\t...first factor %d-%d (%d-%d) added!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
-		}
-		else{
+		} else {
 //Si genera un introne su T
-		  if((pair->t-last_factor->GEN_end-1) > fl){
+		  if ((pair->t-last_factor->GEN_end-1) > fl) {
 			 pfactor tail_factor=(pfactor)list_tail(factorization);
-			 last_factor=create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
+			 last_factor= create_and_set_factor(pair->p, pair->p+pair->l-1, pair->t, pair->t+pair->l-1);
 //L'eventuale gap su P viene lasciato e poi risolto in fase di post-processing
-			 if(0 && (last_factor->EST_start-tail_factor->EST_end-1) > 0){
+			 if (0 && (last_factor->EST_start-tail_factor->EST_end-1) > 0){
 				tail_factor->EST_end=tail_factor->EST_end+((last_factor->EST_start-tail_factor->EST_end-1)/2);
 				last_factor->EST_start=tail_factor->EST_end+1;
 				DEBUG("\t...right end of the last factor, updated on P to %d!", tail_factor->EST_end);
 			 }
 			 list_add_to_tail(factorization, last_factor);
 			 DEBUG("\t...new factor %d-%d (%d-%d) added!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
-		  }
+		  } else {
 //I due esoni vengono fusi (e quindi l'eventuale gap su P scompare)
-		  else{
 			 last_factor=(pfactor)list_tail(factorization);
 			 last_factor->EST_end=pair->p+pair->l-1;
 			 last_factor->GEN_end=pair->t+pair->l-1;
 
-			 DEBUG("\t...updating last factor to %d-%d (%d-%d)!", last_factor->EST_start, last_factor->EST_end, last_factor->GEN_start, last_factor->GEN_end);
+			 DEBUG("\t...updating last factor to %d-%d (%d-%d)!",
+					 last_factor->EST_start, last_factor->EST_end,
+					 last_factor->GEN_start, last_factor->GEN_end);
 		  }
 		}
 	 }
@@ -1301,28 +1360,28 @@ static plist get_factorizations_from_embeddings(plist embedding_list, pconfigura
 //Il confronto parte dal primo pairing per entrambi gli embedding in quanto e' una procedura applicata
 //agli embedding relativi ad un sottoalbero del MEG radicato in un determinato nodo.
 static char maximality_relation(plist add_emb, plist cmp_emb){
+  listit add_pair_it;
+  listit cmp_pair_it;
+  bool check;
+
+  list_first_stack(add_emb, &add_pair_it);
+  list_first_stack(cmp_emb, &cmp_pair_it);
 
   if(list_size(add_emb) > list_size(cmp_emb)){
-	 plistit add_pair_it=list_first(add_emb);
-	 plistit cmp_pair_it=list_first(cmp_emb);
 
-	 bool check=true;
-	 while(listit_has_next(add_pair_it) && listit_has_next(cmp_pair_it) && check){
-		ppairing add_pair=(ppairing)listit_next(add_pair_it);
-		ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it);
+	 check= true;
+	 while (listit_has_next(&cmp_pair_it) && check) {
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
 		if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
 		  check=false;
-		}
-		else{
+		} else {
 		  if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
 			 check=false;
 		  }
 		}
 	 }
-
-	 listit_destroy(add_pair_it);
-	 listit_destroy(cmp_pair_it);
 
 	 if(check)
 		return 2;
@@ -1331,13 +1390,10 @@ static char maximality_relation(plist add_emb, plist cmp_emb){
   }
 
   if(list_size(add_emb) < list_size(cmp_emb)){
-	 plistit add_pair_it=list_first(add_emb);
-	 plistit cmp_pair_it=list_first(cmp_emb);
-
-	 bool check=true;
-	 while(listit_has_next(add_pair_it) && listit_has_next(cmp_pair_it) && check){
-		ppairing add_pair=(ppairing)listit_next(add_pair_it);
-		ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it);
+	 check= true;
+	 while(listit_has_next(&add_pair_it) && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
 		if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
 		  check=false;
@@ -1349,64 +1405,58 @@ static char maximality_relation(plist add_emb, plist cmp_emb){
 		}
 	 }
 
-	 listit_destroy(add_pair_it);
-	 listit_destroy(cmp_pair_it);
-
 	 if(check)
 		return 0;
 	 else
 		return 1;
   }
 
-  plistit add_pair_it_2=list_first(add_emb);
-  plistit cmp_pair_it_2=list_first(cmp_emb);
+  my_assert(list_size(add_emb) == list_size(cmp_emb));
 
-  bool check_2=true;
-  while(listit_has_next(add_pair_it_2) && listit_has_next(cmp_pair_it_2) && check_2){
-	 ppairing add_pair=(ppairing)listit_next(add_pair_it_2);
-	 ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it_2);
+  {
+	 check= true;
+	 while(listit_has_next(&add_pair_it)  && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
 
-	 if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
-		check_2=false;
-	 }
-	 else{
-		if(add_pair->t < cmp_pair->t || (add_pair->t+add_pair->l > cmp_pair->t+cmp_pair->l)){
-		  check_2=false;
+		if(add_pair->p < cmp_pair->p || (add_pair->p+add_pair->l > cmp_pair->p+cmp_pair->l)){
+		  check=false;
+		}else{
+		  if(add_pair->t < cmp_pair->t || (add_pair->t+add_pair->l > cmp_pair->t+cmp_pair->l)){
+			 check=false;
+		  }
 		}
 	 }
-  }
-  listit_destroy(add_pair_it_2);
-  listit_destroy(cmp_pair_it_2);
 
-  if(check_2){
-	 return 0;
-  }
-
-  add_pair_it_2=list_first(add_emb);
-  cmp_pair_it_2=list_first(cmp_emb);
-
-  check_2=true;
-  while(listit_has_next(add_pair_it_2) && listit_has_next(cmp_pair_it_2) && check_2){
-	 ppairing add_pair=(ppairing)listit_next(add_pair_it_2);
-	 ppairing cmp_pair=(ppairing)listit_next(cmp_pair_it_2);
-
-	 if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
-		check_2=false;
+	 if(check){
+		return 0;
 	 }
-	 else{
-		if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
-		  check_2=false;
+
+	 list_first_stack(add_emb, &add_pair_it);
+	 list_first_stack(cmp_emb, &cmp_pair_it);
+
+
+	 check= true;
+	 while(listit_has_next(&add_pair_it) && check){
+		ppairing add_pair=(ppairing)listit_next(&add_pair_it);
+		ppairing cmp_pair=(ppairing)listit_next(&cmp_pair_it);
+
+		if(cmp_pair->p < add_pair->p || (cmp_pair->p+cmp_pair->l > add_pair->p+add_pair->l)){
+		  check=false;
+		}
+		else{
+		  if(cmp_pair->t < add_pair->t || (cmp_pair->t+cmp_pair->l > add_pair->t+add_pair->l)){
+			 check=false;
+		  }
 		}
 	 }
+
+	 if(check)
+		return 2;
+	 else
+		return 1;
+
   }
-
-  listit_destroy(add_pair_it_2);
-  listit_destroy(cmp_pair_it_2);
-
-  if(check_2)
-	 return 2;
-
-  return 1;
 }
 
 static bool check_gap_errors(plist factorization, char *est_seq, char *gen_seq, pconfiguration config){
@@ -1494,23 +1544,6 @@ static bool check_gap_errors(plist factorization, char *est_seq, char *gen_seq, 
 	  return ok;
 }
 
-char* real_substring(const int index, const int length, char* string){
-
-  my_assert(index>=0);
-  my_assert(string != NULL);
-  my_assert(length >= 0);
-
-  //TRACE("index value is: %d", index);
-  //TRACE("string value is: |%s|", string);
-  //TRACE("length value is: %d", length);
-
-  char * const ris= c_palloc(length+1);
-  memcpy(ris, string+index, length*sizeof(char));
-  ris[length]= '\0';
-  return ris;
-}//end real_substring
-
-
 void print_split_string_on_stderr(const int token_dim, char* string){
 
   my_assert(token_dim > 0);
@@ -1536,7 +1569,7 @@ plist clean_low_complexity_exons(plist factorization, char *genomic_sequence, ch
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check complexity:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	plist help_list=list_create();
 
@@ -1631,14 +1664,14 @@ plist clean_low_complexity_exons(plist factorization, char *genomic_sequence, ch
 	return factorization;
 }
 
-plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, char *est_sequence){
+plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, char *est_sequence, pconfiguration config){
 	my_assert(genomic_sequence != NULL);
 	my_assert(est_sequence != NULL);
 	my_assert(factorization != NULL);
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check complexity:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	pintlist split_list=intlist_create();
 	plistit plist_f_t_r=list_first(factorization);
@@ -1655,8 +1688,7 @@ plist clean_low_complexity_exons_2(plist factorization, char *genomic_sequence, 
 			estdscore=dustScoreByLeftAndRight(est_sequence, exon->EST_start, exon->EST_end);
 		}
 
-		//XXX
-		if(gendscore > 1.0 || estdscore > 1.0){
+		if(gendscore > config->complexity_threshold || estdscore > config->complexity_threshold){
 			TRACE("\t exon %d-%d (%d-%d) has a low complexity", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end);
 			intlist_add_to_tail(split_list, index);
 		}
@@ -1792,6 +1824,21 @@ plist clean_external_exons(plist factorization, char *genomic_sequence, char *es
 	return factorization;
 }
 
+static unsigned int
+compute_maximum_edit_distance_for_exons(const size_t exon_length) {
+  double max_error_rate= 0.0;
+  if (exon_length > 100)
+	 max_error_rate= 0.030;
+  else if (exon_length > 50)
+	 max_error_rate= 0.035;
+  else
+	 max_error_rate= 0.040;
+  const unsigned int max_error= (unsigned int)MAX(1.0, ceil(exon_length*max_error_rate));
+  TRACE("Exon length: %5zu.   Maximum edit distance: %ud", exon_length, max_error);
+  return max_error;
+}
+
+
 plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_sequence, bool only_internals){
 	my_assert(genomic_sequence != NULL);
 	my_assert(est_sequence != NULL);
@@ -1799,7 +1846,7 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Check noise:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	pintlist split_list=intlist_create();
 	plistit plist_f_t_r=list_first(factorization);
@@ -1814,35 +1861,16 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 		pfactor exon=(pfactor)listit_next(plist_f_t_r);
 
 		int exon_length=exon->GEN_end-exon->GEN_start+1;
-		//3% of the exon length (decidere se e' il caso di alzare la soglia per esoni corti)
-		//XXX
 
-		//double perc=3.0/100.0;
-		//perc=((double)exon_length)*perc;
-		double perc=(double)exon_length;
-		perc=perc*3.0/100.0;
-
-		//int max_allowed_error=(int)((double)exon_length*(3.0/100.0));
-		int max_allowed_error=(int)perc;
-
-		if(max_allowed_error == 0){
-			//XXX
-			max_allowed_error=1;
-		}
+// See issue #5
+		unsigned int max_allowed_error= compute_maximum_edit_distance_for_exons(exon_length);
 
 		bool ok=false;
-		//int error=max_allowed_error+10;
 
 		//Provvisorio solo per evitare problemi (da sistemare prima)
 		if(exon->GEN_start <= exon->GEN_end){
 			char *gen_exon_seq=real_substring(exon->GEN_start, exon->GEN_end-exon->GEN_start+1, genomic_sequence);
 			char *est_exon_seq=real_substring(exon->EST_start, exon->EST_end-exon->EST_start+1, est_sequence);
-
-			/*size_t l1=strlen(gen_exon_seq);
-			size_t l2=strlen(est_exon_seq);
-			unsigned int* M=edit_distance(gen_exon_seq, l1, est_exon_seq, l2);
-			error=M[(l1+1)*(l2+1)-1];
-			pfree(M);*/
 
 			unsigned int edit;
 			ok=K_band_edit_distance(gen_exon_seq, est_exon_seq, max_allowed_error, &edit);
@@ -1852,9 +1880,10 @@ plist clean_noisy_exons(plist factorization, char *genomic_sequence, char *est_s
 		}
 
 		if(!ok){
-		//if(error > max_allowed_error){
-			//TRACE("\t exon %d-%d (%d-%d) has a high error (%d) and the maximum allowed is %d", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end, error, max_allowed_error);
-			TRACE("\t exon %d-%d (%d-%d) has a high error and the maximum allowed is %d", exon->GEN_start, exon->GEN_end, exon->EST_start, exon->EST_end, max_allowed_error);
+			TRACE("\t exon %d-%d (%d-%d) has a high error and the maximum allowed is %u",
+					exon->GEN_start, exon->GEN_end,
+					exon->EST_start, exon->EST_end,
+					max_allowed_error);
 			intlist_add_to_tail(split_list, index);
 		}
 		index++;
@@ -2019,7 +2048,7 @@ plist add_if_not_exists(plist factorization_to_be_added, plist factorization_lis
 	while(listit_has_next(cmp_it) && found == false){
 		plist cmp_f=(plist)listit_next(cmp_it);
 
-		print_factorization(cmp_f);
+		print_factorization_on_log(LOG_LEVEL_TRACE, cmp_f);
 
 		int cont_result=0;
 		//Gestione del caso in cui entrambe le fattorizzazioni siano composte da un solo esone
@@ -2102,7 +2131,7 @@ plist handle_endpoints(plist factorization, char *genomic_sequence, char *est_se
 	my_assert(!list_is_empty(factorization));
 
 	DEBUG("Handle end points:");
-	print_factorization(factorization);
+	print_factorization_on_log(LOG_LEVEL_TRACE, factorization);
 
 	size_t gen_length=strlen(genomic_sequence);
 	size_t est_length=strlen(est_sequence);
@@ -2121,7 +2150,7 @@ plist handle_endpoints(plist factorization, char *genomic_sequence, char *est_se
 	int cut_factor=head->EST_start;
 	int cut_exon=head->GEN_start;
 	bool stop=false;
-	while(j < alignment->alignment_dim && stop == false){
+	while(j < alignment->alignment_dim && !stop){
 		//Il primo esone deve iniziare con 5 match almeno.
 		//XXX
 		if(matches > 5){

@@ -41,17 +41,29 @@ plist compute_alignment(char *EST_seq, char *genomic_seq, bool only_one_align){
 	const size_t m=strlen(genomic_seq);
 
 	//Per ora computa sempre un solo allineamento
-	only_one_align=true;
+	fail_if(!only_one_align);
 
 	plist alignments=list_create();
+// If the strings are equal, then compute the naive alignment
+	if ((EST_seq==genomic_seq) ||
+		 ((n==m) && (strcmp(EST_seq, genomic_seq)==0))) {
+	  palignment alignment=alignment_create(n+1);
+	  alignment->score= 0;
+	  strncpy(alignment->EST_alignment, EST_seq, n+1);
+	  strncpy(alignment->GEN_alignment, genomic_seq, n+1);
+	  alignment->alignment_dim= n;
+
+	  list_add_to_tail(alignments, alignment);
+	  return alignments;
+	}
 
 	char *Mdir=NPALLOC(char, (n+1)*(m+1));
 
 	memset(Mdir, 0u, (n+1)*(m+1));
 
 //Per ora fare calcolare un solo allineamento
-	if (only_one_align){
-		palignment alignment=alignment_create(n+m+10);
+	if (only_one_align) {
+		palignment alignment=alignment_create(n+m+1);
 		alignment->score= ComputeAlignMatrix(EST_seq, n, genomic_seq, m, Mdir);
 		TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, (int)n, (int) m);
 
@@ -62,6 +74,7 @@ plist compute_alignment(char *EST_seq, char *genomic_seq, bool only_one_align){
 	}
 	else{
 		//Computazione di piu' allineamenti ==> DA FARE
+	  fail();
 	}
 
 	pfree(Mdir);
@@ -94,15 +107,15 @@ ComputeAlignMatrix(const char * const EST_seq,
 
 	for(i=1; i<n+1; i++) {
 	  const char est= EST_seq[i-1];
+	  const bool is_est_a_N= ((est == 'n') || (est == 'N'));
 	  M2[0]= i;
 	  unsigned int left= i;
 	  for(j=1; j<m+1; j++) {
 		 unsigned int current= M1[j-1];
 		 char current_dir= (char)0; //0 per allineamento caratteri in i-1 e j-1
 		 if ((est == genomic_seq[j-1]) ||
-			  (est == 'n') ||
+			  is_est_a_N ||
 			  (genomic_seq[j-1] == 'n') ||
-			  (est == 'N') ||
 			  (genomic_seq[j-1] == 'N')) {
 			//Costo match a 0
 		 } else {
@@ -133,59 +146,70 @@ ComputeAlignMatrix(const char * const EST_seq,
 	return score;
 }
 
-void TracebackAlignment(size_t m, palignment alignment, char *EST_seq, char *genomic_seq, char *Mdir, int i, int j){
+void TracebackAlignment(const size_t m, palignment alignment, const char * const EST_seq, const char * const genomic_seq, const char * const Mdir, int i, int j){
 
 	char direction=0;
+	alignment->alignment_dim= 0;
 
-	if(i > 0 && j > 0){
+// The alignment is computed backwards
+	while (i>0 && j>0) {
 		direction=Mdir[i*m+j];
 
 		if (direction == 0){
-			TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, i-1, j-1);
 			alignment->EST_alignment[alignment->alignment_dim]=EST_seq[i-1];
 			alignment->GEN_alignment[alignment->alignment_dim]=genomic_seq[j-1];
 			alignment->alignment_dim=alignment->alignment_dim+1;
-		}
-		else{
-			if (direction == 1){
-				TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, i-1, j);
-				alignment->EST_alignment[alignment->alignment_dim]=EST_seq[i-1];
-				alignment->GEN_alignment[alignment->alignment_dim]='-';
-				alignment->alignment_dim=alignment->alignment_dim+1;
-			}
-			else{
-				TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, i, j-1);
-				alignment->EST_alignment[alignment->alignment_dim]='-';
-				alignment->GEN_alignment[alignment->alignment_dim]=genomic_seq[j-1];
-				alignment->alignment_dim=alignment->alignment_dim+1;
-			}
+			--i;
+			--j;
+		} else if (direction == 1){
+		  alignment->EST_alignment[alignment->alignment_dim]=EST_seq[i-1];
+		  alignment->GEN_alignment[alignment->alignment_dim]='-';
+		  alignment->alignment_dim=alignment->alignment_dim+1;
+		  --i;
+		} else { // direction == 2
+		  alignment->EST_alignment[alignment->alignment_dim]='-';
+		  alignment->GEN_alignment[alignment->alignment_dim]=genomic_seq[j-1];
+		  alignment->alignment_dim=alignment->alignment_dim+1;
+		  --j;
 		}
 	}
-	else{
-		if(i > 0){
-			TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, i-1, j);
-			alignment->EST_alignment[alignment->alignment_dim]=EST_seq[i-1];
-			alignment->GEN_alignment[alignment->alignment_dim]='-';
-			alignment->alignment_dim=alignment->alignment_dim+1;
-		}
-		else{
-			if(j > 0){
-				TracebackAlignment(m, alignment, EST_seq, genomic_seq, Mdir, i, j-1);
-				alignment->EST_alignment[alignment->alignment_dim]='-';
-				alignment->GEN_alignment[alignment->alignment_dim]=genomic_seq[j-1];
-				alignment->alignment_dim=alignment->alignment_dim+1;
-			}
-		}
+
+	while (i > 0) {
+	  alignment->EST_alignment[alignment->alignment_dim]=EST_seq[i-1];
+	  alignment->GEN_alignment[alignment->alignment_dim]='-';
+	  alignment->alignment_dim=alignment->alignment_dim+1;
+	  --i;
+	}
+	while (j > 0) {
+	  alignment->EST_alignment[alignment->alignment_dim]='-';
+	  alignment->GEN_alignment[alignment->alignment_dim]=genomic_seq[j-1];
+	  alignment->alignment_dim=alignment->alignment_dim+1;
+	  --j;
+	}
+	alignment->EST_alignment[alignment->alignment_dim]='\0';
+	alignment->GEN_alignment[alignment->alignment_dim]='\0';
+// Reverse the alignment
+	char *p1, *p2;
+	for (p1= alignment->EST_alignment, p2= alignment->EST_alignment+alignment->alignment_dim-1;
+		  p1 < p2;
+		  ++p1, --p2) {
+	  *p1 ^= *p2;
+	  *p2 ^= *p1;
+	  *p1 ^= *p2;
+	}
+	for (p1= alignment->GEN_alignment, p2= alignment->GEN_alignment+alignment->alignment_dim-1;
+		  p1 < p2;
+		  ++p1, --p2) {
+	  *p1 ^= *p2;
+	  *p2 ^= *p1;
+	  *p1 ^= *p2;
 	}
 }
 
 
-static size_t
-edit_distance(const char* const s1, const size_t l1,
-				  const char* const s2, const size_t l2) {
-  if ((l1 == l2) && (strcmp(s1, s2)==0)) {
-	 return 0;
-  }
+size_t*
+edit_distance_matrix(const char* const s1, const size_t l1,
+							const char* const s2, const size_t l2) {
   size_t* matrix= NPALLOC(size_t, (l1+1)*(l2+1));
   size_t i, j;
   for (i= 0; i<=l2; ++i) {
@@ -208,12 +232,87 @@ edit_distance(const char* const s1, const size_t l1,
 	 }
 	 base+= (l2+1);
   }
-  const size_t dist= matrix[base-1];
+  return matrix;
+}
+
+
+size_t
+compute_edit_distance(const char* const s1, const size_t l1,
+							 const char* const s2, const size_t l2) {
+  if ((l1 == l2) && (strncmp(s1, s2, l1)==0)) {
+	 return 0;
+  }
+  size_t* matrix= edit_distance_matrix(s1, l1, s2, l2);
+  const size_t dist= matrix[(l1+1)*(l2+1)-1];
   pfree(matrix);
   return dist;
 }
 
-#include <stdio.h>
+size_t
+compute_best_suffix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2) {
+  if ((l1 == l2) && (strncmp(s1, s2, l1)==0)) {
+	 *pcut1= l1;
+	 *pcut2= l2;
+	 return 0;
+  } else {
+	 size_t* matrix= edit_distance_matrix(s1, l1, s2, l2);
+// Get the min in last column and last row
+	 size_t i, j;
+	 size_t mincol= matrix[(l1+1)*(l2+1)-1];
+	 size_t minrow= matrix[(l1+1)*(l2+1)-1];
+	 size_t mincolpos= l1;
+	 size_t minrowpos= l2;
+	 size_t ed;
+	 for (i= 0, j= l2; i<l1; ++i, j+= l2+1) {
+		if (mincol >=  matrix[j]) {
+		  mincol= matrix[j];
+		  mincolpos= i;
+		}
+	 }
+	 for (i= 0, j= l1*(l2+1); i<l2; ++i, ++j) {
+		if (minrow >=  matrix[j]) {
+		  minrow= matrix[j];
+		  minrowpos= i;
+		}
+	 }
+	 if (minrow < mincol) {
+		*pcut1= l1;
+		*pcut2= minrowpos;
+		ed= minrow;
+	 } else {
+		*pcut1= mincolpos;
+		*pcut2= l2;
+		ed= mincol;
+	 }
+	 pfree(matrix);
+	 return ed;
+  }
+}
+
+size_t
+compute_best_prefix_cut(const char* const s1, const size_t l1,
+								const char* const s2, const size_t l2,
+								size_t* pcut1, size_t* pcut2) {
+  if ((l1 == l2) && (strncmp(s1, s2, l1)==0)) {
+	 *pcut1= 0;
+	 *pcut2= 0;
+	 return 0;
+  }
+// Reverse strings
+  const char* s1x= reverse(s1, l1);
+  const char* s2x= reverse(s2, l2);
+  size_t ed= compute_best_suffix_cut(s1x, l1, s2x, l2, pcut1, pcut2);
+  pfree(s1x);
+  pfree(s2x);
+  *pcut1= l1-*pcut1;
+  *pcut2= l2-*pcut2;
+  return ed;
+}
+
+
+
 /*
  * In edit is the real error if the procedures returns true
  */
@@ -269,7 +368,7 @@ bool K_band_edit_distance(char *seq1, char *seq2, unsigned int upper_bound, unsi
 	const size_t k= upper_bound;
 
 	if (2*k+1 >= n) {
-	  *edit= edit_distance(seq1, n, seq2, m);
+	  *edit= compute_edit_distance(seq1, n, seq2, m);
 	  return (*edit)<=upper_bound;
 	}
 
@@ -355,6 +454,8 @@ bool K_band_edit_distance(char *seq1, char *seq2, unsigned int upper_bound, unsi
 
 /*
  *	 MAIN TEST
+ *
+ *#include <stdio.h>
  *
  *int main(int argc, char** argv) {
  *  unsigned int ris;

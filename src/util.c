@@ -101,7 +101,7 @@ char* c_palloc(size_t size) {
   return (char*)palloc(size*sizeof(char));
 }
 
-void pfree(const void* const p) {
+void pfree_function(const void* const p) {
   if (p==NULL) {
 	 FATAL("Cannot free a NULL pointer.");
 	 fail();
@@ -133,6 +133,35 @@ char* substring(const int index, const char* const string){
   FINETRACE("the resulting substring is: |%s|", ris);
   return ris;
 }//end subString
+
+char* real_substring(int index, int length, const char* const string){
+  NOT_NULL(string);
+
+  if (index < 0){
+	 length+= index;
+	 index= 0;
+  }
+
+  my_assert(length >= 0);
+
+  TRACE("index value is:  %d", index);
+  TRACE("string value is: |%s|", string);
+  TRACE("length value is: %d", length);
+
+  char * const restrict ris= c_palloc(length + 1);
+  strncpy(ris, string + index, length);
+  ris[length]= '\0';
+
+  return ris;
+}//end real_substring
+
+char*
+reverse(const char* const s, const size_t len) {
+  char* const rs= c_palloc(len);
+  for (size_t i= 0; i<len; ++i)
+	 rs[len-1-i]= s[i];
+  return rs;
+}
 
 ssize_t my_getline(char **lineptr, size_t *n, FILE *stream) {
   ssize_t ris= custom_getline(lineptr, n, stream);
@@ -189,8 +218,23 @@ FILE* open_statm_file(void) {
   return pf;
 }
 
-void log_info(FILE* const logfile, char* description) {
+void
+log_info(FILE* const logfile, char* description) {
+  log_info_extended(logfile, description, NULL);
+}
+
+void
+log_info_extended(FILE* const logfile, char* description, void* additional_info) {
   my_assert(logfile!=NULL);
+  if (description==NULL)
+	 description= "not-specified";
+  char* additional_info_str= NULL;
+  if (additional_info==NULL)
+	 additional_info_str="";
+  else {
+	 additional_info_str= c_palloc(2*sizeof(additional_info)+4);
+	 snprintf(additional_info_str, 2*sizeof(additional_info)+3, "\t%p", additional_info);
+  }
 #ifdef __APPLE__
   static struct timeval tv;
   if (description==NULL)
@@ -213,11 +257,12 @@ void log_info(FILE* const logfile, char* description) {
   } else {
 	 rewind(statmfile);
   }
-  if (description==NULL)
-	 description= "not-specified";
   my_getline(&buff, &bsize, statmfile);
   gettimeofday(&tv, NULL);
   INFO("log-information %s\t%lu\t%s", description, (unsigned long)tv.tv_sec, buff);
   fprintf(logfile, "%s\t%lu\t%s\n", description, (unsigned long)tv.tv_sec, buff);
 #endif
+  if (additional_info!=NULL) {
+	 pfree(additional_info_str);
+  }
 }

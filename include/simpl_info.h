@@ -27,46 +27,38 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#include "sempl_info.h"
-#include "util.h"
-#include "log.h"
+#ifndef _SEMPL_INFO_H_
+#define _SEMPL_INFO_H_
+
+#include "list.h"
+#include "types.h"
 #include "bit_vector.h"
 #include <stdio.h>
+#include "log.h"
 
-void psempl_destroy(psempl p)
+typedef struct _simpl_info* psimpl;
+
+struct _simpl_info
 {
-  if(p!=NULL){
-	 BV_destroy(p->factors_used);
-	 BV_destroy(p->factors_not_used);
-	 BV_destroy(p->ests_ok);
-	 pfree(p);
-  }
-}
+  pbit_vect factors_used;
+  pbit_vect ests_ok;
+  pbit_vect factors_not_used;
+};
 
-psempl psempl_create(void)
-{
-  psempl p=(psempl)palloc(sizeof(struct _sempl_info));
-  return p;
-}
+psimpl psimpl_create(void);
 
-int countTrue(pbit_vect bv)
-{
-  int cont=0;
-  for(unsigned int i=0;i<bv->n;i++){
-	 if(BV_get(bv,i)==true){
-		cont=cont+1;
-	 }
-  }
-  return cont;
-}
+void psimpl_destroy(psimpl);
 
-#if defined (LOG_MSG) && (LOG_LEVEL_DEBUG <= LOG_THRESHOLD)
+int countTrue(pbit_vect);
 
-void psempl_print(psempl p)
-{
-  DEBUG("fattori certi: %d",countTrue(p->factors_used));
-  DEBUG("fattori non utilizzati: %d",countTrue(p->factors_not_used));
-  DEBUG("est già fattorizzati: %d",countTrue(p->ests_ok));
-}
+
+#if defined (LOG_MSG) && (LOG_LEVEL_INFO <= LOG_THRESHOLD)
+void psimpl_print(psimpl);
+#else
+#define psimpl_print( ps ) \
+  do {							\
+  } while(0)
+
+#endif
 
 #endif

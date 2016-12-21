@@ -45,11 +45,10 @@ void print_factors_list(plist list_of_factors, bool is_not_window) {
 
   my_assert(list_of_factors!=NULL);
 
-  //DEBUG("**** Stampa della lista dei fattori unici ****");
   if (is_not_window) {
-	 DEBUG("**** Stampa della lista dei fattori unici sulla genomica ****");
+	 DEBUG("List of the unique factors:");
   } else {
-	 DEBUG("**** Stampa della lista delle finestre di contenimento sulla genomica ****");
+	 DEBUG("List of the unique genomic windows:");
   }
 
   int number_of_factor= 0;
@@ -368,7 +367,7 @@ plist factors_list_create(plist ests_factorizations){
 
   my_assert(ests_factorizations!=NULL);
 
-  DEBUG("Creazione della lista dei fattori unici");
+  DEBUG("Creating the list of unique factors...");
 
 
   pEST p;
@@ -408,7 +407,7 @@ plist windows_list_create(plist ests_factorizations){
 
   my_assert(ests_factorizations!=NULL);
 
-  DEBUG("Creazione della lista delle finestre di genomica da considerare come fattori unici");
+  DEBUG("Creating the list of genomic windows that will be considered as unique factors...");
 
   pEST p;
   plistit plist_it_id, plist_it_f;
@@ -500,7 +499,8 @@ void add_factoriz(pEST est,plist factorization,plist factors, bool is_not_window
  * factors_list_create(), e deve essere false se factors e' stata costruita con
  * windows_list_create()
  */
-void add_EST(pEST p,plist factors, bool is_not_window)
+static void
+add_EST(pEST p,plist factors, bool is_not_window)
 {
   my_assert((p!=NULL)&&(factors!=NULL));
 
@@ -535,7 +535,7 @@ void color_matrix_print(plist color_matrix)
 {
   my_assert(color_matrix!=NULL);
 
-  DEBUG("Stampa della matrice colorata. Per ogni est stampa dell'id e dei vettori binari delle fattorizzazioni");
+  DEBUG("Colored matrix. Gives the ID of each sequence and the releated binary factorization.");
 
   plistit list_it_est, list_it_factoriz;
   pEST est;
@@ -583,8 +583,8 @@ plist color_matrix_create(plist ests_factorizations, bool is_not_window)
 	 factors=windows_list_create(ests_factorizations);
   }
 
-  INFO("Total factors (prior of simplification): %zu", list_size(factors));
-  DEBUG("Creazione della lista dei fattori unici avvenuta correttamente!!");
+  INFO("Total factors (before simplification): %zu", list_size(factors));
+  DEBUG("Creation of the list of unique factors successful!");
   plist_it_id=list_first(ests_factorizations);
 
   while(listit_has_next(plist_it_id)){

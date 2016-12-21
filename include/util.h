@@ -94,8 +94,8 @@
 
 #endif
 
-static inline void*
-palloc(const size_t size) {
+static inline
+void* palloc(const size_t size) {
 
   void* p= malloc(size);
   if (p==NULL) {
@@ -106,11 +106,16 @@ palloc(const size_t size) {
   return p;
 }
 
-void pfree(const void* const p)
-#ifndef __ICC
-  __attribute__ ((nonnull))
-#endif
-  ;
+static inline
+void pfree(const void* const p) {
+  if (p==NULL) {
+	 FATAL("Cannot free a NULL pointer.");
+	 fail();
+  }
+  free((void *)p);
+}
+
+void pfree_function(const void* const p);
 
 char* c_palloc(size_t dim) __attribute__ ((malloc));
 
@@ -119,6 +124,10 @@ char* alloc_and_copy(const char* const source)  __attribute__ ((malloc));
 void noop_free(void*) __attribute__ ((const));
 
 char* substring(const int, const char* ) __attribute__ ((pure));
+
+char* real_substring(int index, int length, const char* const string) __attribute__ ((pure));
+
+char* reverse(const char* const s, const size_t len);
 
 #ifdef __APPLE__
 
@@ -147,6 +156,7 @@ FILE* open_statm_file(void);
 
 void log_info(FILE* const logfile, char* description);
 
+void log_info_extended(FILE* const logfile, char* description, void* additional_info);
 
 #define NOT_NULL( v ) my_assert( v != NULL )
 
@@ -158,3 +168,31 @@ void log_info(FILE* const logfile, char* description);
   } while (0)
 
 #endif
+
+#define DOT_100_STRING "...................................................................................................."
+
+#define DOT_1K_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING DOT_100_STRING
+
+#define DOT_10K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING DOT_1K_STRING
+
+#define DOT_100K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING DOT_10K_STRING
+
+#define DOT_1M_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING DOT_100K_STRING
+
+#define DOT_STRING DOT_1M_STRING
+
+#define SPACE_32_STRING "                                "
+
+#define SPACE_64_STRING SPACE_32_STRING SPACE_32_STRING
+
+#define SPACE_256_STRING SPACE_64_STRING SPACE_64_STRING SPACE_64_STRING SPACE_64_STRING
+
+#define SPACE_1024_STRING SPACE_256_STRING SPACE_256_STRING SPACE_256_STRING SPACE_256_STRING
+
+#define SPACE_4095_STRING											\
+  SPACE_1024_STRING SPACE_1024_STRING SPACE_1024_STRING	\
+  SPACE_256_STRING SPACE_256_STRING SPACE_256_STRING		\
+  SPACE_64_STRING SPACE_64_STRING SPACE_64_STRING			\
+  SPACE_32_STRING "                               "
+
+#define SPACE_STRING SPACE_4095_STRING

@@ -138,6 +138,7 @@ pEST_info  EST_info_create(void)
   pesti->EST_chr= NULL;
   pesti->EST_strand_as_read= NULL;
   pesti->EST_strand= 1;
+  pesti->fixed_strand= false;
 
   return pesti;
 }

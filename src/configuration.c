@@ -87,11 +87,6 @@ check_and_copy(struct gengetopt_args_info* args) {
 		 "(to be used during factorization construction)",
 		 config->max_suffix_discarded);
 
-// DISABLED BECAUSE NEVER USED !!!
-  /* config->max_gap_onEST= -1; */
-  /* INFO("CONFIG: The maximum gap (bP) allowed on EST between two linked MEG nodes " */
-  /* 		 "(if set to -1, checking not performed): %d", config->max_gap_onEST); */
-
   fail_if(args->min_distance_of_splice_sites_arg<0);
   config->max_site_difference= args->min_distance_of_splice_sites_arg;
   INFO("CONFIG: The maximum difference (nt) in order to consider the same ss "
@@ -118,6 +113,10 @@ check_and_copy(struct gengetopt_args_info* args) {
   config->max_gapLength_diff= args->max_difference_of_gap_length_arg;
   INFO("CONFIG: The minimum gap length difference for accepting a factorization: %d",
 		 config->max_gapLength_diff);
+
+  fail_if(args->complexity_threshold_arg<=0.0);
+  config->complexity_threshold= args->complexity_threshold_arg;
+  INFO("CONFIG: The minimum complexity threshold is %f", config->complexity_threshold);
 
   config->retain_externals=
 	 (args->retain_externals_arg == retain_externals_arg_true) ?
@@ -158,11 +157,6 @@ check_and_copy(struct gengetopt_args_info* args) {
   INFO("CONFIG: The suffix/prefix exon length for intron gap alignment: %d.",
 		 config->suffpref_length_on_gen);
 
-//  fail_if(args->max_seq_in_gst_arg<=0);
-//  config->max_seq_in_gst= args->max_seq_in_gst_arg;
-//  INFO("CONFIG: The GST may contain at most %d sequences.",
-//		 config->max_seq_in_gst);
-
   config->trans_red= !args->no_transitive_reduction_flag;
   INFO("CONFIG: Perform the transitive reduction? %s.",
 		 config->trans_red?"yes":"no");
@@ -170,6 +164,11 @@ check_and_copy(struct gengetopt_args_info* args) {
   config->short_edge_comp= !args->no_short_edge_compaction_flag;
   INFO("CONFIG: Perform the short-edge compaction? %s.",
 		 config->short_edge_comp?"yes":"no");
+
+  fail_if(args->max_single_factorization_time_arg<0);
+  config->max_single_factorization_time= args->max_single_factorization_time_arg;
+  INFO("CONFIG: Maximum time for computing a factorization of a single transcript: %u.",
+		 config->max_single_factorization_time);
 
   return config;
 }
@@ -190,6 +189,14 @@ check_and_copy(struct gengetopt_args_info* args) {
 	 FIELD(opt,given)= 1;									\
   }
 
+#define COPY_long_VALUE(opt)								\
+  {																\
+	 char buff[50];											\
+	 snprintf(buff, 49, "%ld", FIELD(opt,arg));		\
+	 FIELD(opt,orig)= alloc_and_copy(buff);			\
+	 FIELD(opt,given)= 1;									\
+  }
+
 #define COPY_double_VALUE(opt)								\
   {																	\
 	 char buff[15];												\
@@ -202,6 +209,39 @@ check_and_copy(struct gengetopt_args_info* args) {
 	 FIELD(opt,orig)= alloc_and_copy(buff);				\
 	 FIELD(opt,given)= 1;										\
   }
+
+pconfiguration
+config_clone(pconfiguration src) {
+
+  pconfiguration config= PALLOC(struct _configuration);
+
+  config->min_factor_len= src->min_factor_len;
+  config->min_intron_length= src->min_intron_length;
+  config->max_intron_length= src->max_intron_length;
+  config->min_string_depth_rate= src->min_string_depth_rate;
+  config->max_prefix_discarded_rate= src->max_prefix_discarded_rate;
+  config->max_suffix_discarded_rate= src->max_suffix_discarded_rate;
+  config-> max_prefix_discarded= src-> max_prefix_discarded;
+  config-> max_suffix_discarded= src-> max_suffix_discarded;
+  config->max_site_difference= src->max_site_difference;
+  config->max_number_of_factorizations= src->max_number_of_factorizations;
+  config->max_coverage_diff= src->max_coverage_diff;
+  config->max_exonNUM_diff= src->max_exonNUM_diff;
+  config->max_gapLength_diff= src->max_gapLength_diff;
+  config->retain_externals= src->retain_externals;
+  config->max_pairings_in_MEG= src->max_pairings_in_MEG;
+  config->max_freq_shortest_pairing= src->max_freq_shortest_pairing;
+  config->suffpref_length_on_est= src->suffpref_length_on_est;
+  config->suffpref_length_for_intron= src->suffpref_length_for_intron;
+  config->suffpref_length_on_gen= src->suffpref_length_on_gen;
+  config->trans_red= src->trans_red;
+  config->short_edge_comp= src->short_edge_comp;
+  config->max_single_factorization_time= src->max_single_factorization_time;
+  config->complexity_threshold= src->complexity_threshold;
+
+  return config;
+}
+
 
 void config_destroy(pconfiguration config) {
   DEBUG("Destroying the struct for the configuration parameters.");
@@ -263,7 +303,9 @@ pconfiguration config_create(int argc, char** argv) {
   COPY_int_VALUE(suff_pref_length_genomic);
   COPY_int_VALUE(suff_pref_length_est);
   COPY_int_VALUE(suff_pref_length_intron);
+  COPY_long_VALUE(max_single_factorization_time);
 //  COPY_int_VALUE(max_seq_in_gst);
+  COPY_double_VALUE(complexity_threshold);
 
   args_info.retain_externals_orig=
 	 alloc_and_copy((args_info.retain_externals_arg==retain_externals_arg_true) ?

@@ -27,38 +27,15 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#ifndef _SEMPL_INFO_H_
-#define _SEMPL_INFO_H_
+#ifndef _SEMPLIFY_MATRIX_H_
+#define _SEMPLIFY_MATRIX_H_
 
 #include "list.h"
-#include "types.h"
 #include "bit_vector.h"
-#include <stdio.h>
+#include "types.h"
+#include "simpl_info.h"
 #include "log.h"
 
-typedef struct _sempl_info* psempl;
-
-struct _sempl_info
-{
-  pbit_vect factors_used;
-  pbit_vect ests_ok;
-  pbit_vect factors_not_used;
-};
-
-psempl psempl_create(void);
-
-void psempl_destroy(psempl);
-
-int countTrue(pbit_vect);
-
-
-#if defined (LOG_MSG) && (LOG_LEVEL_DEBUG <= LOG_THRESHOLD)
-void psempl_print(psempl);
-#else
-#define psempl_print( ps ) \
-  do {							\
-  } while(0)
-
-#endif
+psimpl simplification(plist, plist);
 
 #endif

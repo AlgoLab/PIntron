@@ -33,6 +33,7 @@
 
 #include "aug_suffix_tree.h"
 
+#include "ext_array.h"
 #include "util.h"
 
 #include "log.h"
@@ -146,76 +147,101 @@ static void initialization(LST_Node *node,
   }
 }
 
-
 static void
 fill_node_info(const char * const gen,
-					const size_t alph_size,
-					const size_t min_string_depth,
-					size_t * const occ,
-					const ppreproc_gen const pg,
-					size_t * const next_el,
-					LST_Node *node){
-  if (node->kids.lh_first==NULL) {
-	 node->single_char= '\0';
-	 if (node->index>0) {
-		const char prev_s= gen[node->index-1];
-		node->single_char= prev_s;
-		if (node->string_depth>=min_string_depth) {
-		  const size_t k= get_key(pg, prev_s);
-		  const size_t nek= next_el[k];
-		  occ[nek]= node->index;
-		  node->slices[2*k]= nek;
-		  node->slices[2*k+1]= nek+1;
-		  ++next_el[k];
-		  TRACE("Found a leaf with index %d and previous "
-				"character %c (key %zu) added at array position %zu.",
-				  node->index, prev_s, k, nek);
+						const size_t alph_size,
+						const size_t min_string_depth,
+						size_t * const occ,
+						const ppreproc_gen const pg,
+						size_t * const next_el,
+						LST_Node *root_node) {
+  pext_array node_stack= EA_create();
+  pboollist flag_stack= boollist_create();
+  EA_insert(node_stack, root_node);
+  boollist_add_to_tail(flag_stack, false);
+  while (!EA_is_empty(node_stack)) {
+	 LST_Node* node= (LST_Node*)EA_pop(node_stack);
+	 const bool reinserted= boollist_remove_from_tail(flag_stack);
+	 if (node->kids.lh_first==NULL) {
+		node->single_char= '\0';
+		if (node->index>0) {
+		  const char prev_s= gen[node->index-1];
+		  node->single_char= prev_s;
+		  if (node->string_depth>=min_string_depth) {
+			 const size_t k= get_key(pg, prev_s);
+			 const size_t nek= next_el[k];
+			 occ[nek]= node->index;
+			 node->slices[2*k]= nek;
+			 node->slices[2*k+1]= nek+1;
+			 ++next_el[k];
+			 TRACE("Found a leaf with index %d and previous "
+					 "character %c (key %zu) added at array position %zu.",
+					 node->index, prev_s, k, nek);
+		  }
+		} else {
+		  for (size_t k= 0; k<pg->alph_size; ++k) {
+			 const size_t nek= next_el[k];
+			 occ[nek]= 0;
+			 node->slices[2*k]= nek;
+			 node->slices[2*k+1]= nek+1;
+			 ++next_el[k];
+			 TRACE("Found the leaf with index 0 added "
+					 "at array position %zu.", nek);
+		  }
 		}
-	 } else {
-		for (size_t k= 0; k<pg->alph_size; ++k) {
-		  const size_t nek= next_el[k];
-		  occ[nek]= 0;
-		  node->slices[2*k]= nek;
-		  node->slices[2*k+1]= nek+1;
-		  ++next_el[k];
-		  TRACE("Found the leaf with index 0 added "
-				  "at array position %zu.", nek);
+	 } else if (!reinserted) {
+		EA_insert(node_stack, node);
+		boollist_add_to_tail(flag_stack, true);
+		LST_Edge *edge;
+		for (edge= node->kids.lh_first; edge!=NULL;
+			  edge= edge->siblings.le_next) {
+		  EA_insert(node_stack, edge->dst_node);
+		  boollist_add_to_tail(flag_stack, false);
 		}
-	 }
-  } else {
-	 LST_Edge *edge;
-	 bool single= true;
-	 char last= '\0';
-	 for (edge= node->kids.lh_first; edge!=NULL;
-			edge= edge->siblings.le_next) {
-		LST_Node * const dnode= edge->dst_node;
-		fill_node_info(gen, alph_size, min_string_depth, occ, pg, next_el, dnode);
-		if (single) {
-		  if (dnode->single_char == '\0') {
-			 last= '\0';
-			 single= false;
-		  } else {
-			 if (last == '\0')
-				last= dnode->single_char;
-			 else if (last != dnode->single_char) {
-				single= false;
+		size_t pos= EA_size(node_stack);
+		for (edge= node->kids.lh_first; edge!=NULL;
+			  edge= edge->siblings.le_next) {
+		  --pos;
+		  EA_set(node_stack, pos, edge->dst_node);
+		}
+	 } else { // node has been reinserted
+		LST_Edge *edge;
+		bool single= true;
+		char last= '\0';
+		for (edge= node->kids.lh_first; edge!=NULL;
+			  edge= edge->siblings.le_next) {
+		  LST_Node * const dnode= edge->dst_node;
+		  if (single) {
+			 if (dnode->single_char == '\0') {
 				last= '\0';
+				single= false;
+			 } else {
+				if (last == '\0')
+				  last= dnode->single_char;
+				else if (last != dnode->single_char) {
+				  single= false;
+				  last= '\0';
+				}
+			 }
+		  }
+		  if (node->string_depth>=min_string_depth) {
+			 for (size_t k= 0; k<alph_size; ++k) {
+				if (node->slices[2*k+1] == 0) {
+				  node->slices[2*k]= dnode->slices[2*k];
+				  node->slices[2*k+1]= dnode->slices[2*k+1];
+				} else if (node->slices[2*k+1] < dnode->slices[2*k+1]) {
+				  node->slices[2*k+1]= dnode->slices[2*k+1];
+				}
 			 }
 		  }
 		}
-		if (node->string_depth>=min_string_depth) {
-		  for (size_t k= 0; k<alph_size; ++k) {
-			 if (node->slices[2*k+1] == 0) {
-				node->slices[2*k]= dnode->slices[2*k];
-				node->slices[2*k+1]= dnode->slices[2*k+1];
-			 } else if (node->slices[2*k+1] < dnode->slices[2*k+1]) {
-				node->slices[2*k+1]= dnode->slices[2*k+1];
-			 }
-		  }
-		}
+		node->single_char= last;
 	 }
-	 node->single_char= last;
   }
+  my_assert(EA_is_empty(node_stack));
+  my_assert(boollist_is_empty(flag_stack));
+  EA_destroy(node_stack, (delete_function)noop_free);
+  boollist_destroy(flag_stack);
 }
 
 void

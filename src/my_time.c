@@ -34,20 +34,26 @@
 
 struct _mytime {
   const char* timer_name;
-  DTYPE interval;
+  MYTIME_DTYPE interval;
   struct timeval start;
   struct timeval stop;
   bool active;
+};
+
+struct _mytime_parallel {
+  pmytime parent;
+  struct timeval start;
+  struct timeval stop;
 };
 
 
 static const char* default_timer_name= "generic timer";
 
 
-static DTYPE
+static MYTIME_DTYPE
 diff_usec(struct timeval start, struct timeval stop) {
-  DTYPE start_usec= ((DTYPE)start.tv_sec*(DTYPE)1000000)+(DTYPE)start.tv_usec;
-  DTYPE stop_usec= ((DTYPE)stop.tv_sec*(DTYPE)1000000)+(DTYPE)stop.tv_usec;
+  MYTIME_DTYPE start_usec= ((MYTIME_DTYPE)start.tv_sec*(MYTIME_DTYPE)1000000)+(MYTIME_DTYPE)start.tv_usec;
+  MYTIME_DTYPE stop_usec= ((MYTIME_DTYPE)stop.tv_sec*(MYTIME_DTYPE)1000000)+(MYTIME_DTYPE)stop.tv_usec;
   return stop_usec-start_usec;
 }
 
@@ -60,11 +66,11 @@ void
 MYTIME_print_interval(FILE* file, pmytime pt) {
   my_assert(pt!=NULL);
   my_assert(file!=NULL);
-  DTYPE diff= pt->interval;
-  if (diff>=(DTYPE)1000) {
+  MYTIME_DTYPE diff= pt->interval;
+  if (diff>=(MYTIME_DTYPE)1000) {
 // in secs
 	 fprintf(file, "@Timer %s. Time elapsed: ", pt->timer_name);
-	 DTYPE min= diff/60000000;
+	 MYTIME_DTYPE min= diff/60000000;
 	 diff= diff%60000000;
 	 if (min>0)
 		fprintf(file, "%llum ", min);
@@ -112,6 +118,23 @@ MYTIME_start(pmytime pt) {
   gettimeofday(&pt->start, NULL);
 }
 
+pmytime_parallel
+MYTIME_start_parallel(pmytime pt) {
+  my_assert(pt!=NULL);
+  pmytime_parallel ppt= PALLOC(struct _mytime_parallel);
+  ppt->parent= pt;
+  gettimeofday(&ppt->start, NULL);
+  return ppt;
+}
+
+void
+MYTIME_stop_parallel(pmytime_parallel ppt) {
+  my_assert(ppt!=NULL);
+  gettimeofday(&(ppt->stop), NULL);
+  ppt->parent->interval+= diff_usec(ppt->start, ppt->stop);
+  pfree(ppt);
+}
+
 void
 MYTIME_reset(pmytime pt)
 {
@@ -136,7 +159,7 @@ MYTIME_getname(pmytime pt)
   return pt->timer_name;
 }
 
-DTYPE
+MYTIME_DTYPE
 MYTIME_getinterval(pmytime pt)
 {
   my_assert(pt!=NULL);
@@ -144,6 +167,40 @@ MYTIME_getinterval(pmytime pt)
 }
 
 
+struct _mytime_timeout {
+  struct timeval start;
+  struct timeval current;
+  MYTIME_DTYPE time_limit;
+  bool expired;
+};
 
-#undef TOUT
-#undef DTYPE
+pmytime_timeout
+MYTIME_timeout_create(unsigned int time_limit_SECONDS)
+{
+  pmytime_timeout ptt= PALLOC(struct _mytime_timeout);
+  ptt->expired= false;
+  ptt->time_limit= time_limit_SECONDS;
+  ptt->time_limit *= (MYTIME_DTYPE)1000000;
+  gettimeofday(&ptt->start, NULL);
+  return ptt;
+}
+
+
+bool
+MYTIME_timeout_expired(pmytime_timeout ptt)
+{
+  my_assert(ptt!=NULL);
+  if (ptt->expired)
+	 return true;
+  gettimeofday(&ptt->current, NULL);
+  ptt->expired= diff_usec(ptt->start, ptt->current) > ptt->time_limit;
+  return ptt->expired;
+}
+
+void
+MYTIME_timeout_destroy(pmytime_timeout ptt)
+{
+  my_assert(ptt!=NULL);
+  pfree(ptt);
+}
+

@@ -52,56 +52,62 @@
  *  position of the BPS sequence (if it exists) wrt to the intron left (0 index) and
  *  BPS_score is the computed BPS score.
  */
+#define _intron_U12 ((char)(0))
+#define _intron_U2 ((char)(1))
+#define _intron_ND ((char)(2))
+
+#define _intron_type_str( c ) (((c)==_intron_U12)?"U12":(((c)==_intron_U2)?"U2":"ND"))
+
 plist classify_genomic_intron_list(char *, plist);
 pgenomic_intron classify_genomic_intron(char *, pgenomic_intron);
-char classify_genomic_intron_start_end(char *, int, int, double *, double *, int *, double *, double **, double **, double **);
+char classify_genomic_intron_start_end(const char * const, int, int, double *, double *, int *, double *, double **, double **, double **);
 
 /*Compute the score of the 14-long input sequence wrt to 5' ss of type GT-AG (U12)
 ==> 3nt inside exon and 11nt inside intron*/
 
-double GetScoreOf5PrimeGTAGU12BySS(char *, int, double *, double *, double *);
+double GetScoreOf5PrimeGTAGU12BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf5PrimeGTAGU12(char *, double *, double *, double *);
 
 /*Compute the score of the 14-long input sequence wrt to 5' ss of type AT-AC (U12)
 ==> 3nt inside exon and 11nt inside intron*/
 
-double GetScoreOf5PrimeATACU12BySS(char *, int, double *, double *, double *);
+double GetScoreOf5PrimeATACU12BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf5PrimeATACU12(char *, double *, double *, double *);
 
 /*Compute the score of the 13-long input sequence wrt to 5' ss of type GT-AG (U2)
 ==> 3nt inside exon and 10nt inside intron*/
 
-double GetScoreOf5PrimeGTAGU2BySS(char *, int, double *, double *, double *);
+double GetScoreOf5PrimeGTAGU2BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf5PrimeGTAGU2(char *, double *, double *, double *);
 
 /*Compute the score of the 14-long input sequence wrt to 5' ss of type GC-AG (U2)
 ==> 3nt inside exon and 11nt inside intron*/
 
-double GetScoreOf5PrimeGCAGU2BySS(char *, int, double *, double *, double *);
+double GetScoreOf5PrimeGCAGU2BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf5PrimeGCAGU2(char *, double *, double *, double *);
 
 /*Compute the score of the 18-long input sequence wrt to 3' ss of type GT-AG (U12)
 ==> 14nt inside intron and 4nt inside exon*/
 
-double GetScoreOf3PrimeGTAGU12BySS(char *, int, double *, double *, double *);
+double GetScoreOf3PrimeGTAGU12BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf3PrimeGTAGU12(char *, double *, double *, double *);
 
 /*Compute the score of the 17-long input sequence wrt to 3' ss of type AT-AC (U12)
 ==> 14nt inside intron and 3nt inside exon*/
 
-double GetScoreOf3PrimeATACU12BySS(char *, int, double *, double *, double *);
+double GetScoreOf3PrimeATACU12BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf3PrimeATACU12(char *, double *, double *, double *);
 
 /*Compute the score of the 17-long input sequence wrt to 3' ss of type GT-AG (U2)
 ==> 14nt inside intron and 3nt inside exon*/
 
-double GetScoreOf3PrimeGTAGU2BySS(char *, int, double *, double *, double *);
+double GetScoreOf3PrimeGTAGU2BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf3PrimeGTAGU2(char *, double *, double *, double *);
 
 /*Compute the score of the 18-long input sequence wrt to 3' ss of type GC-AG (U2)
 ==> 14nt inside intron and 4nt inside exon*/
 
-double GetScoreOf3PrimeGCAGU2BySS(char *, int, double *, double *, double *);
+double GetScoreOf3PrimeGCAGU2BySS(const char * const, int, double *, double *, double *);
 double GetScoreOf3PrimeGCAGU2(char *, double *, double *, double *);
 
 /*Search in the input intron sequence the 12-long substring with the best BPS score.

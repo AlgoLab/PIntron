@@ -92,7 +92,7 @@ pgenomic_intron classify_genomic_intron(char *genomic_sequence, pgenomic_intron 
 	return gen_intron;
 }
 
-char classify_genomic_intron_start_end(char *genomic_sequence, int start, int end, double *score5, double *score3, int *BPS_position, double *BPS_score, double **pwm_matx, double **CVector, double **MAXVector){
+char classify_genomic_intron_start_end(const char * const genomic_sequence, int start, int end, double *score5, double *score3, int *BPS_position, double *BPS_score, double **pwm_matx, double **CVector, double **MAXVector){
 #ifndef NDEBUG
 	my_assert(genomic_sequence != NULL);
 	size_t gen_length=strlen(genomic_sequence);
@@ -228,7 +228,7 @@ char classify_genomic_intron_start_end(char *genomic_sequence, int start, int en
 	return type;
 }
 
-double GetScoreOf5PrimeGTAGU12BySS(char *genomic_sequence, int splice5, double *pwm_5PrimeGTAGU12, double *CV_pwm_5PrimeGTAGU12, double *MAXV_pwm_5PrimeGTAGU12){
+double GetScoreOf5PrimeGTAGU12BySS(const char * const genomic_sequence, int splice5, double *pwm_5PrimeGTAGU12, double *CV_pwm_5PrimeGTAGU12, double *MAXV_pwm_5PrimeGTAGU12){
 
 	my_assert(splice5 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -247,7 +247,7 @@ double GetScoreOf5PrimeGTAGU12BySS(char *genomic_sequence, int splice5, double *
 	return score;
 }
 
-double GetScoreOf5PrimeGTAGU12(char *sequence, double *pwm_5PrimeGTAGU12, double *CV_pwm_5PrimeGTAGU12, double *MAXV_pwm_5PrimeGTAGU12){
+double GetScoreOf5PrimeGTAGU12(char * sequence, double *pwm_5PrimeGTAGU12, double *CV_pwm_5PrimeGTAGU12, double *MAXV_pwm_5PrimeGTAGU12){
 
 	my_assert(sequence != NULL);
 	my_assert(pwm_5PrimeGTAGU12 != NULL);
@@ -266,7 +266,7 @@ double GetScoreOf5PrimeGTAGU12(char *sequence, double *pwm_5PrimeGTAGU12, double
 	return score;
 }
 
-double GetScoreOf5PrimeATACU12BySS(char *genomic_sequence, int splice5, double *pwm_5PrimeATACU12, double *CV_pwm_5PrimeATACU12, double *MAXV_pwm_5PrimeATACU12){
+double GetScoreOf5PrimeATACU12BySS(const char * const genomic_sequence, int splice5, double *pwm_5PrimeATACU12, double *CV_pwm_5PrimeATACU12, double *MAXV_pwm_5PrimeATACU12){
 
 	my_assert(splice5 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -285,7 +285,7 @@ double GetScoreOf5PrimeATACU12BySS(char *genomic_sequence, int splice5, double *
 	return score;
 }
 
-double GetScoreOf5PrimeATACU12(char *sequence, double *pwm_5PrimeATACU12, double *CV_pwm_5PrimeATACU12, double *MAXV_pwm_5PrimeATACU12){
+double GetScoreOf5PrimeATACU12(char * sequence, double *pwm_5PrimeATACU12, double *CV_pwm_5PrimeATACU12, double *MAXV_pwm_5PrimeATACU12){
 
 	my_assert(sequence != NULL);
 	my_assert(pwm_5PrimeATACU12 != NULL);
@@ -304,7 +304,7 @@ double GetScoreOf5PrimeATACU12(char *sequence, double *pwm_5PrimeATACU12, double
 	return score;
 }
 
-double GetScoreOf5PrimeGTAGU2BySS(char *genomic_sequence, int splice5, double *pwm_5PrimeGTAGU2, double *CV_pwm_5PrimeGTAGU2, double *MAXV_pwm_5PrimeGTAGU2){
+double GetScoreOf5PrimeGTAGU2BySS(const char * const genomic_sequence, int splice5, double *pwm_5PrimeGTAGU2, double *CV_pwm_5PrimeGTAGU2, double *MAXV_pwm_5PrimeGTAGU2){
 
 	my_assert(splice5 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -342,7 +342,7 @@ double GetScoreOf5PrimeGTAGU2(char *sequence, double *pwm_5PrimeGTAGU2, double *
 	return score;
 }
 
-double GetScoreOf5PrimeGCAGU2BySS(char *genomic_sequence, int splice5, double *pwm_5PrimeGCAGU2, double *CV_pwm_5PrimeGCAGU2, double *MAXV_pwm_5PrimeGCAGU2){
+double GetScoreOf5PrimeGCAGU2BySS(const char * const genomic_sequence, int splice5, double *pwm_5PrimeGCAGU2, double *CV_pwm_5PrimeGCAGU2, double *MAXV_pwm_5PrimeGCAGU2){
 
 	my_assert(splice5 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -380,7 +380,7 @@ double GetScoreOf5PrimeGCAGU2(char *sequence, double *pwm_5PrimeGCAGU2, double *
 	return score;
 }
 
-double GetScoreOf3PrimeGTAGU12BySS(char *genomic_sequence, int splice3, double *pwm_3PrimeGTAGU12, double *CV_pwm_3PrimeGTAGU12, double *MAXV_pwm_3PrimeGTAGU12){
+double GetScoreOf3PrimeGTAGU12BySS(const char * const genomic_sequence, int splice3, double *pwm_3PrimeGTAGU12, double *CV_pwm_3PrimeGTAGU12, double *MAXV_pwm_3PrimeGTAGU12){
 
 	my_assert(splice3 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -418,7 +418,7 @@ double GetScoreOf3PrimeGTAGU12(char *sequence, double *pwm_3PrimeGTAGU12, double
 	return score;
 }
 
-double GetScoreOf3PrimeATACU12BySS(char *genomic_sequence, int splice3, double *pwm_3PrimeATACU12, double *CV_pwm_3PrimeATACU12, double *MAXV_pwm_3PrimeATACU12){
+double GetScoreOf3PrimeATACU12BySS(const char * const genomic_sequence, int splice3, double *pwm_3PrimeATACU12, double *CV_pwm_3PrimeATACU12, double *MAXV_pwm_3PrimeATACU12){
 
 	my_assert(splice3 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -456,7 +456,7 @@ double GetScoreOf3PrimeATACU12(char *sequence, double *pwm_3PrimeATACU12, double
 	return score;
 }
 
-double GetScoreOf3PrimeGTAGU2BySS(char *genomic_sequence, int splice3, double *pwm_3PrimeGTAGU2, double *CV_pwm_3PrimeGTAGU2, double *MAXV_pwm_3PrimeGTAGU2){
+double GetScoreOf3PrimeGTAGU2BySS(const char * const genomic_sequence, int splice3, double *pwm_3PrimeGTAGU2, double *CV_pwm_3PrimeGTAGU2, double *MAXV_pwm_3PrimeGTAGU2){
 
 	my_assert(splice3 >= 0);
 	my_assert(genomic_sequence != NULL);
@@ -494,7 +494,7 @@ double GetScoreOf3PrimeGTAGU2(char *sequence, double *pwm_3PrimeGTAGU2, double *
 	return score;
 }
 
-double GetScoreOf3PrimeGCAGU2BySS(char *genomic_sequence, int splice3, double *pwm_3PrimeGCAGU2, double *CV_pwm_3PrimeGCAGU2, double *MAXV_pwm_3PrimeGCAGU2){
+double GetScoreOf3PrimeGCAGU2BySS(const char * const genomic_sequence, int splice3, double *pwm_3PrimeGCAGU2, double *CV_pwm_3PrimeGCAGU2, double *MAXV_pwm_3PrimeGCAGU2){
 
 	my_assert(splice3 >= 0);
 	my_assert(genomic_sequence != NULL);

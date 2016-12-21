@@ -41,6 +41,7 @@
 
 #include "util.h"
 #include "log.h"
+#include "refine-intron.h"
 
 #define INDEL_COST 1
 #define MISMATCH_COST 1
@@ -81,14 +82,6 @@ unsigned int* M= NPALLOC(unsigned int, (ls1+1)*(ls2+1));
   return M;
 }
 
-char*
-reverse(const char* const s, const size_t len) {
-  char* const rs= c_palloc(len);
-  for (size_t i= 0; i<len; ++i)
-	 rs[len-1-i]= s[i];
-  return rs;
-}
-
 bool
 refine_borders(const char* const p,
 					const size_t len_p,
@@ -99,8 +92,31 @@ refine_borders(const char* const p,
 					size_t* out_offset_t1,
 					size_t* out_offset_t2,
 					unsigned int* out_edit_distance) {
-  const size_t t_win= (len_p+max_errs>len_t)?
-	 len_t:(len_p+max_errs);
+  return general_refine_borders(p, len_p, 0, len_p,
+										  t, len_t,
+										  max_errs,
+										  out_offset_p,
+										  out_offset_t1,
+										  out_offset_t2,
+										  out_edit_distance);
+}
+
+
+bool
+general_refine_borders(const char* const p,
+							  const size_t len_p,
+							  const size_t min_p_cut,
+							  const size_t max_p_cut,
+							  const char* const t,
+							  const size_t len_t,
+							  const unsigned int max_errs,
+							  size_t* out_offset_p,
+							  size_t* out_offset_t1,
+							  size_t* out_offset_t2,
+							  unsigned int* out_edit_distance) {
+  my_assert(min_p_cut <= max_p_cut);
+  my_assert(max_p_cut <= len_p);
+  const size_t t_win= MIN(len_p+max_errs, len_t);
   const unsigned int* Mp= edit_distance(t, t_win, p, len_p);
   const char* const rt= reverse(t, len_t);
   const char* const rp= reverse(p, len_p);
@@ -142,16 +158,22 @@ refine_borders(const char* const p,
 	 ++pos;
   }
 
-  size_t off_p= 0;
-  size_t off_t1= min_pos_pp[0];
-  size_t off_t2= min_pos_sp[len_p];
-  unsigned int min= min_pp[0]+min_sp[len_p];
-  for (size_t i= 1; i<=len_p; ++i) {
-	 if (min>(min_pp[i]+min_sp[len_p-i])) {
-		min= (min_pp[i]+min_sp[len_p-i]);
+  size_t off_p= min_p_cut;
+  size_t off_t1= min_pos_pp[min_p_cut];
+  size_t off_t2= min_pos_sp[len_p-min_p_cut];
+  unsigned int min= min_pp[min_p_cut]+min_sp[len_p-min_p_cut];
+  int best_burset_freq= getBursetFrequency_adaptor(t, off_t1, len_t-off_t2);
+  for (size_t i= min_p_cut+1; i<=max_p_cut; ++i) {
+	 const int curr_burset_freq= getBursetFrequency_adaptor(t, min_pos_pp[i],
+																			  len_t-min_pos_sp[len_p-i]);
+	 const unsigned int curr= min_pp[i]+min_sp[len_p-i];
+	 if ((min>curr) ||
+		  ((min==curr) && (curr_burset_freq>best_burset_freq))) {
+		min= curr;
 		off_p= i;
 		off_t1= min_pos_pp[i];
 		off_t2= min_pos_sp[len_p-i];
+		best_burset_freq= curr_burset_freq;
 	 }
   }
   *out_offset_p= off_p;

@@ -137,33 +137,6 @@ lst_string_item_copy(LST_String *src, u_int src_index,
 }
 
 
-int
-lst_string_eq(LST_String *s1, u_int item1,
-				  LST_String *s2, u_int item2)
-{
-  if (!s1 || !s2 || item1 >= s1->num_items || item2 >= s2->num_items)
-    return 0;
-  
-  /* Treat the end-of-string markers separately: */
-  if (item1 == s1->num_items - 1 || item2 == s2->num_items - 1) {
-	 if (item1 == s1->num_items - 1 && item2 == s2->num_items - 1) {
-		if (s1 == s2) {
-		  return 1;
-		} else {
-		  return 0;
-		}
-	 } else {
-		return 0;
-	 }
-  }
-/*
-  return !(s1->sclass->cmp_func(lst_string_get_item(s1, item1),
-  lst_string_get_item(s2, item2)));*/
-
-  return *((char*)lst_string_get_item(s1, item1)) == *((char*)lst_string_get_item(s2, item2));
-}
-
-
 u_int
 lst_string_items_common(LST_String *s1, u_int off1,
 			LST_String *s2, u_int off2,

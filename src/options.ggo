@@ -106,9 +106,9 @@ option "min-intron-length" B
 details=
 "Represents the minimum length of an intron (i.e. parameter b' of the article).
 Valid values: >= 0.
-Suggested value: at least 50."
+Suggested value: at least 40."
 int typestr="nt"
-default="60"
+default="40"
 optional
 
 option "max-intron-length" -
@@ -249,6 +249,18 @@ int typestr="number"
 default="20"
 optional
 
+option "complexity-threshold" -
+"The maximum exon dust score that an exon can have."
+details=
+"The maximum exon dust score that an exon can have.
+Exons with dust score greater than this threshold are \
+discarded.
+Valid values: > 0.0. \
+Suggested value: 20.0."
+double typestr="> 0.0"
+default="20.0"
+optional
+
 option "retain-externals" E
 "If false, remove the first (and the last, if a polyA chain has not been found) factors."
 details=
@@ -339,6 +351,24 @@ flag off
 option "no-short-edge-compaction" -
 "Do not perform the short edge compaction on the MEG before compositions are obtained"
 flag off
+
+
+
+####################
+section "Time and memory management"
+sectiondesc="Parameters related to time limits and memory usage."
+
+
+option "max-single-factorization-time" -
+"The maximum time for computing factorizations of a single transcript from a MEG (seconds)."
+details=
+"Represents the amount of seconds after which a MEG with increased minimum pairing length is recomputed.
+Valid values: > 0.
+Suggested value: >= 600."
+long typestr="seconds"
+default="900"
+optional
+
 
 
 ####################

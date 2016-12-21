@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2010  Raffaella Rizzi
+ * Copyright (C) 2010,2011  Yuri Pirola, Raffaella Rizzi
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -179,7 +179,8 @@ struct new_label_for_exon{
 
   int left, right;
 
-  char character;
+  char *representation;
+  //char character;
 };
 
 int align_dim;  //Dimensione della matrice di allineamento
@@ -224,6 +225,22 @@ char *in_path;
 
 char *gene;
 
+static void exit_with_problem(const char* problem) {
+  fprintf(stderr, "%s\n", problem);
+#ifdef HALT_EXIT_MODE
+  exit(1);
+#else
+  exit(EXIT_FAILURE);
+#endif
+}
+
+static void exit_with_problem_if(const bool condition,
+											const char* problem) {
+  if (condition) {
+	 exit_with_problem(problem);
+  }
+}
+
 static int GetCDSStart(struct cds cds_inst);
 static int GetCDSEnd(struct cds cds_inst);
 static void MarkExonEndpoints(struct cds cds_to_be_mapped);
@@ -253,7 +270,7 @@ static void GetCDSAnnotations(char *fileName);
 static char GetCDSAnnotationForRefSeq_2(int i);
 static void CheckStartEndWRTref(int ref, int i);
 
-static char Check_start_codon(int pos, char *tr_seq);
+static bool Check_start_codon(int pos, char *tr_seq);
 static char Check_stop_codon(int pos, char *tr_seq);
 static void Get_Transcripts_from_File_FASTA_format(char *fileName);
 static struct exon *Insert_exon_into_a_exon_list(struct exon *arg_exon_list, int left, int right, int rel_left, int rel_right, char polyA, char *sequence, int *incr);
@@ -267,7 +284,7 @@ static void SetPrintOrder(int ref);
 static int SetREFToLongestTranscript();
 static char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime p);
 
-static struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char *character);
+static struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char **representation);
 
 static void ComputeAlignment(char *EST_exon, char *genomic_exon);
 static void ComputeAlignMatrix(char *EST_exon, char *genomic_exon, int n, int m, char **Mdir);
@@ -275,6 +292,8 @@ static void TracebackAlignment(char *EST_exon, char *genomic_exon, char **Mdir, 
 static void GetExonAlignments();
 static void GetGenomicExons(char *fileName);
 static char *GetGENexonSequence(int rel_left, int rel_right);
+
+char* int2alpha(unsigned int num);
 
 int Tcds;       //Lunghezza minima per le ORF
 
@@ -329,7 +348,7 @@ int main(int argc, char *argv[]){
   sprintf(temp,"%scds",in_path);
   GetCDSAnnotations(temp);
 
-   sprintf(temp,"%sisoforms.txt",out_path);
+  sprintf(temp,"%sisoforms.txt",out_path);
   Get_Transcripts_from_File_FASTA_format(temp);
 
   sprintf(temp,"%spredicted-introns.txt",out_path);
@@ -357,7 +376,7 @@ int main(int argc, char *argv[]){
          MarkTranscriptType(&trs[i]);
   }
 
-  ref=SetREFToLongestTranscript();
+  //ref=SetREFToLongestTranscript();
 
   i=0;
   Tcds=100;     //Lunghezza minima delle ORF
@@ -380,6 +399,8 @@ int main(int argc, char *argv[]){
          }
          i++;
   }
+
+  ref=SetREFToLongestTranscript();
 
   i=0;
   while(i < number_of_transcripts){
@@ -508,7 +529,7 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error3!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
 //Lettura delle prime due righe
@@ -523,71 +544,56 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
   }
 
   trs=(struct transcript *)malloc(number_of_transcripts*sizeof(struct transcript));
-  if(trs == NULL){
-         fprintf(stderr, "Error4!\n");
-         exit(0);
-  }
+  exit_with_problem_if(trs == NULL, "Error4!");
 
   for(i=0; i<number_of_transcripts; i++){
-         fscanf(in, "%s\n", temp_string);
+	 fscanf(in, "%s\n", temp_string);
 
-         if(temp_string[0] != '>'){
-                fprintf(stderr, "Invalid format!\n");
-#ifdef HALT_EXIT_MODE
-                exit(1);
-#else
-                exit(EXIT_FAILURE);
-#endif
-         }
+	 exit_with_problem_if(temp_string[0] != '>', "Invalid format!");
 
-         j=1;
-         while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
-                temp_tr_ID[j-1]=temp_string[j];
-                j++;
-         }
-         temp_tr_ID[j-1]='\0';
-         tr_ID=atoi(temp_tr_ID);
+	 j=1;
+	 while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
+		temp_tr_ID[j-1]=temp_string[j];
+		j++;
+	 }
+	 temp_tr_ID[j-1]='\0';
+	 tr_ID=atoi(temp_tr_ID);
 
-         if(j < (int)strlen(temp_string))
-                j++;
-         while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
-                temp_exons1[j-strlen(temp_tr_ID)-2]=temp_string[j];
-                j++;
-         }
-         temp_exons1[j-strlen(temp_tr_ID)-2]='\0';
-         exons1=atoi(temp_exons1);
-         if(j < (int)strlen(temp_string))
-                j++;
-         while(j < (int)strlen(temp_string)){
-                temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]=temp_string[j];
-                j++;
-         }
-         if(j > (int)strlen(temp_tr_ID)+(int)strlen(temp_exons1)+3){
-                temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]='\0';
-         }
-         else{
-                strcpy(temp_refseq, "");
-         }
+	 if(j < (int)strlen(temp_string))
+		j++;
+	 while(j < (int)strlen(temp_string) && temp_string[j] != ':'){
+		temp_exons1[j-strlen(temp_tr_ID)-2]=temp_string[j];
+		j++;
+	 }
+	 temp_exons1[j-strlen(temp_tr_ID)-2]='\0';
+	 exons1=atoi(temp_exons1);
+	 if(j < (int)strlen(temp_string))
+		j++;
+	 while(j < (int)strlen(temp_string)){
+		temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]=temp_string[j];
+		j++;
+	 }
+	 if(j > (int)strlen(temp_tr_ID)+(int)strlen(temp_exons1)+3){
+		temp_refseq[j-strlen(temp_tr_ID)-strlen(temp_exons1)-3]='\0';
+	 }
+	 else{
+		strcpy(temp_refseq, "");
+	 }
 
-         exons1=atoi(temp_exons1);
+	 exons1=atoi(temp_exons1);
 
-         trs[i].exons=exons1;
+	 trs[i].exons=exons1;
 
-         if(strcmp(temp_refseq, "")){
-                trs[i].type=0;
-                trs[i].RefSeq=(char *)malloc((strlen(temp_refseq)+1)*sizeof(char));
-                if(trs[i].RefSeq == NULL){
-                  fprintf(stderr, "Problem10 of memory allocation in Get_Transcripts_from_File_FASTA_format!\n");
-#ifdef HALT_EXIT_MODE
-                  exit(1);
-#else
-                  exit(EXIT_FAILURE);
-#endif
-                }
-                strcpy(trs[i].RefSeq, temp_refseq);
-         }
-         else
-                trs[i].type=-1;
+	 if(strcmp(temp_refseq, "")){
+		trs[i].type=0;
+		trs[i].RefSeq=(char *)malloc((strlen(temp_refseq)+1)*sizeof(char));
+		exit_with_problem_if(trs[i].RefSeq == NULL,
+									"Problem10 of memory allocation in Get_Transcripts_from_File_FASTA_format!");
+		strcpy(trs[i].RefSeq, temp_refseq);
+	 } else {
+		trs[i].type= -1;
+		trs[i].RefSeq= NULL;
+	 }
 
          trs[i].exon_index=(int *)malloc(exons1*sizeof(int));
          if(trs[i].exon_index == NULL){
@@ -602,19 +608,19 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
          trs[i].tr_to=(int *)malloc(trs[i].exons*sizeof(int));
          if(trs[i].tr_from == NULL || trs[i].tr_to == NULL){
                 fprintf(stderr, "Error5!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
 
          trs[i].temp_sequences=(char **)malloc(trs[i].exons*sizeof(char *));
          if(trs[i].temp_sequences == NULL){
                 fprintf(stderr, "Error51!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
          for(j=0; j<trs[i].exons; j++){
                 trs[i].temp_sequences[j]=(char *)malloc(MAX_NLD*sizeof(char));
                 if(trs[i].temp_sequences[j] == NULL){
                   fprintf(stderr, "Error511!\n");
-                  exit(0);
+                  exit(EXIT_FAILURE);
                 }
          }
 
@@ -668,12 +674,59 @@ void Get_Transcripts_from_File_FASTA_format(char *fileName){
          }
   }
 
-  if(number_of_transcripts != 0){
-         if(trs[0].tr_from[0] > trs[0].tr_from[trs[0].exons-1])
-                strand=-1;
-         else
-                strand=1;
+  //CORREZIONE PER JOB 288 (gene TBCC) - se ogni trascritto ha un solo esone, non va bene... :(((
+  /*if(number_of_transcripts != 0){
+	  	  int p=0;
+	  	  while(p < number_of_transcripts && trs[p].exons == 1){
+	  		  p++;
+	  	  }
+	  	  if(p == number_of_transcripts){
+	  		fprintf(stderr, "The strand is not retrieved!\n");
+	  		#ifdef HALT_EXIT_MODE
+	  		         exit(1);
+	  		#else
+	  		         exit(EXIT_FAILURE);
+	  		#endif
+	  	  }else{
+	  		  if(trs[p].tr_from[0] > trs[p].tr_from[trs[p].exons-1])
+	  			  strand=-1;
+	  		  else
+	  			  strand=1;
+	  	  }
+  }*/
+  char *temp = (char *) malloc(255*sizeof(char)); temp[0] = '\0';
+  sprintf(temp,"%sgenomic.txt",out_path);
+  FILE *in_gen=fopen(temp, "r");
+  if(in_gen == NULL){
+         fprintf(stderr, "Error genomic file!\n");
+         exit(EXIT_FAILURE);
   }
+  
+  char *tmp_line= NULL;
+  size_t tmp_string_l = 0;
+  int bytes_read;
+  bytes_read=my_getline(&tmp_line, &tmp_string_l, in_gen);
+  if (bytes_read == -1) {
+		 DEBUG("Empty genomic file!");
+		 strand=1;
+  }
+  else{
+	 char *occurrence=strrchr(tmp_line, ':');
+	 if(occurrence == NULL){
+	 	DEBUG("Strand not found in genomic file!");
+	 	strand=1;
+	 }else{
+	 	strand=atoi(occurrence+1);
+		DEBUG("Genomic strand: %d", strand);
+	 }
+  }
+  if (tmp_line!=NULL) {
+	 pfree(tmp_line);
+  }
+
+  //fscanf(in_gen, ">chr%*d:%*d:%*d:%d\n", &strand);
+  fclose(in_gen);
+  free(temp);
 
   exons=(struct exon *)malloc(number_of_exons*sizeof(struct exon));
   if(exons == NULL){
@@ -820,7 +873,7 @@ void GetIntronList(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error6!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   number_of_introns=0;
@@ -840,13 +893,13 @@ void GetIntronList(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error6!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   introns=(struct intron *)calloc(number_of_introns,sizeof(struct intron));
   if(introns == NULL){
          fprintf(stderr, "Error7!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
@@ -862,7 +915,7 @@ void GetIntronList(char *fileName){
          introns[counter].IDs=(char **)malloc(conf_EST*sizeof(char *));
          if(introns[counter].IDs == NULL){
                 fprintf(stderr, "Error8!\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
 
          i=0;
@@ -879,7 +932,7 @@ void GetIntronList(char *fileName){
                   introns[counter].IDs[ID_counter]=(char *)malloc(strlen(temp_ID)+1*sizeof(char));
                   if(introns[counter].IDs[ID_counter] == NULL){
                          fprintf(stderr, "Error9!\n");
-                         exit(0);
+                         exit(EXIT_FAILURE);
                   }
                   strcpy(introns[counter].IDs[ID_counter], temp_ID);
                   ID_counter++;
@@ -918,24 +971,35 @@ void GetCDSAnnotations(char *fileName){
    a_cds=(struct annotated_cds *)malloc(number_of_cds*sizeof(struct annotated_cds));
   if(a_cds == NULL){
          fprintf(stderr, "Error1 in memory allocation GetCDSAnnotations!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
-         fscanf(in, "%d\n", &length);
-         a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
-         if(a_cds == NULL){
-                fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
-                exit(0);
-         }
+	 fscanf(in, "%d\n", &length);
 
-         fscanf(in, "%s\t%d\t%d\t%d\t%s\n", temp_ID, &rel_start, &rel_end, &exons, a_cds[counter].RefSeq_sequence);
-         strcpy(a_cds[counter].RefSeq, temp_ID);
-         a_cds[counter].rel_start=rel_start;
-         a_cds[counter].rel_end=rel_end;
-         a_cds[counter].exons=exons;
+	 if(length > 0){
+		a_cds[counter].RefSeq_sequence=(char *)malloc((length+1)*sizeof(char));
+		if (a_cds == NULL) {
+		  fprintf(stderr, "Error2 in memory allocation GetCDSAnnotations!\n");
+		  exit(EXIT_FAILURE);
+		}
 
-         counter++;
+		DEBUG("Reading RefSeq no. %d...", counter+1);
+		int fscanf_res= fscanf(in, "%s\t%d\t%d\t%d\t%s\n",
+									  temp_ID, &rel_start, &rel_end, &exons,
+									  a_cds[counter].RefSeq_sequence);
+		my_assert(fscanf_res == 5);
+		strcpy(a_cds[counter].RefSeq, temp_ID);
+		a_cds[counter].rel_start=rel_start;
+		a_cds[counter].rel_end=rel_end;
+		a_cds[counter].exons=exons;
+
+		counter++;
+	 } else {
+		fprintf(stderr, "WARNING: CDS annotation %s file not correct!\n", fileName);
+		fscanf(in, "%s\t%d\t%d\t%d\n", temp_ID, &rel_start, &rel_end, &exons);
+		fprintf(stderr, "\tRefSeq %s has null length!\n", temp_ID);
+	 }
   }
 
   fclose(in);
@@ -1043,7 +1107,8 @@ char GetCDSAnnotationForRefSeq_2(int i){
   z=0;
   while(z < (int)strlen(tr_seq) && !found){
          found=0;
-         if(Check_start_codon(z, tr_seq)){
+	//Non necessariamente il primo codine dell'annotazione deve essere ATG (issue #31)
+         //if(Check_start_codon(z, tr_seq)){
                 k=a_cds[r_index].rel_start-1;
                 p=z;
                 stop=0;
@@ -1057,7 +1122,7 @@ char GetCDSAnnotationForRefSeq_2(int i){
                 }
                 if(!stop && k == a_cds[r_index].rel_end)
                   found=1;
-         }
+         //}
          if(!found)
                 z++;
   }
@@ -1078,6 +1143,11 @@ char GetCDSAnnotationForRefSeq_2(int i){
          trs[i].start_c[z]=tr_seq[trs[i].ORF_start+z-1];
   }
   trs[i].start_c[z]='\0';
+
+  //Controllo presenza ATG (issue #31)
+   if(!(!strcmp(trs[i].start_c, "atg") || !strcmp(trs[i].start_c, "ATG")))
+         trs[i].no_ATG=1;
+
   for(z=0; z<3; z++){
          trs[i].stop_c[z]=tr_seq[trs[i].ORF_end+z-3];
   }
@@ -1237,7 +1307,7 @@ void MarkIntronType(){
                 introns[i].RefSeq=(char **)malloc(refseqnum*sizeof(char *));
                 if(introns[i].RefSeq == NULL){
                   fprintf(stderr, "Error in MarkIntronType!\n");
-                  exit(0);
+                  exit(EXIT_FAILURE);
                 }
                 j=0;
                 refseqnum=0;
@@ -1246,7 +1316,7 @@ void MarkIntronType(){
                          introns[i].RefSeq[refseqnum]=(char *)malloc((strlen(introns[i].IDs[j])+1)*sizeof(char));
                          if(introns[i].RefSeq[refseqnum] == NULL){
                                 fprintf(stderr, "Error in MarkIntronType!\n");
-                                exit(0);
+                                exit(EXIT_FAILURE);
                          }
                          strcpy(introns[i].RefSeq[refseqnum], introns[i].IDs[j]);
                          refseqnum++;
@@ -1459,18 +1529,16 @@ void PrintTABOutput(int ref, struct cds cds_for_gene){
                 if(print_counter < number_of_transcripts)
                   fprintf(gtf, "\n");
 #endif
-         }
-         else{
-                getCompetingLabels(i, ref, comp_label);
+         } else {
+			  getCompetingLabels(i, ref, comp_label);
+			  getnewIRLabels(i, ref, ir_label);
 
-                getnewIRLabels(i, ref, ir_label);
+			  getEXInitTermSkipNewLabels(i, ref, new_label);
 
-                getEXInitTermSkipNewLabels(i, ref, new_label);
-
-                if(trs[i].RefSeq == NULL)
-                  fprintf(stderr, "\t%s%s%s", comp_label, ir_label, new_label);
-                else
-                  fprintf(stderr, "\t%s (%s%s%s)", trs[i].RefSeq, comp_label, ir_label, new_label);
+			  if (trs[i].RefSeq == NULL)
+				 fprintf(stderr, "\t%s%s%s", comp_label, ir_label, new_label);
+			  else
+				 fprintf(stderr, "\t%s (%s%s%s)", trs[i].RefSeq, comp_label, ir_label, new_label);
 
 #ifdef PRINT_GTF_VARIANT
                 fprintf(gtf, " /Type=%s%s%s", comp_label, ir_label, new_label);
@@ -1838,7 +1906,10 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
   char add[20];
   char extr_variant=1;
-  char label_char=0;
+
+  //char label_char=0;
+  char *representation;
+
   char localize_str[20];
   char first_time=1;
 
@@ -1889,16 +1960,16 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          if(exons[trs[index].exon_index[0]].left < exons[trs[ref].exon_index[0]].left){
                 r_index=0;
          }
-         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &label_char);
+         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &representation);
 
          if(strand == 1){
-                sprintf(label, "init(E%d%c),", r_index, label_char);
+                sprintf(label, "init(E%d%s),", r_index, representation);
          }
          else{
                 if(r_index == 1)
-                  sprintf(label, "term(E%d%c),", trs[ref].exons, label_char);
+                  sprintf(label, "term(E%d%s),", trs[ref].exons, representation);
                 else
-                  sprintf(label, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(label, "term(%da%s),", trs[ref].exons, representation);
          }
 
          strcat(label, localize_str);
@@ -1908,13 +1979,13 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          first_time=0;
 
          while(i < trs[index].exons && exons[trs[index].exon_index[i]].right < exons[trs[ref].exon_index[0]].left){
-                list_of_new_labels[0]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[0], exons[trs[index].exon_index[i]].left, exons[trs[index].exon_index[i]].right, &label_char);
+                list_of_new_labels[0]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[0], exons[trs[index].exon_index[i]].left, exons[trs[index].exon_index[i]].right, &representation);
 
                 if(strand == 1){
-                  sprintf(add, "init(E0%c),", label_char);
+                  sprintf(add, "init(E0%s),", representation);
                 }
                 else{
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
                 }
 
                 strcat(label, add);
@@ -1967,16 +2038,16 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
          if(exons[trs[index].exon_index[trs[index].exons-1]].right > exons[trs[ref].exon_index[trs[ref].exons-1]].right){
                 r_index=trs[ref].exons+1;
          }
-         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &label_char);
+         list_of_new_labels[r_index]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[r_index], exons[trs[index].exon_index[0]].left, exons[trs[index].exon_index[0]].right, &representation);
 
          if(strand == 1){
                 if(r_index == trs[ref].exons)
-                  sprintf(add, "term(E%d%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(E%d%s),", trs[ref].exons, representation);
                 else
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
          }
          else{
-                sprintf(add, "init(E%d%c),", (trs[ref].exons-r_index+1), label_char);
+                sprintf(add, "init(E%d%s),", (trs[ref].exons-r_index+1), representation);
          }
 
          strcat(label, add);
@@ -1986,13 +2057,13 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
          while(j >= 0 && exons[trs[index].exon_index[j]].left > exons[trs[ref].exon_index[trs[ref].exons-1]].right){
 
-                list_of_new_labels[trs[ref].exons+1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[trs[ref].exons+1], exons[trs[index].exon_index[j]].left, exons[trs[index].exon_index[j]].right, &label_char);
+                list_of_new_labels[trs[ref].exons+1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[trs[ref].exons+1], exons[trs[index].exon_index[j]].left, exons[trs[index].exon_index[j]].right, &representation);
 
                 if(strand == 1){
-                  sprintf(add, "term(%da%c),", trs[ref].exons, label_char);
+                  sprintf(add, "term(%da%s),", trs[ref].exons, representation);
                 }
                 else{
-                  sprintf(add, "init(E0%c),", label_char);
+                  sprintf(add, "init(E0%s),", representation);
                 }
 
                 strcat(label, add);
@@ -2013,9 +2084,9 @@ void getEXInitTermSkipNewLabels(int index, int ref, char *label){
 
          if(q < trs[ref].exons && exons[trs[ref].exon_index[q]].left > exons[trs[index].exon_index[k]].right){
                 GetLocalization(localize_str, ref, q-1);
-                list_of_new_labels[q-1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[q-1], exons[trs[index].exon_index[k]].left, exons[trs[index].exon_index[k]].right, &label_char);
+                list_of_new_labels[q-1]=Insert_newlabel_into_a_newlabel_list(list_of_new_labels[q-1], exons[trs[index].exon_index[k]].left, exons[trs[index].exon_index[k]].right, &representation);
 
-                sprintf(add, "new(E%d%c),", (strand == 1)?(q):(trs[ref].exons-q), label_char);
+                sprintf(add, "new(E%d%s),", (strand == 1)?(q):(trs[ref].exons-q), representation);
 
                 strcat(label, add);
                 strcat(label, localize_str);
@@ -2094,84 +2165,91 @@ void GetLocalization(char *local, int index, int exon){
 }
 
 void GetLongestORF(int ref, int i, int min_length){
-  char *tr_seq=NULL;
-  int j=0, z=0, p=0, k=0;
-  int orf_length=0;
+  char *tr_seq= NULL;
+  int j=0, p=0, k=0;
   int tmp_ORF_start=0, tmp_ORF_end=0;
   int length=0;
   char stop=0;
-  int ccds_end=0;
   int start_align_index=0, end_align_index=0;
-
-  char ORF_found=0, first_ORF_found=0;
 
   char *EST_temp, *GEN_temp;
   int cfr_length=0;
 
+  DEBUG("Looking for an ORF for transcript %d (%dbp long)", i, trs[i].length);
+
   tr_seq=(char *)malloc((trs[i].length+1)*sizeof(char));
-
-  if(tr_seq == NULL){
-         fprintf(stderr, "Memory problem\n");
-#ifdef HALT_EXIT_MODE
-         exit(1);
-#else
-         exit(EXIT_FAILURE);
-#endif
+  exit_with_problem_if(tr_seq == NULL, "Memory problem");
+  tr_seq[0]= '\0';
+  if (strand == 1) {
+	 for (j=0; j<trs[i].exons; j++) {
+		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
+	 }
+  } else {
+	 for (j=trs[i].exons-1; j>=0; j--) {
+		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
+	 }
   }
 
-  strcpy(tr_seq, "");
+  DEBUG("Transcript sequence: %s", tr_seq);
 
-  if(strand == 1){
-         for(j=0; j<trs[i].exons; j++){
-                strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
-         }
-  }
-  else{
-         for(j=trs[i].exons-1; j>=0; j--){
-                strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
-         }
-  }
+  trs[i].has_stop= 0;
+  trs[i].no_ATG= 0;
+  trs[i].ORF_start= -1;
+  trs[i].ORF_end= -1;
 
-  ORF_found=0;
-  first_ORF_found=0;
+  int z= 0;
+  const int ccds_end= strlen(tr_seq)-3;
+  bool ORF_found= false;
+  int ORF_length= 0;
 
-  trs[i].has_stop=0;
-  trs[i].no_ATG=0;
-  trs[i].ORF_start=-1;
-  trs[i].ORF_end=-1;
+  for (int frame= 0; frame<3; ++frame) {
+	 DEBUG("Considering frame %d...", frame);
+	 z= frame;
 
-  z=0;
-  ccds_end=strlen(tr_seq)-3;
+	 while (z <= ccds_end) {
 
-  while(z <= ccds_end && !ORF_found){
-         if(Check_start_codon(z, tr_seq)){
-                j=z+3;
-                while(j <= ccds_end && !Check_stop_codon(j, tr_seq))
-                  j+=3;
+		if (Check_start_codon(z, tr_seq)) {
+		  DEBUG("  Found a start codon at position %d.", z);
+		  j= z+3;
+		  while (j <= ccds_end && !Check_stop_codon(j, tr_seq)) {
+			 j+=3;
+		  }
 
-//Ha trovato lo stop
-                if(j <= ccds_end){
-                  if(j-z+3 >= min_length){
-                         if(first_ORF_found == 0){
-                                first_ORF_found=1;
-                                orf_length=j-z+3;
-                                trs[i].ORF_start=z+1;
-                                trs[i].ORF_end=j+3;
-                                if(getContext(z, tr_seq) > 0)
-                                  ORF_found=1;
-                         }
-                         else{
-                                if(getContext(z, tr_seq) > 0){
-                                  orf_length=j-z+3;
-                                  trs[i].ORF_start=z+1;
-                                  trs[i].ORF_end=j+3;
-                                  ORF_found=1;
-                                }
-                         }
-                  }
-                }
-         }
-         z++;
+		  if (j <= ccds_end) {
+			 const int this_ORF_length= j-z+3;
+			 DEBUG("  Found a in-frame stop codon at position %d (ORF length=%d)",
+					 j, this_ORF_length);
+			 if (this_ORF_length >= min_length) {
+// An ORF is annotated if (see issue #20):
+// - it has a context and the previous one has not
+// OR
+// - ( * it is longer than the previous AND
+//     * it has a context if the previous one has it )
+				const bool has_context= getContext(z, tr_seq)>0;
+				DEBUG("    New ORF found (start=%d, end=%d, length=%d, ORF_found=%s).",
+						z+1, j+3, this_ORF_length, has_context?"YES":"NO");
+				if ( (!ORF_found && has_context) ||
+					  ( (this_ORF_length > ORF_length) &&
+						 (!ORF_found || has_context) ) ) {
+				  DEBUG("    The new ORF is better than the previous one. Saved.");
+				  ORF_length= this_ORF_length;
+				  trs[i].ORF_start= z+1;
+				  trs[i].ORF_end= j+3;
+				  ORF_found= has_context;
+				} else {
+				  DEBUG("    The new ORF is NOT better than the previous one. Discarded.");
+				}
+			 } else {
+				DEBUG("    The ORF is shorter than the minimum allowed length. Discarded.");
+			 }
+		  } else {
+			 DEBUG("  No in-frame stop codon found.");
+		  }
+		  z= j+3;
+		} else {
+		  z+= 3;
+		}
+	 }
   }
 
   if(trs[i].ORF_start != -1 && trs[i].ORF_end != -1){
@@ -2352,54 +2430,40 @@ void GetLongestORF(int ref, int i, int min_length){
 }
 
 char getContext(int ATG_start, char *tr_seq){
-  int i;
-  char check[4];
+
+  if (!Check_start_codon(ATG_start, tr_seq)) {
+	 exit_with_problem("ATG problem");
+  }
+
   char context=2; //0=weak, 1=medium, 2=strong
 
-
-  for(i=ATG_start; i<ATG_start+3; i++){
-         check[i-ATG_start]=tr_seq[i];
-  }
-  check[i-ATG_start]='\0';
-
-  if(strcmp(check, "atg") && strcmp(check, "ATG")){
-         fprintf(stderr, "ATG problem\n");
-#ifdef HALT_EXIT_MODE
-         exit(1);
-#else
-         exit(EXIT_FAILURE);
-#endif
+  if ( (ATG_start-3 < 0) ||
+		 ( (tr_seq[ATG_start-3] != 'a' && tr_seq[ATG_start-3] != 'A') &&
+			(tr_seq[ATG_start-3] != 'g' && tr_seq[ATG_start-3] != 'G') ) ) {
+	 context--;
   }
 
-  if(ATG_start-3 < 0 || ((tr_seq[ATG_start-3] != 'a' && tr_seq[ATG_start-3] != 'A') && (tr_seq[ATG_start-3] != 'g' && tr_seq[ATG_start-3] != 'G'))){
-         context--;
-  }
-
-  if(ATG_start+3 >= (int)strlen(tr_seq) || ((tr_seq[ATG_start+3] != 'a' && tr_seq[ATG_start+3] != 'A') && (tr_seq[ATG_start+3] != 'g' && tr_seq[ATG_start+3] != 'G'))){
-         context--;
+  if ( (ATG_start+3 >= (int)strlen(tr_seq)) ||
+		 ( (tr_seq[ATG_start+3] != 'a' && tr_seq[ATG_start+3] != 'A') &&
+			(tr_seq[ATG_start+3] != 'g' && tr_seq[ATG_start+3] != 'G') ) ) {
+	 context--;
   }
 
   return context;
 }
 
-char Check_start_codon(int pos, char *tr_seq){
-  if((tr_seq[pos] == 'a' && tr_seq[pos+1] == 't' && tr_seq[pos+2] == 'g') || (tr_seq[pos] == 'A' && tr_seq[pos+1] == 'T' && tr_seq[pos+2] == 'G'))
-         return 1;
-  else
-         return 0;
+bool Check_start_codon(int pos, char *tr_seq){
+  return ((tr_seq[pos] == 'a' && tr_seq[pos+1] == 't' && tr_seq[pos+2] == 'g') ||
+			 (tr_seq[pos] == 'A' && tr_seq[pos+1] == 'T' && tr_seq[pos+2] == 'G'));
 }
 
 char Check_stop_codon(int pos, char *tr_seq){
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'a') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'A'))
-         return 1;
-
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'g') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'G'))
-         return 1;
-
-  if((tr_seq[pos] == 't' && tr_seq[pos+1] == 'g' && tr_seq[pos+2] == 'a') || (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'G' && tr_seq[pos+2] == 'A'))
-         return 1;
-
-  return 0;
+  return ( ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'a') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'A') ) ||
+			  ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'a' && tr_seq[pos+2] == 'g') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'A' && tr_seq[pos+2] == 'G') ) ||
+			  ( (tr_seq[pos] == 't' && tr_seq[pos+1] == 'g' && tr_seq[pos+2] == 'a') ||
+				 (tr_seq[pos] == 'T' && tr_seq[pos+1] == 'G' && tr_seq[pos+2] == 'A') ) );
 }
 
 struct exon *Insert_exon_into_a_exon_list(struct exon *arg_exon_list, int left, int right, int rel_left, int rel_right, char polyA, char *sequence, int *incr){
@@ -2890,11 +2954,21 @@ int SetREFToLongestTranscript(){
   i=0;
 
   while(i<number_of_transcripts){
+
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 	  j=0;
 	 first=1;
+
 	 while(j < trs[i].exons-1){
-		 intron_left=exons[trs[i].exon_index[j]].right+1;
-		intron_right=exons[trs[i].exon_index[j+1]].left-1;
+		 //CORREZIONE PER JOB 288 (gene TBCC)
+		 if(strand == 1){
+			 intron_left=exons[trs[i].exon_index[j]].right+1;
+			 intron_right=exons[trs[i].exon_index[j+1]].left-1;
+		 }else{
+			 intron_right=exons[trs[i].exon_index[j+1]].left-1;
+			 intron_left=exons[trs[i].exon_index[j]].right+1;
+		 }
 		k=0;
 		stop=0;
 		DEBUG("Looking for intron %d-%d.", intron_left, intron_right);
@@ -2906,6 +2980,7 @@ int SetREFToLongestTranscript(){
 			 k++;
 		  }
 		}
+
 		my_assert(k<number_of_introns);
 		if(first){
 		  first=0;
@@ -2917,9 +2992,44 @@ int SetREFToLongestTranscript(){
 		}
 		j++;
 	 }
+	}
 	 i++;
   }
 #endif
+
+//PRIMA SI RICERCA TRA I REFSEQ CHE SONO ANNOTATI nel file cds (vedi issue #32)
+i=0;
+
+  trs_length=0;
+  trs_exons=0;
+
+#ifndef EXON_LONGEST_REF
+  product=0;
+#endif
+
+  while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
+#ifdef EXON_LONGEST_REF
+	 if((trs[i].type == 0 && trs[i].is_annotated == 1) && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
+		trs_exons=trs[i].exons;
+		trs_length=trs[i].length;
+		index=i;
+	 }
+#else
+	 if(trs[i].type == 0 && trs[i].exons*min_E[i] > product) {
+		product=trs[i].exons*min_E[i];
+		index=i;
+	 }
+#endif
+	}
+	 i++;
+  }
+
+  if(index != -1){
+	 return index;
+  }
+//FINE DELLA RICERCA TRA I REFSEQ CHE SONO ANNOTATI
 
   i=0;
 
@@ -2931,8 +3041,10 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
-	 if(trs[i].type == 0 && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
+	 if((trs[i].type == 0 && trs[i].is_annotated == 0)  && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
 		trs_exons=trs[i].exons;
 		trs_length=trs[i].length;
 		index=i;
@@ -2943,6 +3055,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -2960,6 +3073,8 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
 	 if(trs[i].type == 1 && (trs[i].exons >= trs_exons && trs[i].length >= trs_length)){
 		trs_exons=trs[i].exons;
@@ -2972,6 +3087,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -2989,6 +3105,8 @@ int SetREFToLongestTranscript(){
 #endif
 
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 #ifdef EXON_LONGEST_REF
 	 if(trs[i].exons >= trs_exons && trs[i].length >= trs_length){
 		trs_exons=trs[i].exons;
@@ -3001,6 +3119,7 @@ int SetREFToLongestTranscript(){
 		index=i;
 	 }
 #endif
+	}
 	 i++;
   }
 
@@ -3014,6 +3133,8 @@ int SetREFToLongestTranscript(){
   trs_exons=0;
   int current_type=-1;
   while(i<number_of_transcripts){
+	//Si considerano i soli full-lengths annotati con CDS
+	if(trs[i].abs_ORF_start != -1 && trs[i].abs_ORF_end != -1){
 	 if(current_type != 0){
 		 if(trs[i].exons >= trs_exons && trs[i].length >= trs_length){
 		   	trs_exons=trs[i].exons;
@@ -3030,6 +3151,7 @@ int SetREFToLongestTranscript(){
 		 	index=i;
 		 }
 	 }
+	}
   	 i++;
     }
   //FINE 30nov10
@@ -3037,7 +3159,7 @@ int SetREFToLongestTranscript(){
   DEBUG("Index %d", index);
   if(index == -1 && number_of_transcripts != 0){
 	 fprintf(stderr, "Error!\n");
-	 exit(0);
+	 exit(EXIT_FAILURE);
   }
 
 #ifndef EXON_LONGEST_REF
@@ -3073,7 +3195,7 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
 
                   if(cds_for_gene->cds_from == NULL || cds_for_gene->cds_to == NULL){
                          fprintf(stderr, "Error2 here1!\n");
-                         exit(0);
+                         exit(EXIT_FAILURE);
                   }
 
                   counter=0;
@@ -3094,10 +3216,10 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                   return 1;
                 }
 
-                struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char *character){
+              struct new_label_for_exon *Insert_newlabel_into_a_newlabel_list(struct new_label_for_exon *arg_newlabel_list, int left, int right, char **representation){
                   struct new_label_for_exon *head=arg_newlabel_list;
                   struct new_label_for_exon *tail=NULL;
-                  int counter=0;
+                  unsigned int counter=0;
                   char stop=0;
 
                   stop=0;
@@ -3113,7 +3235,7 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                   }
 
                   if(stop){
-                         *character=head->character;
+	                         *representation=head->representation;
                   }
                   else{
                          computed_newlabel_copy=(struct new_label_for_exon *)malloc(sizeof(struct new_label_for_exon));
@@ -3130,8 +3252,12 @@ char GetLongestORFforCCDS(struct cds *cds_for_gene, int i, pmytime pt_tot){
                          computed_newlabel_copy->right=right;
                          computed_newlabel_copy->next=NULL;
                          computed_newlabel_copy->prev=tail;
-                         computed_newlabel_copy->character=97+counter;
-                         *character=computed_newlabel_copy->character;
+
+                         //computed_newlabel_copy->character=97+counter;
+                         computed_newlabel_copy->representation=int2alpha(counter);
+
+                         //*character=computed_newlabel_copy->character;
+                         *representation=computed_newlabel_copy->representation;
 
                          if(tail == NULL)
                                 arg_newlabel_list=computed_newlabel_copy;
@@ -3159,7 +3285,7 @@ void ComputeAlignment(char *EST_exon, char *genomic_exon){
          Mdir[i]=(char *)malloc((m+1)*sizeof(char));
          if(Mdir[i] == NULL){
                 fprintf(stderr, "Error in ComputeAlignment\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
   }
 
@@ -3190,14 +3316,14 @@ void ComputeAlignMatrix(char *EST_exon, char *genomic_exon, int n, int m, char *
   M=(int **)malloc((n+1)*sizeof(int *));
   if(M == NULL){
          fprintf(stderr, "Error in ComputeAlignMatrix\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   for(i=0; i<n+1; i++){
          M[i]=(int *)malloc((m+1)*sizeof(int));
          if(M[i] == NULL){
                 fprintf(stderr, "Error2 in ComputeAlignMatrix\n");
-                exit(0);
+                exit(EXIT_FAILURE);
          }
   }
 
@@ -3354,7 +3480,7 @@ void GetGenomicExons(char *fileName){
   in=fopen(fileName, "r");
   if(in == NULL){
          fprintf(stderr, "Error11!\n");
-         exit(0);
+         exit(EXIT_FAILURE);
   }
 
   while(!feof(in)){
@@ -3393,4 +3519,25 @@ char *GetGENexonSequence(int rel_left, int rel_right){
          return head->sequence;
   else
          return NULL;
+}
+
+char* int2alpha(unsigned int num) {
+  unsigned int n_digits= 0;
+  unsigned int drift= 0;
+  while ((drift+1)*26<=num) {
+	 drift= (drift+1)*26;
+	 ++n_digits;
+  };
+  ++n_digits;
+  //printf("%6d ", drift);
+  char* repr= (char*)calloc(sizeof(char), n_digits+1);
+  unsigned int quotient= num-drift;
+  unsigned int i= n_digits;
+  do {
+	 unsigned int remainder= quotient % 26;
+	 quotient= quotient / 26;
+	 --i;
+	 repr[i]= 'a'+remainder;
+  } while (i>0);
+  return repr;
 }

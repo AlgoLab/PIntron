@@ -49,6 +49,22 @@
 #include "log.h"
 
 
+void MEG_stats(pext_array V, size_t* tot_pairings, size_t* tot_edges) {
+  *tot_pairings= 0;
+  *tot_edges= 0;
+  for (size_t i= 0; i< EA_size(V); ++i) {
+	 plist Vi= EA_get(V, i);
+	 plistit lit= list_first(Vi);
+	 while (listit_has_next(lit)) {
+		ppairing p= listit_next(lit);
+		++(*tot_pairings);
+		(*tot_edges)+= list_size(p->adjs);
+	 }
+	 listit_destroy(lit);
+  }
+}
+
+
 bool
 is_too_complex_for_compaction(pext_array V, pconfiguration config) {
   NOT_NULL(V);
@@ -56,16 +72,7 @@ is_too_complex_for_compaction(pext_array V, pconfiguration config) {
 
   size_t tot_pairings= 0;
   size_t tot_edges= 0;
-  for (size_t i= 0; i< EA_size(V); ++i) {
-	 plist Vi= EA_get(V, i);
-	 plistit lit= list_first(Vi);
-	 while (listit_has_next(lit)) {
-		ppairing p= listit_next(lit);
-		++tot_pairings;
-		tot_edges+= list_size(p->adjs);
-	 }
-	 listit_destroy(lit);
-  }
+  MEG_stats(V, &tot_pairings, &tot_edges);
   INFO("The MEG has %7zd vertices and %7zd edges.", tot_pairings, tot_edges);
 //XXX: INSERITO PARAMETRO ARBITRARIO SUL NUMERO MASSIMO DI PAIRING IN UN MEG E DI ARCHI
   if (
@@ -106,6 +113,9 @@ is_too_complex(pext_array V, pconfiguration config) {
   DEBUG("The shortest pairings have length %4d, "
 		  "they appear %8zd times over %8zd total pairings.",
 		  min_len, freq_min_len, tot_pairings);
+  // Small graphs are always accepted
+  if ((tot_pairings < 5) || (tot_edges < 4))
+    return false;
   if ((config->max_pairings_in_MEG!=0) &&
 		(tot_pairings > config->max_pairings_in_MEG) &&
 		(freq_min_len >
@@ -405,10 +415,10 @@ dfs_visit(pgraph G,
   do {
 	 while (!intlist_is_empty(S)) {
 		int id_v= intlist_remove_from_tail(S);
-		DEBUG("Extracted vertex %d.", id_v);
+		TRACE("Extracted vertex %d.", id_v);
 		ppairing v= EA_get(G, id_v);
 		if (color[id_v]==0) {
-		  DEBUG("Discovered pairing (%4d, %5d, %4d)", PAIRING(v));
+		  TRACE("Discovered pairing (%4d, %5d, %4d)", PAIRING(v));
 		  color[id_v]= 1;
 		  dtime[id_v]= time;
 		  ++time;
@@ -428,7 +438,7 @@ dfs_visit(pgraph G,
 			 }
 		  }
 		} else if (color[id_v]==1) {
-		  DEBUG("Finished visiting pairing (%4d, %5d, %4d)", PAIRING(v));
+		  TRACE("Finished visiting pairing (%4d, %5d, %4d)", PAIRING(v));
 		  color[id_v]= 2;
 		  ftime[id_v]= time;
 		  ++time;

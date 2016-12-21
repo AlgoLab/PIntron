@@ -78,7 +78,7 @@ find_deepest_common_node_rec(const char const* pattern,
 				(edge->dst_node->single_char != avoid_prev_char)) {
 			 TRACE("Edge found!");
 		  } else {
-			 DEBUG("Edge ignored because the subtree contains "
+			 TRACE("Edge ignored because the subtree contains "
 					 "only occurrences preceeded by char %c that is the same "
 					 "of %c.", edge->dst_node->single_char, avoid_prev_char);
 			 edge= NULL;
@@ -109,7 +109,7 @@ find_deepest_common_node_rec(const char const* pattern,
 								 pattern);
 		}
 		const size_t lcp= tmp_lcp;
-		DEBUG("Edge length %zu-%zu", lcp, edge_length);
+		TRACE("Edge length %zu-%zu", lcp, edge_length);
 		if ((pattern[lcp] == '\0') || (lcp < edge_length)) {
 		  *final= edge;
 		  *matched_len= lcp;
@@ -135,7 +135,7 @@ find_deepest_common_node(const char* const pattern,
 								 LST_STree* const tree,
 								 const char avoid_prev_char,
 								 LST_Edge** final, size_t* const matched_len) {
-  DEBUG("Finding deepest common node.");
+  TRACE("Finding deepest common node.");
   find_deepest_common_node_rec(pattern, tree->root_node, 0, avoid_prev_char, final, matched_len);
 }
 
@@ -146,7 +146,7 @@ follow_suffix_link_and_fast_fwd(const char* pattern,
 										  const char avoid_prev_char,
 										  LST_Edge** final,
 										  size_t* const out_matched_len) {
-  DEBUG("Following the suffix link.");
+  TRACE("Following the suffix link.");
   LST_Node* sl= NULL;
   if (lst_edge_get_length(prev_edge)==matched_len) {
 	 sl= prev_edge->dst_node->suffix_link_node;
@@ -154,8 +154,8 @@ follow_suffix_link_and_fast_fwd(const char* pattern,
   } else {
 	 sl= prev_edge->src_node->suffix_link_node;
   }
-  my_assert(sl!=NULL);
-  DEBUG("Matched len %zu and string-depth %zu", matched_len, sl->string_depth);
+  NOT_NULL(sl);
+  TRACE("Matched len %zu and string-depth %zu", matched_len, sl->string_depth);
   find_deepest_common_node_rec(pattern + sl->string_depth,
 										 sl, matched_len,
 										 avoid_prev_char,
@@ -245,7 +245,7 @@ build_vertex_set(pEST_info pattern,
   char prev_symbol= '\0';
   size_t prev_symbol_key= pg->alph_size;
   for (unsigned int i= 0; i<pattern_len; ++i) {
-	 DEBUG("Considering the %dth suffix of the pattern.", i);
+	 TRACE("Considering the %dth suffix of the pattern.", i);
 	 LST_Edge* block_edge= NULL;
 	 Vi= list_create();
 	 EA_insert(V, Vi);
@@ -268,15 +268,11 @@ build_vertex_set(pEST_info pattern,
 		NOT_NULL(N);
 		NOT_NULL(N->src_node);
 		NOT_NULL(N->dst_node);
-		DEBUG("The deepest common node has string-depth %zd.",
+		TRACE("The deepest common node has string-depth %zd.",
 				N->src_node->string_depth + matched_len);
-#ifdef MUMMER_EMULATION
-		size_t min_string_depth= config->min_factor_len;
-#else
 		size_t min_string_depth= MAX((N->src_node->string_depth + matched_len)*(config->min_string_depth_rate),
 											  config->min_factor_len);
-		DEBUG("The minimum string-depth that will be considered is %zd.", min_string_depth);
-#endif
+		TRACE("The minimum string-depth that will be considered is %zd.", min_string_depth);
 
 // Salvo il nodo trovato per seguire poi il suffix link
 		prev_N= N;
@@ -303,7 +299,6 @@ build_vertex_set(pEST_info pattern,
 		  matched_len= lst_edge_get_length(N);
 		}
 		list_sort(Vi, (comparator)pairing_compare);
-#ifndef MUMMER_EMULATION
 		plist ltoremove= list_create();
 		list_last_reuse(Vi, &Vij);
 		while (listit_has_prev(Vij)) {
@@ -337,7 +332,6 @@ build_vertex_set(pEST_info pattern,
 		  list_remove_at_iterator(Vij, (delete_function)pairing_destroy);
 		}
 		list_destroy(ltoremove, (delete_function)noop_free);
-#endif
 	 }
 	 prev_symbol= pattern->EST_seq[i];
 	 prev_symbol_key= get_key(pg, prev_symbol);
@@ -352,13 +346,12 @@ build_vertex_set(pEST_info pattern,
   list_add_to_tail(Vi, pairing);
   EA_insert(V, Vi);
 
-#ifndef MUMMER_EMULATION
   INFO("Cleaning low-complexity pairings starting at different positions on P.");
   {
 	 const size_t n= EA_size(V);
 	 plist Vi1= EA_get(V, n-2);
 	 for (size_t i= n-3; i>0; --i) {
-		DEBUG("Analysis of the %zdth pairing list.", i);
+		TRACE("Analysis of the %zdth pairing list.", i);
 		plist Vi= EA_get(V, i);
 		plistit Vit1= list_first(Vi1);
 		while (listit_has_next(Vit1)) {
@@ -367,9 +360,9 @@ build_vertex_set(pEST_info pattern,
 		  bool rim= false;
 		  while (!rim && listit_has_next(Vit)) {
 			 ppairing I= listit_next(Vit);
-			 DEBUG("Pairings %d %d %d and %d %d %d", PAIRING(I), PAIRING(I1));
+			 TRACE("Pairings (%d, %d, %d) and (%d, %d, %d)", PAIRING(I), PAIRING(I1));
 			 if ((I->t == I1->t) && (I->l >= I1->l)) {
-				DEBUG("Pairing %d %d %d rimosso", PAIRING(I1));
+				DEBUG("Pairing (%d, %d, %d) rimosso", PAIRING(I1));
 				list_remove_at_iterator(Vit1, (delete_function)pairing_destroy);
 				rim= true;
 			 }
@@ -380,7 +373,6 @@ build_vertex_set(pEST_info pattern,
 		Vi1= Vi;
 	 }
   }
-#endif
 
   INFO("Build of vertex set of the MEG completed!");
 
@@ -415,14 +407,14 @@ is_there_an_edge_strict(const ppairing I,
   const bool J_is_long= (J->l >= 5*l);
 
   if (J->p <= I->p) {
-	 DEBUG("STRICT. "
+	 TRACE("STRICT. "
 			 "Pairing (%d, %d, %d) starts before (%d, %d, %d) on P. "
 			 "Edge not possible.",
 			 PAIRING(J), PAIRING(I));
 	 return false;
   }
   if (J->t <= I->t) {
-	 DEBUG("STRICT. "
+	 TRACE("STRICT. "
 			 "Pairing (%d, %d, %d) starts before (%d, %d, %d) on T. "
 			 "Edge not possible.",
 			 PAIRING(J), PAIRING(I));
@@ -669,7 +661,7 @@ build_edge_set(pext_array V,
 	 plistit Vit= list_first(Vi);
 	 while (listit_has_next(Vit)) {
 		ppairing I= listit_next(Vit);
-		DEBUG("Analysis of pairing (%d, %d, %d)", PAIRING(I));
+		TRACE("Analysis of pairing (%d, %d, %d)", PAIRING(I));
 		add_edges_from(I, V, config->min_factor_len, fl, n, config);
 	 }
 	 listit_destroy(Vit);

@@ -32,7 +32,7 @@
 #include "io-factorizations.h"
 #include "color_matrix.h"
 #include "util.h"
-#include "semplify_matrix.h"
+#include "simplify_matrix.h"
 #include "my_time.h"
 #include "log-build-info.h"
 
@@ -50,7 +50,7 @@ int main(void) {
 
   MYTIME_start(timer);
 
-  INFO("Start color_matrix_create");
+  INFO("Colored matrix creation...");
   bool is_not_window;
   //Colorazione della matrice sulla base degli esoni come fattori unici
   is_not_window=true;
@@ -88,59 +88,57 @@ int main(void) {
   MYTIME_LOG(INFO, timer);
   MYTIME_reset(timer);
   MYTIME_start(timer);
-  INFO("Start simplification");
-  psempl psemp= semplification(p,unique_factors);
-  INFO("Used factors: %d", countTrue(psemp->factors_used));
-  INFO("Not-used factors: %d", countTrue(psemp->factors_not_used));
-  INFO("EST simplified: %d", countTrue(psemp->ests_ok));
+  INFO("Starting simplification");
+  psimpl psimp= simplification(p,unique_factors);
+  psimpl_print(psimp);
 
   /*unsigned int j;
    fprintf(stdout, "Used: ");
-   for(j=0; j<psemp->factors_used->n; j++){
- 	  if(BV_get(psemp->factors_used,j))
- 		  fprintf(stdout, "%d-", j);
+   for(j=0; j<psimp->factors_used->n; j++){
+	  if(BV_get(psimp->factors_used,j))
+		  fprintf(stdout, "%d-", j);
    }*/
-   //exit(1);
+	//exit(1);
 
-  //fprintf(stdout, "ESTs %d factors %d\n", list_size(p), psemp->factors_used->n);
+  //fprintf(stdout, "ESTs %d factors %d\n", list_size(p), psimp->factors_used->n);
   //exit(1);
 
   /*unsigned int j;
    fprintf(stdout, "Used: ");
-   for(j=0; j<psemp->factors_used->n; j++){
- 	  if(BV_get(psemp->factors_used,j))
- 		  fprintf(stdout, "%d-", j);
+   for(j=0; j<psimp->factors_used->n; j++){
+	  if(BV_get(psimp->factors_used,j))
+		  fprintf(stdout, "%d-", j);
    }
    fprintf(stdout, "\n");
    fprintf(stdout, "ESTs ok: ");
    unsigned int c=0;
-   for(j=0; j<psemp->ests_ok->n; j++){
- 	  if(BV_get(psemp->ests_ok,j)){
- 		  fprintf(stdout, "%d-", j);
- 		  c++;
- 	  }
+   for(j=0; j<psimp->ests_ok->n; j++){
+	  if(BV_get(psimp->ests_ok,j)){
+		  fprintf(stdout, "%d-", j);
+		  c++;
+	  }
    }
    fprintf(stdout, "\nSimplified rows %d", c);
    fprintf(stdout, "\n");
    fprintf(stdout, "Not used: ");
-   for(j=0; j<psemp->factors_not_used->n; j++){
- 	  if(BV_get(psemp->factors_not_used,j))
- 		  fprintf(stdout, "%d-", j);
+   for(j=0; j<psimp->factors_not_used->n; j++){
+	  if(BV_get(psimp->factors_not_used,j))
+		  fprintf(stdout, "%d-", j);
    }
    fprintf(stdout, "\n");
    exit(1);*/
 
 
-  //printf("usati: %s", BV_to_string(psemp->ests_ok));
+  //printf("usati: %s", BV_to_string(psimp->ests_ok));
   //exit(1);
 
-  plist pl= color_matrix_semplified_create(p,psemp);
+  plist pl= color_matrix_simplified_create(p,psimp);
   //color_matrix_print(pl);
   //exit(1);
 
   //Se pl e' vuota significa che tutti i fattori sono necessari
 
-  INFO("Simplification done!");
+  INFO("Simplification terminated!");
   MYTIME_stop(timer);
   MYTIME_LOG(INFO, timer);
   MYTIME_reset(timer);
@@ -148,19 +146,19 @@ int main(void) {
   MYTIME_start(timer);
   INFO("Start search of the minimum factorization");
 
-  if(!all_true(psemp->ests_ok)){
+  if(!BV_all_true(psimp->ests_ok)){
 	 bv= min_fact(pl);
 	 INFO("Search of the minimum factorization completed");
   } else {
-	 INFO("Nessuna combinazione da ricercare!");
+	 INFO("Minimum factorization is already found by simplification.");
   }
 
-  print_factorizations_result(bv,p,unique_factors,psemp);
+  print_factorizations_result(bv,p,unique_factors,psimp);
 
   unsigned int q;
   unsigned int count_used_opt=0;
-  for(q=0; q<psemp->factors_used->n; q++){
-	 if (BV_get(psemp->factors_used,q)){
+  for(q=0; q<psimp->factors_used->n; q++){
+	 if (BV_get(psimp->factors_used,q)){
 		  //INFO("U %d ", q);
 		count_used_opt++;
 	 }
@@ -172,15 +170,11 @@ int main(void) {
 
   list_destroy(p,(delete_function)EST_destroy);
 
-  //Controllo che pl non sia vuota. Altrimenti potrebbe dare segm. fault!!
-  if(!list_is_empty(pl))
-	  color_matrix_semplified_destroy(pl);
+  color_matrix_simplified_destroy(pl);
 
-  list_destroy(pl,(delete_function)noop_free);
+  list_destroy(unique_factors,(delete_function)factor_destroy);
 
-  list_destroy(unique_factors,(delete_function)noop_free);
-
-  psempl_destroy(psemp);
+  psimpl_destroy(psimp);
 
   //Controllo!! Altrimenti potrebbe dare segm. fault!!
   if(bv != NULL)

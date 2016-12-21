@@ -6,7 +6,7 @@
  * A novel pipeline for computational gene-structure prediction based on
  * spliced alignment of expressed sequences (ESTs and mRNAs).
  *
- * Copyright (C) 2010  Yuri Pirola
+ * Copyright (C) 2011  Yuri Pirola
  *
  * Distributed under the terms of the GNU Affero General Public License (AGPL)
  *
@@ -27,19 +27,29 @@
  * along with PIntron.  If not, see <http://www.gnu.org/licenses/>.
  *
  **/
-#ifndef _SEMPLIFY_MATRIX_H_
-#define _SEMPLIFY_MATRIX_H_
+/*
+** factorization-refinement.h
+*/
 
-#include "list.h"
-#include "bit_vector.h"
-#include "types.h"
+#ifndef _FACTORIZATION_REFINEMENT_H_
+#define _FACTORIZATION_REFINEMENT_H_
+
 #include <stdio.h>
-#include "sempl_info.h"
-#include "log.h"
 
-psempl semplification(plist, plist);
-bool semplify_row(plist,pbit_vect,pbit_vect,int);
-bool semplify_column(plist,pbit_vect);
+#include "types.h"
+#include "configuration.h"
+
+void
+remove_duplicated_factorizations(plist factorizations);
+
+void
+remove_factorizations_with_very_small_exons(plist factorizations);
+
+void
+refine_EST_factorizations(pEST_info genomic,
+								  pEST factorized_est,
+								  pconfiguration config);
 
 
-#endif
+
+#endif /* _FACTORIZATION_REFINEMENT_H_ */
