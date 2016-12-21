@@ -3131,7 +3131,10 @@ void Filter_Path_Transcripts_by_Introns(){
 				isRefSeq=0;
 				q=0;
 				while (q < (int)strlen(EST_ids[k])-1 && isRefSeq == 0){
-				  if(EST_ids[k][q] == 'N' && EST_ids[k][q+1]){
+		 			/* UPDATE for noncoding RefSeq
+		  			*/
+		  		  if(EST_ids[k][q] == 'N' && (EST_ids[k][q+1] == 'M' || EST_ids[k][q+1] == 'R')){
+				  //if(EST_ids[k][q] == 'N' && EST_ids[k][q+1]){
 					 if(q == 0 || EST_ids[k][q-1] == ','){
 						if(q < (int)strlen(EST_ids[k])-2 && EST_ids[k][q+2] == '_')
 						  isRefSeq=1;

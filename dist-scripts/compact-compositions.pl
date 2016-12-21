@@ -121,7 +121,9 @@ foreach my $composition(@file_str){
         
         if($header =~ m/\/gb=(\w+)/){
             $gb=$1;
-            if($gb =~ m/^NM_/){
+		  	#UPDATE for noncoding RefSeq
+            if($gb =~ m/^N[MR]_/){
+            #if($gb =~ m/^NM_/){
                 $is_RefSeq=1;
             }
          }
@@ -157,7 +159,9 @@ foreach my $composition(@file_str){
                 }
             }
         }
-      if(substr($gb, 0, 2) eq "NM"){
+        #UPDATE for noncoding RefSeq
+	  if(substr($gb, 0, 3) eq "NM_" || substr($gb, 0, 3) eq "NR_"){
+      #if(substr($gb, 0, 2) eq "NM"){
         foreach my $ref(@exon_list){
             my @coord_list=@{$ref};
             print OUT $coord_list[0], " ", $coord_list[1], " ", $coord_list[2], "\n";
@@ -177,7 +181,9 @@ foreach my $composition(@file_str){
             my @last_coord_list=@{$exon_list[$#exon_list]};
             $key_str.=$last_coord_list[0]."-";
         
-            if(substr($gb, 0, 2) eq "NM"){
+        	#UPDATE for noncoding RefSeq
+        	if(substr($gb, 0, 3) eq "NM_" || substr($gb, 0, 3) eq "NR_"){
+            #if(substr($gb, 0, 2) eq "NM"){
                 $key_str.=$gb;
                 $key_must_not_exist=1;
             }
@@ -472,7 +478,9 @@ foreach my $key(@keys){
     #print $key, "\n";
     my @temp_list=@{$composition_hash{$key}};
     
-    if(substr($key, 0, 2) ne "NM" && scalar(@temp_list) > 2){
+    #Update for noncoding RefSeq
+    if((substr($key, 0, 3) ne "NM_" && substr($key, 0, 3) ne "NR_") && scalar(@temp_list) > 2){
+    #if(substr($key, 0, 2) ne "NM" && scalar(@temp_list) > 2){
     
         my @first_coords=@{$temp_list[1]};
         my @next_first_coord=@{$temp_list[2]};
@@ -659,7 +667,9 @@ foreach my $key(@keys){
     my $composition_str="";
   
     my $isRefSeq=0;
-    if(substr($key, 0, 2) eq "NM"){
+    #Update for non coding RefSeq
+    if(substr($key, 0, 3) eq "NM_" || substr($key, 0, 3) eq "NR_"){
+    #if(substr($key, 0, 2) eq "NM"){
         $isRefSeq=1;
     }
      

@@ -1734,9 +1734,16 @@ fprintf(stdout, "HERE (%d,%d) = %d\n", i,j,getMatx(matx,i,j,n)->flag);
 		char isRefSeq=0;
 		while(s_EST_ids != NULL && !isRefSeq){
 		  if(s_EST_ids->value != NULL) {
-			 if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
+		  	/* UPDATE for noncoding RefSeq
+		  	*/
+			/*if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
 				isRefSeq=1;
-			 }
+			 }*/
+		  	if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[2] == '_'){
+		  		if(s_EST_ids->value[1] == 'M' || s_EST_ids->value[1] == 'R'){
+					isRefSeq=1;
+		  		}
+		  	}	  
 		  }
 		  s_EST_ids=s_EST_ids->next;
 		}
@@ -1808,9 +1815,16 @@ fprintf(stdout, "HERE (%d,%d) = %d\n", i,j,getMatx(matx,i,j,n)->flag);
 		char isRefSeq=0;
 		while(s_EST_ids != NULL && !isRefSeq){
 		  if(s_EST_ids->value != NULL) {
-			 if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
+			/* UPDATE for noncoding RefSeq
+		  	*/
+		  	/*if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
 				isRefSeq=1;
-			 }
+			 }*/
+		  	if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[2] == '_'){
+		  		if(s_EST_ids->value[1] == 'M' || s_EST_ids->value[1] == 'R'){
+					isRefSeq=1;
+		  		}
+		  	}	  
 		  }
 		  s_EST_ids=s_EST_ids->next;
 		}
@@ -2420,9 +2434,16 @@ exit(0);*/
 		char isRefSeq=0;
 		while(s_EST_ids != NULL && !isRefSeq){
 		  if(s_EST_ids->value != NULL) {
-			 if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
+			/* UPDATE for noncoding RefSeq
+		  	*/
+		  	/*if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
 				isRefSeq=1;
-			 }
+			 }*/
+		  	if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[2] == '_'){
+		  		if(s_EST_ids->value[1] == 'M' || s_EST_ids->value[1] == 'R'){
+					isRefSeq=1;
+		  		}
+		  	}	  
 		  }
 		  s_EST_ids=s_EST_ids->next;
 		}
@@ -2500,9 +2521,16 @@ exit(0);*/
 		structSimpleList *s_EST_ids=elementAtListOfList(global_tr_est_ids,i)->local;
 		while(s_EST_ids != NULL){
 		  if(s_EST_ids->value != NULL) {
-			 if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
+			/* UPDATE for noncoding RefSeq
+		  	*/
+			 /*if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[1] == 'M'){
 				fprintf(out,".%s", s_EST_ids->value);
-			 }
+			 }*/
+		  	if(s_EST_ids->value[0] == 'N' && s_EST_ids->value[2] == '_'){
+		  		if(s_EST_ids->value[1] == 'M' || s_EST_ids->value[1] == 'R'){
+					fprintf(out,".%s", s_EST_ids->value);
+		  		}
+		  	}	  
 		  }
 		  s_EST_ids=s_EST_ids->next;
 		}

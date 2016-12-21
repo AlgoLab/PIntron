@@ -1288,10 +1288,18 @@ void MarkIntronType(){
          j=0;
          refseqnum=0;
          while(j<introns[i].ESTs){
-                if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][1] == 'M'){
+ 		 		/* UPDATE for noncoding RefSeq
+		  		*/
+                /*if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][1] == 'M'){
                   introns[i].type=0;
                   refseqnum++;
-                }
+                }*/
+		  		if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][2] == '_'){
+		  			if(introns[i].IDs[j][1] == 'M' || introns[i].IDs[j][1] == 'R'){
+		  				introns[i].type=0;
+                  		refseqnum++;
+		  			}
+		  		}	  
                 j++;
          }
 
@@ -1312,7 +1320,9 @@ void MarkIntronType(){
                 j=0;
                 refseqnum=0;
                 while(j<introns[i].ESTs){
-                  if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][1] == 'M'){
+		 			/* UPDATE for noncoding RefSeq
+		  			*/
+                 	/*if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][1] == 'M'){
                          introns[i].RefSeq[refseqnum]=(char *)malloc((strlen(introns[i].IDs[j])+1)*sizeof(char));
                          if(introns[i].RefSeq[refseqnum] == NULL){
                                 fprintf(stderr, "Error in MarkIntronType!\n");
@@ -1320,8 +1330,19 @@ void MarkIntronType(){
                          }
                          strcpy(introns[i].RefSeq[refseqnum], introns[i].IDs[j]);
                          refseqnum++;
-                  }
-                  j++;
+                  	}*/
+		  			if(introns[i].IDs[j][0] == 'N' && introns[i].IDs[j][2] == '_'){
+		  				if(introns[i].IDs[j][1] == 'M' || introns[i].IDs[j][1] == 'R'){
+                         	introns[i].RefSeq[refseqnum]=(char *)malloc((strlen(introns[i].IDs[j])+1)*sizeof(char));
+                         	if(introns[i].RefSeq[refseqnum] == NULL){
+                            	    fprintf(stderr, "Error in MarkIntronType!\n");
+                                	exit(EXIT_FAILURE);
+                         	}
+                         	strcpy(introns[i].RefSeq[refseqnum], introns[i].IDs[j]);
+                         	refseqnum++;
+		  				}
+		  			}	  
+                  	j++;
                 }
          }
   }

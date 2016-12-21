@@ -377,8 +377,20 @@ pintron set_agree_flags(pintron intron){
 		  my_assert(intron->est_info != NULL);
 		  my_assert(intron->gen_intron->donor_pt != NULL);
 		  my_assert(intron->gen_intron->acceptor_pt != NULL);
+		  
+		  /* UPDATE for noncoding RefSeq
+		  */
+		  bool isNMorNR = false;
+		  if(intron->est_info->EST_gb[0] == 'N' && intron->est_info->EST_gb[2] == '_'){
+		  	if(intron->est_info->EST_gb[1] == 'M' || intron->est_info->EST_gb[1] == 'R'){
+		  		isNMorNR = true;
+		  	}
+		  }	  
 
-		  if(intron->est_info->EST_gb[0] != 'N' || intron->est_info->EST_gb[1] != 'M'){
+		  /* UPDATE for noncoding RefSeq
+		  */
+		  //if(intron->est_info->EST_gb[0] != 'N' || intron->est_info->EST_gb[1] != 'M'){
+		  if(isNMorNR == false){
 			  if((strcmp(intron->gen_intron->donor_pt, "gt") && strcmp(intron->gen_intron->donor_pt, "GT")) && (strcmp(intron->gen_intron->donor_pt, "gc") && strcmp(intron->gen_intron->donor_pt, "GC"))){
 				  if(!strcmp(intron->gen_intron->donor_pt, "at") || !strcmp(intron->gen_intron->donor_pt, "AT")){
 					  if(!strcmp(intron->gen_intron->acceptor_pt, "ac") || !strcmp(intron->gen_intron->acceptor_pt, "AC")){
