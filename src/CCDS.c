@@ -359,7 +359,7 @@ int main(int argc, char *argv[]){
 
   GetGenomicExons(temp);
   free(temp);
-
+  
   GetExonAlignments();
 
   MarkIntronType();
@@ -2210,7 +2210,7 @@ void GetLongestORF(int ref, int i, int min_length){
 		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
 	 }
   }
-
+  
   DEBUG("Transcript sequence: %s", tr_seq);
 
   trs[i].has_stop= 0;
@@ -2223,8 +2223,8 @@ void GetLongestORF(int ref, int i, int min_length){
   bool ORF_found= false;
   int ORF_length= 0;
   
-  //UpdateFEB2017
-  if(!(trs[i].RefSeq[0] == 'N' && (trs[i].RefSeq[1] == 'R' && trs[i].RefSeq[2] == '_'))){
+  //UPDATE for non-coding
+  if(trs[i].RefSeq == NULL || !(trs[i].RefSeq[0] == 'N' && (trs[i].RefSeq[1] == 'R' && trs[i].RefSeq[2] == '_'))){
 
    for (int frame= 0; frame<3; ++frame) {
 	 DEBUG("Considering frame %d...", frame);
@@ -2275,7 +2275,7 @@ void GetLongestORF(int ref, int i, int min_length){
 		}
 	 }
    }
-  //UpdateFEB2017
+  //UPDATE for non-coding
   }
 
   if(trs[i].ORF_start != -1 && trs[i].ORF_end != -1){
