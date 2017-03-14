@@ -359,7 +359,7 @@ int main(int argc, char *argv[]){
 
   GetGenomicExons(temp);
   free(temp);
-
+  
   GetExonAlignments();
 
   MarkIntronType();
@@ -381,7 +381,7 @@ int main(int argc, char *argv[]){
   i=0;
   Tcds=100;     //Lunghezza minima delle ORF
   while(i < number_of_transcripts){
-         if(trs[i].type == 0){
+        if(trs[i].type == 0){
                 if(GetCDSAnnotationForRefSeq_2(i)){
                   trs[i].is_annotated=1;
                 }
@@ -394,10 +394,10 @@ int main(int argc, char *argv[]){
 
   i=0;
   while(i < number_of_transcripts){
-         if(trs[i].type != 0 || trs[i].is_annotated == 0){
+        if(trs[i].type != 0 || trs[i].is_annotated == 0){
                 GetLongestORF(ref, i, Tcds);
-         }
-         i++;
+        }
+        i++;
   }
 
   ref=SetREFToLongestTranscript();
@@ -2210,7 +2210,7 @@ void GetLongestORF(int ref, int i, int min_length){
 		strcat(tr_seq, exons[trs[i].exon_index[j]].sequence);
 	 }
   }
-
+  
   DEBUG("Transcript sequence: %s", tr_seq);
 
   trs[i].has_stop= 0;
@@ -2222,8 +2222,11 @@ void GetLongestORF(int ref, int i, int min_length){
   const int ccds_end= strlen(tr_seq)-3;
   bool ORF_found= false;
   int ORF_length= 0;
+  
+  //UPDATE for non-coding
+  if(trs[i].RefSeq == NULL || !(trs[i].RefSeq[0] == 'N' && (trs[i].RefSeq[1] == 'R' && trs[i].RefSeq[2] == '_'))){
 
-  for (int frame= 0; frame<3; ++frame) {
+   for (int frame= 0; frame<3; ++frame) {
 	 DEBUG("Considering frame %d...", frame);
 	 z= frame;
 
@@ -2271,6 +2274,8 @@ void GetLongestORF(int ref, int i, int min_length){
 		  z+= 3;
 		}
 	 }
+   }
+  //UPDATE for non-coding
   }
 
   if(trs[i].ORF_start != -1 && trs[i].ORF_end != -1){
