@@ -1,0 +1,26 @@
+variant_isoform#1 /nex=11 /L=2591 /CDS=203..1384 /RefSeq=NM_000546 /ProtL=393 /Type=Ref
+variant_isoform#2 /nex=12 /L=2651 /CDS=203..1243 /RefSeq=NM_001126113(YN) /ProtL=346 /Frame=yes /Type=new(E9a),CDS; 
+variant_isoform#3 /nex=12 /L=2516 /CDS=203..1309 /RefSeq=(YY) /ProtL=368 /Frame=yes /Type=IR-(E4),CDS; 
+variant_isoform#4 /nex=12 /L=2724 /CDS=203..1228 /RefSeq=NM_001126114(YN) /ProtL=341 /Frame=yes /Type=new(E9b),CDS; 
+variant_isoform#5 /nex=11 /L=2588 /CDS=200..1381 /RefSeq=NM_001126112(YY) /ProtL=393 /Frame=yes /Type=A3E (I1, +3 nt), 5UTR; 
+variant_isoform#6 /nex=11 /L=2624 /CDS=200..1417 /RefSeq=(YY) /ProtL=405 /Frame=yes /Type=A3E (I8, -36 nt), CDS; A3E (I1, +3 nt), 5UTR; 
+variant_isoform#7 /nex=11 /L=2627 /CDS=203..1420 /RefSeq=(YY) /ProtL=405 /Frame=yes /Type=A3E (I8, -36 nt), CDS; 
+variant_isoform#8 /nex=11 /L=2527 /CDS=94..1320 /RefSeq=(NY) /ProtL=408 /Frame=yes /Type=init(E1a),5UTR; 
+variant_isoform#9 /nex=11 /L=2563 /CDS=94..1356 /RefSeq=(NY) /ProtL=420 /Frame=yes /Type=A3E (I8, -36 nt), CDS; init(E1a),5UTR; 
+variant_isoform#10 /nex=10 /L=2708 /CDS=437..1501 /RefSeq=NM_001126118(NY) /ProtL=354 /Frame=yes /Type=IR+(I2),CDS; 
+variant_isoform#11 /nex=10 /L=2386 /CDS=394..1179 /RefSeq=(NY) /ProtL=261 /Frame=yes /Type=A3E (I4, -11 nt), CDS; A5E (I4, +42 nt), CDS; 
+variant_isoform#12 /nex=10 /L=2312 /CDS=203..1105 /RefSeq=(YY) /ProtL=300 /Frame=yes /Type=skip(E4),CDS; 
+variant_isoform#13 /nex=10 /L=2348 /CDS=203..1141 /RefSeq=(YY) /ProtL=312 /Frame=yes /Type=A3E (I8, -36 nt), CDS; skip(E4),CDS; 
+variant_isoform#14 /nex=9 /L=2570 /CDS=263..1363 /RefSeq=(NY) /ProtL=366 /Frame=yes /Type=A3E (I8, -36 nt), CDS; IR+(I2),CDS; init(E1a),5UTR; 
+variant_isoform#15 /nex=8 /L=2331 /CDS=279..923 /RefSeq=NM_001126117(NN) /ProtL=214 /Frame=yes /Type=init(E1a),5UTR; new(E9a),CDS; 
+variant_isoform#16 /nex=8 /L=2224 /CDS=196..1017 /RefSeq=(NY) /ProtL=273 /Frame=yes /Type=A3E (I8, -36 nt), CDS; skip(E4),CDS; skip(E3),CDS; skip(E2),5UTR_CDS; 
+variant_isoform#17 /nex=8 /L=2188 /CDS=196..981 /RefSeq=(NY) /ProtL=261 /Frame=yes /Type=skip(E4),CDS; skip(E3),CDS; skip(E2),5UTR_CDS; 
+variant_isoform#18 /nex=8 /L=2404 /CDS=279..908 /RefSeq=NM_001126116(NN) /ProtL=209 /Frame=yes /Type=init(E1a),5UTR; new(E9b),CDS; 
+variant_isoform#19 /nex=7 /L=2271 /CDS=279..1064 /RefSeq=NM_001126115(NY) /ProtL=261 /Frame=yes /Type=init(E1a),5UTR; 
+variant_isoform#20 /nex=7 /L=2274 /CDS=279..1067 /RefSeq=(NY) /ProtL=262 /Frame=yes /Type=A3E (I7, -3 nt), CDS; init(E1a),5UTR; 
+variant_isoform#21 /nex=7 /L=2307 /CDS=279..1100 /RefSeq=(NY) /ProtL=273 /Frame=yes /Type=A3E (I8, -36 nt), CDS; init(E1a),5UTR; 
+variant_isoform#22 /nex=5 /L=631 /CDS=384..569 /RefSeq=(NN) /ProtL=61 /Frame=no /Type=A3E (I4, +21 nt), CDS; term(E11c),CDS_3UTR; 
+variant_isoform#23 /nex=2 /L=243 /CDS=.. /RefSeq= /ProtL=.. /Frame=.. /Type=term(E11b),CDS_3UTR; init(E1b),5UTR; 
+variant_isoform#24 /nex=2 /L=1399 /CDS=891..1367 /RefSeq=(NN) /ProtL=158 /Frame=no /Type=init(E1a),5UTR; skip(E10),CDS; 
+variant_isoform#25 /nex=2 /L=551 /CDS=279..452 /RefSeq=(NN) /ProtL=57 /Frame=no /Type=init(E1c),5UTR; skip(E6),CDS; 
+variant_isoform#26 /nex=2 /L=750 /CDS=162..308 /RefSeq=(NN) /ProtL=48 /Frame=no /Type=term(E11d),CDS_3UTR; init(E1d),5UTR; skip(E4),CDS; skip(E3),CDS; skip(E2),5UTR_CDS; 
