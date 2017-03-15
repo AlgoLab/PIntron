@@ -5,7 +5,7 @@
 #include <string.h>
 #include <criterion/criterion.h>
 
-int confronta(char f1[],char f2[]){
+int compare(char f1[],char f2[]){
 	int flag=1;
 	FILE *fp1,*fp2;
 	int l;
@@ -56,9 +56,9 @@ int main(int argc, char *argv[]){
 Test(output,confrontaOutput) {
 	char f1[]="exampleOutput/pintron-all-isoforms.gtf";
 	char f2[]="executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(confronta(f1,f2)==1);
+	cr_expect(compare(f1,f2)==1);
 
 	char f3[]="exampleOutput/pintron-full-output.json";
 	char f4[]="executionOutput/pintron-full-output.json";
-	cr_expect(confronta(f3,f4)==1);
+	cr_expect(compare(f3,f4)==1);
 }
