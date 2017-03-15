@@ -33,7 +33,7 @@ int BV_comp(pbit_vect bv, pbit_vect bv2)
 }
 
 int main(int argc, char *argv[]){
-	//eseguo i test
+	//for test execution
 	struct criterion_test_set *tests = criterion_initialize();
 	int result = 0;
 	if (criterion_handle_args(argc, argv, true))
@@ -43,24 +43,33 @@ int main(int argc, char *argv[]){
 }
 
 /*
-	creo un vettore v1 di 10 elementi,
-	creo un vettore v2 clonato dal v1
-	testo che v1 e v2 siano uguali,
-	in questo modo ho testato le funzioni
-	BV_create, BV_clone e BV_comp
+	create a vector of 10 elements called v1,
+	create a vector v2 cloned from v1,
+	test that v1 and v2 are equals
 */
 Test(BV_test,BV_cloneTest) {
 	pbit_vect v1=BV_create(10);
 	pbit_vect v2=BV_clone(v1);
-	//BV_set(v2,1,3);
 	cr_expect(BV_comp(v1,v2)==1);
 }
 
 /*
-	creo un vettore v1 di 1 elementi,
-	setto in posizione 0 del vettore il valore true,
-	testo che il valore sia stato salvato correttamente,
-	in questo modo ho testato le funzioni BV_set e BV_get
+	create a vector of 10 elements called v1,
+	create a vector v2 cloned from v1,
+	set an element of v1 with a value,
+	test that v1 and v2 are different
+*/
+Test(BV_test,BV_cloneTestDiff) {
+	pbit_vect v1=BV_create(10);
+	pbit_vect v2=BV_clone(v1);
+	BV_set(v2,1,3);
+	cr_expect(BV_comp(v1,v2)==0);
+}
+
+/*
+	create a vector v1 of 1 element,
+	set true value in position 0,
+	verify that true value is in position 0
 */
 Test(BV_test,BV_singleValueTest) {
 	pbit_vect v1=BV_create(1);
@@ -68,7 +77,13 @@ Test(BV_test,BV_singleValueTest) {
 	cr_expect(BV_get(v1,0)==1);
 }
 
-
+/*
+	create a vector v1 of 3 elements,
+	set false value in position 0,
+	set true value in position 1,
+	set false value in position 2,
+	verify all that values
+*/
 Test(BV_test,BV_multipleValueTest) {
 	pbit_vect v1=BV_create(3);
 	BV_set(v1,0,0);
@@ -79,6 +94,12 @@ Test(BV_test,BV_multipleValueTest) {
 	cr_expect(BV_get(v1,2)==0);
 }
 
+/*
+	create a vector v1 of 3 elements,
+	set true value in position 0,
+	set true value in position 1,
+	verify that the vector contains only true values
+*/
 Test(BV_test,BV_allTrueTest) {
 	pbit_vect v1=BV_create(2);
 	BV_set(v1,0,1);

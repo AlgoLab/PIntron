@@ -5,14 +5,14 @@
 #include "util.h"
 #include <stdlib.h>
 
-#include "list.c"
+#include "../src/list.c"
 #include <criterion/criterion.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int main(int argc, char *argv[]){
-	//eseguo i test
+	//for test execution
 	struct criterion_test_set *tests = criterion_initialize();
 	int result = 0;
 	if (criterion_handle_args(argc, argv, true))

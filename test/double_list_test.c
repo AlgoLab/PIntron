@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "log.h"
 
-#include "double_list.c"
+#include "../src/double_list.c"
 #include <criterion/criterion.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 
 
 int main(int argc, char *argv[]){
-	//eseguo i test
+	//for test execution
 	struct criterion_test_set *tests = criterion_initialize();
 	int result = 0;
 	if (criterion_handle_args(argc, argv, true))
