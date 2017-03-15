@@ -32,7 +32,7 @@ int compare(char f1[],char f2[]){
 		}
 	}
 	if(flag==1){
-		//files are equals
+		//files are equal
 	}
 	if((fclose(fp1)==EOF)||(fclose(fp2)==EOF)){
 		flag=-2;
