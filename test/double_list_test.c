@@ -25,8 +25,8 @@ int main(int argc, char *argv[]){
 
 /*
 	create two doublelists,
-	add 1 to the tail of the first list,
-	add 1 to the head of the second list,
+	add 79.82 to the tail of the first list,
+	add 79.82 to the head of the second list,
 	extract the head of the first list,
 	extract the tail of the second list,
 	test that the two extracted elements are equal
@@ -43,13 +43,13 @@ Test(doubleListTest,headTailTest) {
 
 /*
 	create two doublelists,
-	add 1 to the tail of the first list,
-	add 0 to the tail of the second list,
+	add 79.82 to the tail of the first list,
+	add 14.97 to the tail of the second list,
 	extract the head of the first list,
 	extract the tail of the second list,
 	test that the two extracted elements are different
 */
-Test(boolListTest,headTailDiffTest) {
+Test(doubleListTest,headTailDiffTest) {
 	pdoublelist d1=doublelist_create();
 	pdoublelist d2=doublelist_create();
 	doublelist_add_to_tail(d1,79.82);
@@ -77,7 +77,7 @@ Test(doubleListTest,emptyTest) {
 	verify that the size of the list is 0,
 	verify that the list is empty
 */
-Test(boolListTest,emptyListTest) {
+Test(doubleListTest,emptyListTest) {
 	pdoublelist d1=doublelist_create();
 	cr_expect(doublelist_size(d1)==0);
 	cr_expect(doublelist_is_empty(d1)==1);
@@ -88,7 +88,7 @@ Test(boolListTest,emptyListTest) {
 	enter some elements in the lists,
 	verify that the sizes of the lists are correct
 */
-Test(boolListTest,listSizeTest) {
+Test(doubleListTest,listSizeTest) {
 	pdoublelist d1=doublelist_create();
 	pdoublelist d2=doublelist_create();
 	doublelist_add_to_tail(d1,79.14);
@@ -103,9 +103,9 @@ Test(boolListTest,listSizeTest) {
 	enter some elements in the lists,
 	create a copy of the list,
 	verify that the sizes of the 2 lists are equal,
-	verify that the heads ant the tails of the two lists are equal
+	verify that the heads and the tails of the two lists are equal
 */
-Test(boolListTest,listCopyTest) {
+Test(doubleListTest,listCopyTest) {
 	pdoublelist d1=doublelist_create();
 	doublelist_add_to_tail(d1,79.16);
 	doublelist_add_to_tail(d1,0.27);

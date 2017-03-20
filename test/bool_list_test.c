@@ -103,7 +103,7 @@ Test(boolListTest,listSizeTest) {
 	enter some elements in the lists,
 	create a copy of the list,
 	verify that the sizes of the 2 lists are equal,
-	verify that the heads ant the tails of the two lists are equal
+	verify that the heads and the tails of the two lists are equal
 */
 Test(boolListTest,listCopyTest) {
 	pboollist b1=boollist_create();
