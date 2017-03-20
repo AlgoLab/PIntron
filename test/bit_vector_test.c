@@ -1,7 +1,8 @@
 //gcc bit_vector_test.c -o bit_vector_test -l criterion -I '/home/lorenzo/PIntron/include'
 
 #include "bit_vector.h"
-
+#include <stddef.h>
+#include <signal.h>
 #include "util.h"
 #include <stdio.h>
 #include <limits.h>
@@ -75,6 +76,14 @@ Test(BV_test,BV_singleValueTest) {
 	pbit_vect v1=BV_create(1);
 	BV_set(v1,0,1);
 	cr_expect(BV_get(v1,0)==1);
+}
+
+/*
+	create a vector v1 of 0 element,
+	verify that this will cause a failure
+*/
+Test(BV_test,BV_errorSizeTest,.signal = SIGSEGV) {
+	pbit_vect v1=BV_create(0);
 }
 
 /*

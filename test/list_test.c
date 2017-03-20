@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
 }
 
 /*
-	create a lsit,
+	create a list,
 	verify that the size of the list is 0,
 	verify that the list is empty
 */
