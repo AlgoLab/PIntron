@@ -23,6 +23,14 @@ int main(int argc, char *argv[]){
 	return result;
 }
 
+/*
+	create two doublelists,
+	add 1 to the tail of the first list,
+	add 1 to the head of the second list,
+	extract the head of the first list,
+	extract the tail of the second list,
+	test that the two extracted elements are equal
+*/
 Test(doubleListTest,headTailTest) {
 	pdoublelist d1=doublelist_create();
 	pdoublelist d2=doublelist_create();
@@ -33,6 +41,29 @@ Test(doubleListTest,headTailTest) {
 	cr_expect(v1==v2);
 }
 
+/*
+	create two doublelists,
+	add 1 to the tail of the first list,
+	add 0 to the tail of the second list,
+	extract the head of the first list,
+	extract the tail of the second list,
+	test that the two extracted elements are different
+*/
+Test(boolListTest,headTailDiffTest) {
+	pdoublelist d1=doublelist_create();
+	pdoublelist d2=doublelist_create();
+	doublelist_add_to_tail(d1,79.82);
+	doublelist_add_to_head(d2,14.97);
+	double v1=doublelist_head(d1);
+	double v2=doublelist_tail(d2);
+	cr_expect(v1!=v2);
+}
+
+/*
+	create a doublelist,
+	try to extract head and tail from it,
+	verify that head and tail are null
+*/
 Test(doubleListTest,emptyTest) {
 	pdoublelist d1=doublelist_create();
 	double v1=doublelist_head(d1);
@@ -41,6 +72,59 @@ Test(doubleListTest,emptyTest) {
 	cr_expect(v2==0);
 }
 
+/*
+	create a doublelist,
+	verify that the size of the list is 0,
+	verify that the list is empty
+*/
+Test(boolListTest,emptyListTest) {
+	pdoublelist d1=doublelist_create();
+	cr_expect(doublelist_size(d1)==0);
+	cr_expect(doublelist_is_empty(d1)==1);
+}
+
+/*
+	create two doublelists,
+	enter some elements in the lists,
+	verify that the sizes of the lists are correct
+*/
+Test(boolListTest,listSizeTest) {
+	pdoublelist d1=doublelist_create();
+	pdoublelist d2=doublelist_create();
+	doublelist_add_to_tail(d1,79.14);
+	doublelist_add_to_tail(d2,13.78);
+	doublelist_add_to_head(d2,23.67);
+	cr_expect(doublelist_size(d1)==1);
+	cr_expect(doublelist_size(d2)==2);
+}
+
+/*
+	create a double,
+	enter some elements in the lists,
+	create a copy of the list,
+	verify that the sizes of the 2 lists are equal,
+	verify that the heads ant the tails of the two lists are equal
+*/
+Test(boolListTest,listCopyTest) {
+	pdoublelist d1=doublelist_create();
+	doublelist_add_to_tail(d1,79.16);
+	doublelist_add_to_tail(d1,0.27);
+	doublelist_add_to_head(d1,19.45);
+	pdoublelist d2=doublelist_copy(d1);
+	cr_expect(doublelist_size(d1)==doublelist_size(d2));
+	double v1=doublelist_head(d1);
+	double v2=doublelist_head(d2);
+	cr_expect(v1==v2);
+	double v3=doublelist_tail(d1);
+	double v4=doublelist_tail(d2);
+	cr_expect(v3==v4);
+}
+
+/*
+	create a doublelist,
+	enter a value in the head of the list,
+	verify that this value was saved correctly
+*/
 Test(doubleListTest,headSingleValueTest) {
 	pdoublelist d1=doublelist_create();
 	doublelist_add_to_head(d1,83.87);
@@ -48,6 +132,11 @@ Test(doubleListTest,headSingleValueTest) {
 	cr_expect(v1==83.87);
 }
 
+/*
+	create a doublelist,
+	enter a value in the tail of the list,
+	verify that this value was saved correctly
+*/
 Test(doubleListTest,tailSingleValueTest) {
 	pdoublelist d1=doublelist_create();
 	doublelist_add_to_tail(d1,196.124);
@@ -55,6 +144,11 @@ Test(doubleListTest,tailSingleValueTest) {
 	cr_expect(v1==196.124);
 }
 
+/*
+	create two doublelists,
+	enter many values in these lists,
+	verify that them values were saved correctly
+*/
 Test(doubleListTest,multipleValueTest) {
 	pdoublelist d1=doublelist_create();
 	doublelist_add_to_head(d1,85.21);
