@@ -59,7 +59,7 @@ Test(BV_test,BV_cloneTest) {
 	set an element of v1 with a value,
 	test that v1 and v2 are different
 */
-Test(BV_test,BV_cloneTestDiff) {
+Test(BV_test,BV_cloneDiffTest) {
 	pbit_vect v1=BV_create(10);
 	pbit_vect v2=BV_clone(v1);
 	BV_set(v2,1,3);
