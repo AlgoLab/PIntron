@@ -27,7 +27,7 @@ int compare(char f1[],char f2[]){
 		}
 		if(r1!=r2){                
 			flag=0;  
-			//files are different, n in the number of first different row
+			//files are different, n is the number of first different row
 			break;
 		}
 	}
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
 }
 
 
-Test(output,confrontaOutput) {
+Test(output,compareOutput) {
 	char f1[]="exampleOutput/pintron-all-isoforms.gtf";
 	char f2[]="executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compare(f1,f2)==1);
