@@ -40,7 +40,7 @@ Test(exonComplexityTest,dustScoreByLeftAndRightTest) {
 /*
 	create variable needed for the function dustScore,
 	verify that the function return the expected value,
-	it was used >= instead of == because the result can be a irrational number
+	it was used >= instead of == because the result can be an irrational number
 */
 Test(exonComplexityTest,dustScoreTest) {
 	char *s="aCgTccAAtGTaC";
