@@ -1,0 +1,46 @@
+//possiblePIntronErrors.txt
+
+//omitted from io-multifasta_test.c
+/*	DUPLICATE LINE OF CODE FOUND AT: LINE 57 OF io-multifasta.c
+
+	verify that the function get_Complement return the correct complement
+
+	Test(ioMultifastaTest,getComplementTestX) {
+		cr_expect(get_Complement('A')=='T');
+	}
+*/
+
+
+//omitted from refine-intron_test.c
+/*	getBursetFrequency POSSIBLE ERROR FOUND AT: LINE 381 OF refine-intron.c
+
+	create variables needed for the function getBursetFrequency,
+	set these variables with right values,
+	verify that the function with these variables returns 1,
+	but the function is crashing, THIS WAS NOT EXPECTED,
+	I think that the error is in the use of To_upper
+
+	Test(refineIntronTest,getBursetFrequencyTest) {
+		char *gsd="AA";
+		char *gsa="AG";
+		cr_expect(getBursetFrequency(gsd,gsa)==1);
+	}
+	
+	
+	POSSIBLE ERRORS FOUND AT:
+	*To_lower LINE 1975 of refine-intron.c
+	*To_upper LINE 1986 of refine-intron.c
+	
+	test To_lower and To_upper functions,
+	but got UNEXPECTED CRASHES during the execution of these tests
+
+	Test(refineIntronTest,toLowerTest) {
+		char *s="ACGTACTGGA";
+		cr_expect(strcmp(To_lower(s),"acgtactgga")==0);
+	}
+
+	Test(refineIntronTest,toUpperTest) {
+		char *s="acgtactgga";
+		cr_expect(strcmp(To_upper(s),"ACGTACTGGA")==0);
+	}
+*/

@@ -93,13 +93,6 @@ Test(ioMultifastaTest,getComplementTest8) {
 	cr_expect(get_Complement('g')=='c');
 }
 
-/*	DUPLICATE LINE OF CODE FOUND AT LINE 57 OF io-multifasta.c
-	verify that the function get_Complement return the correct complement
-
-Test(ioMultifastaTest,getComplementTestX) {
-	cr_expect(get_Complement('A')=='T');
-}*/
-
 /*
 	verify that the function get_Complement return the correct complement
 */
