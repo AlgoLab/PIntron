@@ -44,3 +44,31 @@
 		cr_expect(strcmp(To_upper(s),"ACGTACTGGA")==0);
 	}
 */
+
+
+//omitted from types_test.c
+/*
+	POSSIBLE ERRORS FOUND AT: pairing_compare LINE 391 of types.c
+	tests cannot pass, 1 expected but 0 was returned
+
+	
+	create two empty pairing,
+	verify that they are equal
+
+	Test(typesTest,pairingCompareTest) {
+		ppairing pair1=pairing_create();
+		ppairing pair2=pairing_create();
+		cr_expect(pairing_compare(&pair1,&pair2));
+	}
+
+
+	create an empty pairing,
+	clone it to another pairing,
+	verify that they are equal
+
+	Test(typesTest,pairingCloneTest) {
+		ppairing pair1=pairing_create();
+		ppairing pair2=pairing_simple_copy(pair1);
+		cr_expect(pairing_compare(&pair1,&pair2));
+	}
+*/
