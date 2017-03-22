@@ -49,7 +49,7 @@
 //omitted from types_test.c
 /*
 	POSSIBLE ERRORS FOUND AT: pairing_compare LINE 391 of types.c
-	tests cannot pass, 1 expected but 0 was returned
+	tests cannot pass, from the function pairing_compare value 1 is expected but 0 was returned
 
 	
 	create two empty pairing,
