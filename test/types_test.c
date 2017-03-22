@@ -168,6 +168,24 @@ Test(typesTest,genomicIntronNegativeTest) {
 }
 
 /*
+	create an empty genomic intron with one negative value,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronFirstNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(-3,7);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with one negative value,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronSecondNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(3,-7);
+	genomic_intron_destroy(gi1);
+}
+
+/*
 	create two empty genomic intron with correct values,
 	verify that they are equal
 */
@@ -227,6 +245,26 @@ Test(typesTest,genomicIntronCompareNegativeTest) {
 }
 
 /*
+	create two empty genomic intron with partial negative values,
+	verify that they are equal
+*/
+Test(typesTest,genomicIntronCompareFirstNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(-3,7);
+	pgenomic_intron gi2=genomic_intron_create(-3,7);
+	cr_expect(genomic_intron_compare(&gi1,&gi2));
+}
+
+/*
+	create two empty genomic intron with partial negative values,
+	verify that they are equal
+*/
+Test(typesTest,genomicIntronCompareSecondNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(3,-7);
+	pgenomic_intron gi2=genomic_intron_create(3,-7);
+	cr_expect(genomic_intron_compare(&gi1,&gi2));
+}
+
+/*
 	create an empty burset frequency with correct values,
 	try to destroy it and verify that this will work correctly
 */
@@ -277,6 +315,24 @@ Test(typesTest,bursetFrequencyHighTest) {
 */
 Test(typesTest,bursetFrequencyNegativeTest) {
 	pburset_frequency bf1=burset_frequency_create(-3,-7);
+	burset_frequency_destroy(bf1);
+}
+
+/*
+	create an empty burset frequency with one negative value,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,bursetFrequencyFirstNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(-3,7);
+	burset_frequency_destroy(bf1);
+}
+
+/*
+	create an empty burset frequency with one negative value,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,bursetFrequencySecondNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(3,-7);
 	burset_frequency_destroy(bf1);
 }
 
@@ -336,6 +392,26 @@ Test(typesTest,bursetFrequencyCompareHighTest) {
 Test(typesTest,bursetFrequencyCompareNegativeTest) {
 	pburset_frequency bf1=burset_frequency_create(-3,-7);
 	pburset_frequency bf2=burset_frequency_create(-3,-7);
+	cr_expect(burset_frequency_compare(&bf1,&bf2));
+}
+
+/*
+	create two empty burset frequency with partial negative values,
+	verify that they are equal
+*/
+Test(typesTest,bursetFrequencyCompareFirstNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(-3,7);
+	pburset_frequency bf2=burset_frequency_create(-3,7);
+	cr_expect(burset_frequency_compare(&bf1,&bf2));
+}
+
+/*
+	create two empty burset frequency with partial negative values,
+	verify that they are equal
+*/
+Test(typesTest,bursetFrequencyCompareSecondNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(3,-7);
+	pburset_frequency bf2=burset_frequency_create(3,-7);
 	cr_expect(burset_frequency_compare(&bf1,&bf2));
 }
 
