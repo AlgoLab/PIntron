@@ -114,6 +114,60 @@ Test(typesTest,factorTest) {
 }
 
 /*
+	create an empty genomic intron with correct values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronTest) {
+	pgenomic_intron gi1=genomic_intron_create(1,3);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with wrong values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronWrongTest) {
+	pgenomic_intron gi1=genomic_intron_create(93,5);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with limit values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronLimitTest) {
+	pgenomic_intron gi1=genomic_intron_create(7,7);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with 0 values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronZeroTest) {
+	pgenomic_intron gi1=genomic_intron_create(0,0);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with high values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronHighTest) {
+	pgenomic_intron gi1=genomic_intron_create(86721589,1246549534);
+	genomic_intron_destroy(gi1);
+}
+
+/*
+	create an empty genomic intron with negative values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,genomicIntronNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(-3,-7);
+	genomic_intron_destroy(gi1);
+}
+
+/*
 	create two empty genomic intron with correct values,
 	verify that they are equal
 */
@@ -163,48 +217,12 @@ Test(typesTest,genomicIntronCompareHighTest) {
 }
 
 /*
-	create an empty genomic intron with wrong values,
-	try to destroy it and verify that this will work correctly
-*/
-Test(typesTest,genomicIntronWrongTest) {
-	pgenomic_intron gi1=genomic_intron_create(93,5);
-	genomic_intron_destroy(gi1);
-}
-
-/*
-	create an empty genomic intron with limit values,
-	try to destroy it and verify that this will work correctly
-*/
-Test(typesTest,genomicIntronLimitTest) {
-	pgenomic_intron gi1=genomic_intron_create(7,7);
-	genomic_intron_destroy(gi1);
-}
-
-/*
-	create an empty genomic intron with 0 values,
-	try to destroy it and verify that this will work correctly
-*/
-Test(typesTest,genomicIntronZeroTest) {
-	pgenomic_intron gi1=genomic_intron_create(0,0);
-	genomic_intron_destroy(gi1);
-}
-
-/*
-	create an empty genomic intron with high values,
-	try to destroy it and verify that this will work correctly
-*/
-Test(typesTest,genomicIntronHighTest) {
-	pgenomic_intron gi1=genomic_intron_create(86721589,1246549534);
-	genomic_intron_destroy(gi1);
-}
-
-/*
-	create two empty genomic intron,
+	create two empty genomic intron with negative values,
 	verify that they are equal
 */
-Test(typesTest,genomicIntroncompareTest) {
-	pgenomic_intron gi1=genomic_intron_create(1,3);
-	pgenomic_intron gi2=genomic_intron_create(1,3);
+Test(typesTest,genomicIntronCompareNegativeTest) {
+	pgenomic_intron gi1=genomic_intron_create(-3,-7);
+	pgenomic_intron gi2=genomic_intron_create(-3,-7);
 	cr_expect(genomic_intron_compare(&gi1,&gi2));
 }
 
@@ -254,6 +272,15 @@ Test(typesTest,bursetFrequencyHighTest) {
 }
 
 /*
+	create an empty burset frequency with negative values,
+	try to destroy it and verify that this will work correctly
+*/
+Test(typesTest,bursetFrequencyNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(-3,-7);
+	burset_frequency_destroy(bf1);
+}
+
+/*
 	create two empty burset frequency with correct values,
 	verify that they are equal
 */
@@ -299,6 +326,16 @@ Test(typesTest,bursetFrequencyCompareZeroTest) {
 Test(typesTest,bursetFrequencyCompareHighTest) {
 	pburset_frequency bf1=burset_frequency_create(86721589,1246549534);
 	pburset_frequency bf2=burset_frequency_create(86721589,1246549534);
+	cr_expect(burset_frequency_compare(&bf1,&bf2));
+}
+
+/*
+	create two empty burset frequency with negative values,
+	verify that they are equal
+*/
+Test(typesTest,bursetFrequencyCompareNegativeTest) {
+	pburset_frequency bf1=burset_frequency_create(-3,-7);
+	pburset_frequency bf2=burset_frequency_create(-3,-7);
 	cr_expect(burset_frequency_compare(&bf1,&bf2));
 }
 
