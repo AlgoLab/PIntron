@@ -1,15 +1,5 @@
 //gcc refine-intron_test.c -o refine-intron_test -l criterion -I '/home/lorenzo/PIntron/include'
 
-#include <ctype.h>
-
-#include "refine-intron.h"
-#include "refine.h"
-#include "est-factorizations.h"
-#include "list.h"
-#include "types.h"
-
-#include "log.h"
-
 #include "../src/refine.c"
 #include "../src/refine-intron.c"
 #include "../src/util.c"
@@ -23,6 +13,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+
+#include <ctype.h>
+#include "refine-intron.h"
+#include "refine.h"
+#include "est-factorizations.h"
+#include "list.h"
+#include "types.h"
+#include "log.h"
 
 int main(int argc, char *argv[]){
 	//for test execution
@@ -106,4 +104,24 @@ Test(refineIntronTest,getBursetFrequencyEmptyTest) {
 	char *gsd="";
 	char *gsa="";
 	cr_expect(getBursetFrequency(gsd,gsa)==0);
+}
+
+/*
+	create an example string written in uppercase,
+	use To_lower function on it,
+	compare it with an equivalent string written in lowercase
+*/
+Test(refineIntronTest,toLowerTest) {
+	char s=*"ACGTACTGGA";
+	cr_expect(strcmp(To_lower(&s),"acgtactgga"));
+}
+
+/*
+	create an example string written in lowercase,
+	use To_upper function on it,
+	compare it with an equivalent string written in uppercase
+*/
+Test(refineIntronTest,toUpperTest) {
+	char s=*"acgtactgga";
+	cr_expect(strcmp(To_upper(&s),"ACGTACTGGA"));
 }

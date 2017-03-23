@@ -11,65 +11,43 @@
 	}
 */
 
-
 //omitted from refine-intron_test.c
-/*	getBursetFrequency POSSIBLE ERROR FOUND AT: LINE 381 OF refine-intron.c
+/*	getBursetFrequency POSSIBLE ERROR FOUND AT: FROM LINE 381 OF refine-intron.c
 
 	create variables needed for the function getBursetFrequency,
 	set these variables with right values,
-	verify that the function with these variables returns 1,
-	but the function is crashing, THIS WAS NOT EXPECTED,
-	I think that the error is in the use of To_upper
+	verify that the function with these variables returns 1 (in tests from 1 to 5),
+	verify that the function with these variables returns 5 (in test 6),
+	but the function returns 0 in every test (UNEXPECTED)
 
 	Test(refineIntronTest,getBursetFrequencyTest) {
-		char *gsd="AA";
-		char *gsa="AG";
-		cr_expect(getBursetFrequency(gsd,gsa)==1);
+		char gsd=*"AA";
+		char gsa=*"AG";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==1);
 	}
-	
-	
-	POSSIBLE ERRORS FOUND AT:
-	*To_lower LINE 1975 of refine-intron.c
-	*To_upper LINE 1986 of refine-intron.c
-	
-	test To_lower and To_upper functions,
-	but got UNEXPECTED CRASHES during the execution of these tests
-
-	Test(refineIntronTest,toLowerTest) {
-		char *s="ACGTACTGGA";
-		cr_expect(strcmp(To_lower(s),"acgtactgga")==0);
+	Test(refineIntronTest,getBursetFrequencyTest2) {
+		char gsd=*"AA";
+		char gsa=*"AT";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==1);
 	}
-
-	Test(refineIntronTest,toUpperTest) {
-		char *s="acgtactgga";
-		cr_expect(strcmp(To_upper(s),"ACGTACTGGA")==0);
+	Test(refineIntronTest,getBursetFrequencyTest3) {
+		char gsd=*"AA";
+		char gsa=*"GT";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==1);
 	}
-*/
-
-
-//omitted from types_test.c
-/*
-	POSSIBLE ERRORS FOUND AT: pairing_compare LINE 391 of types.c
-	tests cannot pass, from the function pairing_compare value 1 is expected but 0 was returned
-
-	
-	create two empty pairing,
-	verify that they are equal
-
-	Test(typesTest,pairingCompareTest) {
-		ppairing pair1=pairing_create();
-		ppairing pair2=pairing_create();
-		cr_expect(pairing_compare(&pair1,&pair2));
+	Test(refineIntronTest,getBursetFrequencyTest4) {
+		char gsd=*"AC";
+		char gsa=*"CC";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==1);
 	}
-
-
-	create an empty pairing,
-	clone it to another pairing,
-	verify that they are equal
-
-	Test(typesTest,pairingCloneTest) {
-		ppairing pair1=pairing_create();
-		ppairing pair2=pairing_simple_copy(pair1);
-		cr_expect(pairing_compare(&pair1,&pair2));
+	Test(refineIntronTest,getBursetFrequencyTest5) {
+		char gsd=*"AG";
+		char gsa=*"AC";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==1);
+	}
+	Test(refineIntronTest,getBursetFrequencyTest6) {
+		char gsd=*"AG";
+		char gsa=*"AG";
+		cr_expect(getBursetFrequency(&gsd,&gsa)==5);
 	}
 */

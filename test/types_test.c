@@ -474,6 +474,27 @@ Test(typesTest,pairingDestroyTest) {
 }
 
 /*
+	create two empty pairing,
+	verify that they are equal
+*/
+Test(typesTest,pairingCompareTest) {
+	ppairing pair1=pairing_create();
+	ppairing pair2=pairing_create();
+	cr_expect(!pairing_compare(&pair1,&pair2));
+}
+
+/*
+	create an empty pairing,
+	clone it to another pairing,
+	verify that they are equal
+*/
+Test(typesTest,pairingCloneTest) {
+	ppairing pair1=pairing_create();
+	ppairing pair2=pairing_simple_copy(pair1);
+	cr_expect(!pairing_compare(&pair1,&pair2));
+}
+
+/*
 	create an empty pairing,
 	try to destroy it with pairing_destroy2,
 	verify that this will work correctly
