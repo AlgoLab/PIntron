@@ -2,6 +2,7 @@
 
 //omitted from io-multifasta_test.c
 /*	DUPLICATE LINE OF CODE FOUND AT: LINE 57 OF io-multifasta.c
+	LINES 57-58 equal to LINES 41-42 in io-multifasta.c
 
 	verify that the function get_Complement return the correct complement
 
