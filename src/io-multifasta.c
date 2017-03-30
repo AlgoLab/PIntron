@@ -54,9 +54,6 @@ static char get_Complement(char car){
 	 return 'C';
   if(car == 'g')
 	 return 'c';
-  if(car == 'A')
-	 return 'T';
-
   if(car == 'R')
 	 return 'Y';
   if(car == 'r')
