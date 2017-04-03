@@ -863,37 +863,37 @@ comp-test: $(test_EXEC) $(all_header_files) $(stree_header_files)
 	$(CC) $(test_SOURCE) $(CFLAGS)
 	
 test: $(test_EXEC)
-	@echo '\033[92mTesting aug_suffix_tree_test\033[0m';
+	@echo '\033[92mTesting aug_suffix_tree.c\033[0m';
 	$(CURDIR)/test/aug_suffix_tree_test
-	@echo '\033[92mTesting bit_vector_test\033[0m';
+	@echo '\033[92mTesting bit_vector.c\033[0m';
 	$(CURDIR)/test/bit_vector_test
-	@echo '\033[92mTesting bool_list_test\033[0m';
+	@echo '\033[92mTesting bool_list.c\033[0m';
 	$(CURDIR)/test/bool_list_test
-	@echo '\033[92mTesting BuildTranscripts_test\033[0m';
+	@echo '\033[92mTesting BuildTranscripts.c\033[0m';
 	$(CURDIR)/test/BuildTranscripts_test
-	@echo '\033[92mTesting conversions_test\033[0m';
+	@echo '\033[92mTesting conversions.c\033[0m';
 	$(CURDIR)/test/conversions_test
-	@echo '\033[92mTesting double_list_test\033[0m';
+	@echo '\033[92mTesting double_list.c\033[0m';
 	$(CURDIR)/test/double_list_test
-	@echo '\033[92mTesting exon-complexity_test\033[0m';
+	@echo '\033[92mTesting exon-complexity.c\033[0m';
 	$(CURDIR)/test/exon-complexity_test
-	@echo '\033[92mTesting ext_array_test\033[0m';
+	@echo '\033[92mTesting ext_array.c\033[0m';
 	$(CURDIR)/test/ext_array_test
-	@echo '\033[92mTesting int_list_test\033[0m';
+	@echo '\033[92mTesting int_list.c\033[0m';
 	$(CURDIR)/test/int_list_test
-	@echo '\033[92mTesting io-multifasta_test\033[0m';
+	@echo '\033[92mTesting io-multifasta.c\033[0m';
 	$(CURDIR)/test/io-multifasta_test
-	@echo '\033[92mTesting list_test\033[0m';
+	@echo '\033[92mTesting list.c\033[0m';
 	$(CURDIR)/test/list_test
-	@echo '\033[92mTesting min_factorization_test\033[0m';
+	@echo '\033[92mTesting min_factorization.c\033[0m';
 	$(CURDIR)/test/min_factorization_test
-	@echo '\033[92mTesting refine-intron_test\033[0m';
+	@echo '\033[92mTesting refine-intron.c\033[0m';
 	$(CURDIR)/test/refine-intron_test
-	@echo '\033[92mTesting simpl_info_test\033[0m';
+	@echo '\033[92mTesting simpl_info.c\033[0m';
 	$(CURDIR)/test/simpl_info_test
-	@echo '\033[92mTesting types_test\033[0m';
+	@echo '\033[92mTesting types.c\033[0m';
 	$(CURDIR)/test/types_test
-	@echo '\033[92mTesting util_test\033[0m';
+	@echo '\033[92mTesting util.c\033[0m';
 	$(CURDIR)/test/util_test
 	@echo '\033[92mCleaning executable files\033[0m';
 	rm $(CURDIR)/test/*_test
