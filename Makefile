@@ -879,4 +879,7 @@ test: $(test_EXEC)
 	$(CURDIR)/test/simpl_info_test
 	$(CURDIR)/test/types_test
 	$(CURDIR)/test/util_test
+
+.PHONY: clean-test
+clean-test:
 	rm $(CURDIR)/test/*_test
