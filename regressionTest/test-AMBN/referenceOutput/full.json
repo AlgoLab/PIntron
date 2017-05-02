@@ -1,0 +1,2231 @@
+{
+    "genome": {
+        "sequence_id": "chr4", 
+        "strand": "+"
+    }, 
+    "introns": {
+        "1": {
+            "BPS position": 831, 
+            "BPS score": 0.762519, 
+            "acceptor alignment average error": 0.0, 
+            "acceptor prefix": "ATTCCACTTTTCAAA", 
+            "acceptor score": 0.835659, 
+            "chromosome end": 71459043, 
+            "chromosome start": 71458091, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.87151, 
+            "donor suffix": "ATGTCAGCATCTAAG", 
+            "length": 953, 
+            "number supporting EST": 10, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAAATGGGATTTTATGAT", 
+            "relative end": 1069, 
+            "relative start": 117, 
+            "repeat sequence": "AG", 
+            "suffix": "CCAACTTAATTATGTTTTAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 99, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 167, 
+                    "end EST donor factor": 98
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 81, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 149, 
+                    "end EST donor factor": 80
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 91, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 159, 
+                    "end EST donor factor": 90
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 91, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 159, 
+                    "end EST donor factor": 90
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 52, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 120, 
+                    "end EST donor factor": 51
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 52, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 120, 
+                    "end EST donor factor": 51
+                }, 
+                "BP217694": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 80, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 148, 
+                    "end EST donor factor": 79
+                }, 
+                "BP248666": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 117, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 185, 
+                    "end EST donor factor": 116
+                }, 
+                "DA287559": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 52, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 120, 
+                    "end EST donor factor": 51
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "ATTCCACTTTTCAAA", 
+                    "EST donor factor suffix": "ATGTCAGCATCTAAG", 
+                    "begin EST acceptor factor": 117, 
+                    "begin EST donor factor": 1, 
+                    "end EST acceptor factor": 185, 
+                    "end EST donor factor": 116
+                }
+            }, 
+            "type": "1"
+        }, 
+        "2": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.083333, 
+            "acceptor prefix": "TTCTTTCCTCAGCAA", 
+            "acceptor score": 0.904044, 
+            "chromosome end": 71462715, 
+            "chromosome start": 71459113, 
+            "donor alignment average error": 0.083333, 
+            "donor score": 0.942942, 
+            "donor suffix": "AGTTTTGCAGTGCCG", 
+            "length": 3603, 
+            "number supporting EST": 12, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTCAGTCTTTAGAGTG", 
+            "relative end": 4741, 
+            "relative start": 1139, 
+            "repeat sequence": "G", 
+            "suffix": "TTATTCTTATTTTCATTCAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 168, 
+                    "begin EST donor factor": 99, 
+                    "end EST acceptor factor": 218, 
+                    "end EST donor factor": 167
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 150, 
+                    "begin EST donor factor": 81, 
+                    "end EST acceptor factor": 200, 
+                    "end EST donor factor": 149
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 160, 
+                    "begin EST donor factor": 91, 
+                    "end EST acceptor factor": 210, 
+                    "end EST donor factor": 159
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 160, 
+                    "begin EST donor factor": 91, 
+                    "end EST acceptor factor": 210, 
+                    "end EST donor factor": 159
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 121, 
+                    "begin EST donor factor": 52, 
+                    "end EST acceptor factor": 171, 
+                    "end EST donor factor": 120
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 121, 
+                    "begin EST donor factor": 52, 
+                    "end EST acceptor factor": 171, 
+                    "end EST donor factor": 120
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 70, 
+                    "begin EST donor factor": 6, 
+                    "end EST acceptor factor": 120, 
+                    "end EST donor factor": 69
+                }, 
+                "BG214473": {
+                    "EST acceptor factor prefix": "TTCTTCCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTCTGCAGTGCCG", 
+                    "begin EST acceptor factor": 106, 
+                    "begin EST donor factor": 60, 
+                    "end EST acceptor factor": 156, 
+                    "end EST donor factor": 105
+                }, 
+                "BP217694": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 149, 
+                    "begin EST donor factor": 80, 
+                    "end EST acceptor factor": 199, 
+                    "end EST donor factor": 148
+                }, 
+                "BP248666": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 186, 
+                    "begin EST donor factor": 117, 
+                    "end EST acceptor factor": 236, 
+                    "end EST donor factor": 185
+                }, 
+                "DA287559": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 121, 
+                    "begin EST donor factor": 52, 
+                    "end EST acceptor factor": 171, 
+                    "end EST donor factor": 120
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "TTCTTTCCTCAGCAA", 
+                    "EST donor factor suffix": "AGTTTTGCAGTGCCG", 
+                    "begin EST acceptor factor": 186, 
+                    "begin EST donor factor": 117, 
+                    "end EST acceptor factor": 236, 
+                    "end EST donor factor": 185
+                }
+            }, 
+            "type": "1"
+        }, 
+        "3": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.105263, 
+            "acceptor prefix": "ACAATGAGACAGTTG", 
+            "acceptor score": 0.884115, 
+            "chromosome end": 71464072, 
+            "chromosome start": 71462767, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.909314, 
+            "donor suffix": "AGTTTGAGCCTTGAG", 
+            "length": 1306, 
+            "number supporting EST": 19, 
+            "pattern": "GTAG", 
+            "prefix": "GTATGTATTGTCAGAATTTT", 
+            "relative end": 6098, 
+            "relative start": 4793, 
+            "repeat sequence": "AG", 
+            "suffix": "CCACTTTTTTTTCTTGATAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 219, 
+                    "begin EST donor factor": 168, 
+                    "end EST acceptor factor": 266, 
+                    "end EST donor factor": 218
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 201, 
+                    "begin EST donor factor": 150, 
+                    "end EST acceptor factor": 248, 
+                    "end EST donor factor": 200
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 211, 
+                    "begin EST donor factor": 160, 
+                    "end EST acceptor factor": 258, 
+                    "end EST donor factor": 210
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 211, 
+                    "begin EST donor factor": 160, 
+                    "end EST acceptor factor": 258, 
+                    "end EST donor factor": 210
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 172, 
+                    "begin EST donor factor": 121, 
+                    "end EST acceptor factor": 219, 
+                    "end EST donor factor": 171
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 172, 
+                    "begin EST donor factor": 121, 
+                    "end EST acceptor factor": 219, 
+                    "end EST donor factor": 171
+                }, 
+                "BG184837": {
+                    "EST acceptor factor prefix": "ACACTGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 110, 
+                    "begin EST donor factor": 89, 
+                    "end EST acceptor factor": 157, 
+                    "end EST donor factor": 109
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 56, 
+                    "begin EST donor factor": 28, 
+                    "end EST acceptor factor": 103, 
+                    "end EST donor factor": 55
+                }, 
+                "BG194708": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 97, 
+                    "begin EST donor factor": 60, 
+                    "end EST acceptor factor": 144, 
+                    "end EST donor factor": 96
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 45, 
+                    "begin EST donor factor": 9, 
+                    "end EST acceptor factor": 92, 
+                    "end EST donor factor": 44
+                }, 
+                "BG200369": {
+                    "EST acceptor factor prefix": "ACAACGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 119, 
+                    "begin EST donor factor": 75, 
+                    "end EST acceptor factor": 166, 
+                    "end EST donor factor": 118
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 55, 
+                    "begin EST donor factor": 37, 
+                    "end EST acceptor factor": 102, 
+                    "end EST donor factor": 54
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 121, 
+                    "begin EST donor factor": 70, 
+                    "end EST acceptor factor": 168, 
+                    "end EST donor factor": 120
+                }, 
+                "BG214473": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 157, 
+                    "begin EST donor factor": 106, 
+                    "end EST acceptor factor": 204, 
+                    "end EST donor factor": 156
+                }, 
+                "BG218171": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 88, 
+                    "begin EST donor factor": 52, 
+                    "end EST acceptor factor": 135, 
+                    "end EST donor factor": 87
+                }, 
+                "BP217694": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 200, 
+                    "begin EST donor factor": 149, 
+                    "end EST acceptor factor": 247, 
+                    "end EST donor factor": 199
+                }, 
+                "BP248666": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 237, 
+                    "begin EST donor factor": 186, 
+                    "end EST acceptor factor": 284, 
+                    "end EST donor factor": 236
+                }, 
+                "DA287559": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 172, 
+                    "begin EST donor factor": 121, 
+                    "end EST acceptor factor": 219, 
+                    "end EST donor factor": 171
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "ACAATGAGACAGTTG", 
+                    "EST donor factor suffix": "AGTTTGAGCCTTGAG", 
+                    "begin EST acceptor factor": 237, 
+                    "begin EST donor factor": 186, 
+                    "end EST acceptor factor": 284, 
+                    "end EST donor factor": 236
+                }
+            }, 
+            "type": "1"
+        }, 
+        "4": {
+            "BPS position": 1081, 
+            "BPS score": 0.752743, 
+            "acceptor alignment average error": 0.0, 
+            "acceptor prefix": "TATTCTAGATACGGC", 
+            "acceptor score": 0.799652, 
+            "chromosome end": 71465252, 
+            "chromosome start": 71464121, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.872872, 
+            "donor suffix": "AACACACTTTCTCAG", 
+            "length": 1132, 
+            "number supporting EST": 22, 
+            "pattern": "GTAG", 
+            "prefix": "GTAATCATATTTCTTATTGC", 
+            "relative end": 7278, 
+            "relative start": 6147, 
+            "repeat sequence": "AG", 
+            "suffix": "TTTTTTATCCATGTCTTTAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 267, 
+                    "begin EST donor factor": 219, 
+                    "end EST acceptor factor": 377, 
+                    "end EST donor factor": 266
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 249, 
+                    "begin EST donor factor": 201, 
+                    "end EST acceptor factor": 359, 
+                    "end EST donor factor": 248
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 259, 
+                    "begin EST donor factor": 211, 
+                    "end EST acceptor factor": 369, 
+                    "end EST donor factor": 258
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 259, 
+                    "begin EST donor factor": 211, 
+                    "end EST acceptor factor": 369, 
+                    "end EST donor factor": 258
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 220, 
+                    "begin EST donor factor": 172, 
+                    "end EST acceptor factor": 330, 
+                    "end EST donor factor": 219
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 220, 
+                    "begin EST donor factor": 172, 
+                    "end EST acceptor factor": 330, 
+                    "end EST donor factor": 219
+                }, 
+                "BG184837": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 158, 
+                    "begin EST donor factor": 110, 
+                    "end EST acceptor factor": 257, 
+                    "end EST donor factor": 157
+                }, 
+                "BG190153": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 65, 
+                    "begin EST donor factor": 22, 
+                    "end EST acceptor factor": 175, 
+                    "end EST donor factor": 64
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 104, 
+                    "begin EST donor factor": 56, 
+                    "end EST acceptor factor": 214, 
+                    "end EST donor factor": 103
+                }, 
+                "BG194708": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 145, 
+                    "begin EST donor factor": 97, 
+                    "end EST acceptor factor": 255, 
+                    "end EST donor factor": 144
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 93, 
+                    "begin EST donor factor": 45, 
+                    "end EST acceptor factor": 203, 
+                    "end EST donor factor": 92
+                }, 
+                "BG200369": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 167, 
+                    "begin EST donor factor": 119, 
+                    "end EST acceptor factor": 277, 
+                    "end EST donor factor": 166
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 103, 
+                    "begin EST donor factor": 55, 
+                    "end EST acceptor factor": 213, 
+                    "end EST donor factor": 102
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 54, 
+                    "begin EST donor factor": 3, 
+                    "end EST acceptor factor": 164, 
+                    "end EST donor factor": 53
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 169, 
+                    "begin EST donor factor": 121, 
+                    "end EST acceptor factor": 279, 
+                    "end EST donor factor": 168
+                }, 
+                "BG214473": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 205, 
+                    "begin EST donor factor": 157, 
+                    "end EST acceptor factor": 288, 
+                    "end EST donor factor": 204
+                }, 
+                "BG218171": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 136, 
+                    "begin EST donor factor": 88, 
+                    "end EST acceptor factor": 246, 
+                    "end EST donor factor": 135
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 94, 
+                    "begin EST donor factor": 57, 
+                    "end EST acceptor factor": 204, 
+                    "end EST donor factor": 93
+                }, 
+                "BP217694": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 248, 
+                    "begin EST donor factor": 200, 
+                    "end EST acceptor factor": 358, 
+                    "end EST donor factor": 247
+                }, 
+                "BP248666": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 285, 
+                    "begin EST donor factor": 237, 
+                    "end EST acceptor factor": 395, 
+                    "end EST donor factor": 284
+                }, 
+                "DA287559": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 220, 
+                    "begin EST donor factor": 172, 
+                    "end EST acceptor factor": 330, 
+                    "end EST donor factor": 219
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "TATTCTAGATACGGC", 
+                    "EST donor factor suffix": "AACACACTTTCTCAG", 
+                    "begin EST acceptor factor": 285, 
+                    "begin EST donor factor": 237, 
+                    "end EST acceptor factor": 395, 
+                    "end EST donor factor": 284
+                }
+            }, 
+            "type": "1"
+        }, 
+        "5": {
+            "BPS position": 1604, 
+            "BPS score": 0.776338, 
+            "acceptor alignment average error": 0.157895, 
+            "acceptor prefix": "TATGAATATTCTTTG", 
+            "acceptor score": 0.867572, 
+            "chromosome end": 71467134, 
+            "chromosome start": 71465364, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.970395, 
+            "donor suffix": "CATGAAACTCAACAG", 
+            "length": 1771, 
+            "number supporting EST": 19, 
+            "pattern": "GTAG", 
+            "prefix": "GTGAGTGAATAGCATCAATA", 
+            "relative end": 9160, 
+            "relative start": 7390, 
+            "repeat sequence": "CAG", 
+            "suffix": "CTTTTCAAATTTCTCTGCAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 378, 
+                    "begin EST donor factor": 267, 
+                    "end EST acceptor factor": 614, 
+                    "end EST donor factor": 377
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 360, 
+                    "begin EST donor factor": 249, 
+                    "end EST acceptor factor": 596, 
+                    "end EST donor factor": 359
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 370, 
+                    "begin EST donor factor": 259, 
+                    "end EST acceptor factor": 606, 
+                    "end EST donor factor": 369
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 370, 
+                    "begin EST donor factor": 259, 
+                    "end EST acceptor factor": 606, 
+                    "end EST donor factor": 369
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 331, 
+                    "begin EST donor factor": 220, 
+                    "end EST acceptor factor": 567, 
+                    "end EST donor factor": 330
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 331, 
+                    "begin EST donor factor": 220, 
+                    "end EST acceptor factor": 567, 
+                    "end EST donor factor": 330
+                }, 
+                "BG190153": {
+                    "EST acceptor factor prefix": "CATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 176, 
+                    "begin EST donor factor": 65, 
+                    "end EST acceptor factor": 412, 
+                    "end EST donor factor": 175
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "TATGAATATTTTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 215, 
+                    "begin EST donor factor": 104, 
+                    "end EST acceptor factor": 451, 
+                    "end EST donor factor": 214
+                }, 
+                "BG194708": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 256, 
+                    "begin EST donor factor": 145, 
+                    "end EST acceptor factor": 492, 
+                    "end EST donor factor": 255
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 204, 
+                    "begin EST donor factor": 93, 
+                    "end EST acceptor factor": 440, 
+                    "end EST donor factor": 203
+                }, 
+                "BG200369": {
+                    "EST acceptor factor prefix": "CATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 278, 
+                    "begin EST donor factor": 167, 
+                    "end EST acceptor factor": 326, 
+                    "end EST donor factor": 277
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 214, 
+                    "begin EST donor factor": 103, 
+                    "end EST acceptor factor": 450, 
+                    "end EST donor factor": 213
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 165, 
+                    "begin EST donor factor": 54, 
+                    "end EST acceptor factor": 401, 
+                    "end EST donor factor": 164
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 280, 
+                    "begin EST donor factor": 169, 
+                    "end EST acceptor factor": 513, 
+                    "end EST donor factor": 279
+                }, 
+                "BG218171": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 247, 
+                    "begin EST donor factor": 136, 
+                    "end EST acceptor factor": 473, 
+                    "end EST donor factor": 246
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 205, 
+                    "begin EST donor factor": 94, 
+                    "end EST acceptor factor": 441, 
+                    "end EST donor factor": 204
+                }, 
+                "BP248666": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 396, 
+                    "begin EST donor factor": 285, 
+                    "end EST acceptor factor": 515, 
+                    "end EST donor factor": 395
+                }, 
+                "DA287559": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 331, 
+                    "begin EST donor factor": 220, 
+                    "end EST acceptor factor": 546, 
+                    "end EST donor factor": 330
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "TATGAATATTCTTTG", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 396, 
+                    "begin EST donor factor": 285, 
+                    "end EST acceptor factor": 632, 
+                    "end EST donor factor": 395
+                }
+            }, 
+            "type": "1"
+        }, 
+        "6": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.0, 
+            "acceptor prefix": "CCATCCTTGAAGCCT", 
+            "acceptor score": 0.857603, 
+            "chromosome end": 71467179, 
+            "chromosome start": 71465364, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.970395, 
+            "donor suffix": "CATGAAACTCAACAG", 
+            "length": 1816, 
+            "number supporting EST": 1, 
+            "pattern": "GTAG", 
+            "prefix": "GTGAGTGAATAGCATCAATA", 
+            "relative end": 9205, 
+            "relative start": 7390, 
+            "repeat sequence": "ACAG", 
+            "suffix": "CCCCACCTCTCCCATCACAG", 
+            "supporting ESTs": {
+                "BP217694": {
+                    "EST acceptor factor prefix": "CCATCCTTGAAGCCT", 
+                    "EST donor factor suffix": "CATGAAACTCAACAG", 
+                    "begin EST acceptor factor": 359, 
+                    "begin EST donor factor": 248, 
+                    "end EST acceptor factor": 550, 
+                    "end EST donor factor": 358
+                }
+            }, 
+            "type": "1"
+        }, 
+        "7": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.125, 
+            "acceptor prefix": "CTCCCAGGAGTAGAT", 
+            "acceptor score": 0.801045, 
+            "chromosome end": 71468340, 
+            "chromosome start": 71467372, 
+            "donor alignment average error": 0.0625, 
+            "donor score": 0.788541, 
+            "donor suffix": "CCACCAAAGCCTGAG", 
+            "length": 969, 
+            "number supporting EST": 16, 
+            "pattern": "GTAG", 
+            "prefix": "GTACTTCCTTTCTCTTGAAG", 
+            "relative end": 10366, 
+            "relative start": 9398, 
+            "repeat sequence": "AG", 
+            "suffix": "AATATTTATCTGTGATATAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "CTCCCAAGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 615, 
+                    "begin EST donor factor": 378, 
+                    "end EST acceptor factor": 653, 
+                    "end EST donor factor": 614
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 597, 
+                    "begin EST donor factor": 360, 
+                    "end EST acceptor factor": 635, 
+                    "end EST donor factor": 596
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 607, 
+                    "begin EST donor factor": 370, 
+                    "end EST acceptor factor": 645, 
+                    "end EST donor factor": 606
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 607, 
+                    "begin EST donor factor": 370, 
+                    "end EST acceptor factor": 645, 
+                    "end EST donor factor": 606
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 568, 
+                    "begin EST donor factor": 331, 
+                    "end EST acceptor factor": 606, 
+                    "end EST donor factor": 567
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 568, 
+                    "begin EST donor factor": 331, 
+                    "end EST acceptor factor": 606, 
+                    "end EST donor factor": 567
+                }, 
+                "BG190153": {
+                    "EST acceptor factor prefix": "CTNCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 413, 
+                    "begin EST donor factor": 176, 
+                    "end EST acceptor factor": 451, 
+                    "end EST donor factor": 412
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 452, 
+                    "begin EST donor factor": 215, 
+                    "end EST acceptor factor": 490, 
+                    "end EST donor factor": 451
+                }, 
+                "BG194708": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGTCTGAG", 
+                    "begin EST acceptor factor": 493, 
+                    "begin EST donor factor": 256, 
+                    "end EST acceptor factor": 508, 
+                    "end EST donor factor": 492
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 441, 
+                    "begin EST donor factor": 204, 
+                    "end EST acceptor factor": 479, 
+                    "end EST donor factor": 440
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 451, 
+                    "begin EST donor factor": 214, 
+                    "end EST acceptor factor": 489, 
+                    "end EST donor factor": 450
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 402, 
+                    "begin EST donor factor": 165, 
+                    "end EST acceptor factor": 440, 
+                    "end EST donor factor": 401
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 514, 
+                    "begin EST donor factor": 280, 
+                    "end EST acceptor factor": 552, 
+                    "end EST donor factor": 513
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 442, 
+                    "begin EST donor factor": 205, 
+                    "end EST acceptor factor": 480, 
+                    "end EST donor factor": 441
+                }, 
+                "BP217694": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 551, 
+                    "begin EST donor factor": 359, 
+                    "end EST acceptor factor": 582, 
+                    "end EST donor factor": 550
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "CTCCCAGGAGTAGAT", 
+                    "EST donor factor suffix": "CCACCAAAGCCTGAG", 
+                    "begin EST acceptor factor": 633, 
+                    "begin EST donor factor": 396, 
+                    "end EST acceptor factor": 671, 
+                    "end EST donor factor": 632
+                }
+            }, 
+            "type": "1"
+        }, 
+        "8": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.071429, 
+            "acceptor prefix": "CTCCCAGGAATGGAT", 
+            "acceptor score": 0.792481, 
+            "chromosome end": 71468514, 
+            "chromosome start": 71468380, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.822204, 
+            "donor suffix": "CCACAAGGTCCATCA", 
+            "length": 135, 
+            "number supporting EST": 14, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTACAGATCTCAATGA", 
+            "relative end": 10540, 
+            "relative start": 10406, 
+            "repeat sequence": ".", 
+            "suffix": "AATATTTATCTACAATATAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 654, 
+                    "begin EST donor factor": 615, 
+                    "end EST acceptor factor": 692, 
+                    "end EST donor factor": 653
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 636, 
+                    "begin EST donor factor": 597, 
+                    "end EST acceptor factor": 674, 
+                    "end EST donor factor": 635
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 646, 
+                    "begin EST donor factor": 607, 
+                    "end EST acceptor factor": 684, 
+                    "end EST donor factor": 645
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 646, 
+                    "begin EST donor factor": 607, 
+                    "end EST acceptor factor": 684, 
+                    "end EST donor factor": 645
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 607, 
+                    "begin EST donor factor": 568, 
+                    "end EST acceptor factor": 645, 
+                    "end EST donor factor": 606
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 607, 
+                    "begin EST donor factor": 568, 
+                    "end EST acceptor factor": 645, 
+                    "end EST donor factor": 606
+                }, 
+                "BG190153": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 452, 
+                    "begin EST donor factor": 413, 
+                    "end EST acceptor factor": 490, 
+                    "end EST donor factor": 451
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 491, 
+                    "begin EST donor factor": 452, 
+                    "end EST acceptor factor": 529, 
+                    "end EST donor factor": 490
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 480, 
+                    "begin EST donor factor": 441, 
+                    "end EST acceptor factor": 518, 
+                    "end EST donor factor": 479
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 490, 
+                    "begin EST donor factor": 451, 
+                    "end EST acceptor factor": 528, 
+                    "end EST donor factor": 489
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 441, 
+                    "begin EST donor factor": 402, 
+                    "end EST acceptor factor": 479, 
+                    "end EST donor factor": 440
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 553, 
+                    "begin EST donor factor": 514, 
+                    "end EST acceptor factor": 591, 
+                    "end EST donor factor": 552
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 481, 
+                    "begin EST donor factor": 442, 
+                    "end EST acceptor factor": 519, 
+                    "end EST donor factor": 480
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "CTCCCAGGAATGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 672, 
+                    "begin EST donor factor": 633, 
+                    "end EST acceptor factor": 710, 
+                    "end EST donor factor": 671
+                }
+            }, 
+            "type": "1"
+        }, 
+        "9": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.071429, 
+            "acceptor prefix": "CTCCCAGGATTGGAT", 
+            "acceptor score": 0.802458, 
+            "chromosome end": 71468688, 
+            "chromosome start": 71468554, 
+            "donor alignment average error": 0.071429, 
+            "donor score": 0.822204, 
+            "donor suffix": "CCACAAGGTCCATCA", 
+            "length": 135, 
+            "number supporting EST": 14, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTACAGATCTCAGTGA", 
+            "relative end": 10714, 
+            "relative start": 10580, 
+            "repeat sequence": ".", 
+            "suffix": "AATATTTATCTGTAATATAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 693, 
+                    "begin EST donor factor": 654, 
+                    "end EST acceptor factor": 731, 
+                    "end EST donor factor": 692
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 675, 
+                    "begin EST donor factor": 636, 
+                    "end EST acceptor factor": 713, 
+                    "end EST donor factor": 674
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 685, 
+                    "begin EST donor factor": 646, 
+                    "end EST acceptor factor": 723, 
+                    "end EST donor factor": 684
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 685, 
+                    "begin EST donor factor": 646, 
+                    "end EST acceptor factor": 723, 
+                    "end EST donor factor": 684
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 646, 
+                    "begin EST donor factor": 607, 
+                    "end EST acceptor factor": 684, 
+                    "end EST donor factor": 645
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 646, 
+                    "begin EST donor factor": 607, 
+                    "end EST acceptor factor": 684, 
+                    "end EST donor factor": 645
+                }, 
+                "BC106932": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 643, 
+                    "begin EST donor factor": 604, 
+                    "end EST acceptor factor": 681, 
+                    "end EST donor factor": 642
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 530, 
+                    "begin EST donor factor": 491, 
+                    "end EST acceptor factor": 568, 
+                    "end EST donor factor": 529
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CTACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 519, 
+                    "begin EST donor factor": 480, 
+                    "end EST acceptor factor": 557, 
+                    "end EST donor factor": 518
+                }, 
+                "BG208157": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 529, 
+                    "begin EST donor factor": 490, 
+                    "end EST acceptor factor": 567, 
+                    "end EST donor factor": 528
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "CTCCCAGGTTTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 480, 
+                    "begin EST donor factor": 441, 
+                    "end EST acceptor factor": 518, 
+                    "end EST donor factor": 479
+                }, 
+                "BG213392": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 592, 
+                    "begin EST donor factor": 553, 
+                    "end EST acceptor factor": 607, 
+                    "end EST donor factor": 591
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 520, 
+                    "begin EST donor factor": 481, 
+                    "end EST acceptor factor": 557, 
+                    "end EST donor factor": 519
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "CTCCCAGGATTGGAT", 
+                    "EST donor factor suffix": "CCACAAGGTCCATCA", 
+                    "begin EST acceptor factor": 711, 
+                    "begin EST donor factor": 672, 
+                    "end EST acceptor factor": 749, 
+                    "end EST donor factor": 710
+                }
+            }, 
+            "type": "1"
+        }, 
+        "10": {
+            "BPS position": 120, 
+            "BPS score": 0.755047, 
+            "acceptor alignment average error": 0.583333, 
+            "acceptor prefix": "ATTTTCCAAATAGCC", 
+            "acceptor score": 0.809367, 
+            "chromosome end": 71468976, 
+            "chromosome start": 71468728, 
+            "donor alignment average error": 0.416667, 
+            "donor score": 0.833754, 
+            "donor suffix": "CCACAAGGTTCAACA", 
+            "length": 249, 
+            "number supporting EST": 12, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTACAGATCTCAATGA", 
+            "relative end": 11002, 
+            "relative start": 10754, 
+            "repeat sequence": ".", 
+            "suffix": "CTGTTTTCTACCATTTAAAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 732, 
+                    "begin EST donor factor": 693, 
+                    "end EST acceptor factor": 791, 
+                    "end EST donor factor": 731
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 714, 
+                    "begin EST donor factor": 675, 
+                    "end EST acceptor factor": 773, 
+                    "end EST donor factor": 713
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "ATTTTCCAGATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 724, 
+                    "begin EST donor factor": 685, 
+                    "end EST acceptor factor": 783, 
+                    "end EST donor factor": 723
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 724, 
+                    "begin EST donor factor": 685, 
+                    "end EST acceptor factor": 783, 
+                    "end EST donor factor": 723
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 685, 
+                    "begin EST donor factor": 646, 
+                    "end EST acceptor factor": 744, 
+                    "end EST donor factor": 684
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 685, 
+                    "begin EST donor factor": 646, 
+                    "end EST acceptor factor": 744, 
+                    "end EST donor factor": 684
+                }, 
+                "BC106932": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 682, 
+                    "begin EST donor factor": 643, 
+                    "end EST acceptor factor": 741, 
+                    "end EST donor factor": 681
+                }, 
+                "BG193219": {
+                    "EST acceptor factor prefix": "ATTTTCCAGATAGCC", 
+                    "EST donor factor suffix": "CCACACGGTTCAACA", 
+                    "begin EST acceptor factor": 569, 
+                    "begin EST donor factor": 530, 
+                    "end EST acceptor factor": 625, 
+                    "end EST donor factor": 568
+                }, 
+                "BG195227": {
+                    "EST acceptor factor prefix": "ATTTTCCAGATAGCC", 
+                    "EST donor factor suffix": "CCACAAAGTTCAACA", 
+                    "begin EST acceptor factor": 558, 
+                    "begin EST donor factor": 519, 
+                    "end EST acceptor factor": 617, 
+                    "end EST donor factor": 557
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "ATTTTCCAGATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 519, 
+                    "begin EST donor factor": 480, 
+                    "end EST acceptor factor": 578, 
+                    "end EST donor factor": 518
+                }, 
+                "BG218715": {
+                    "EST acceptor factor prefix": "CATTTTCCAGATAGC", 
+                    "EST donor factor suffix": "TCCACAAGGTTTAAC", 
+                    "begin EST acceptor factor": 558, 
+                    "begin EST donor factor": 520, 
+                    "end EST acceptor factor": 594, 
+                    "end EST donor factor": 557
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "ATTTTCCAAATAGCC", 
+                    "EST donor factor suffix": "CCACAAGGTTCAACA", 
+                    "begin EST acceptor factor": 750, 
+                    "begin EST donor factor": 711, 
+                    "end EST acceptor factor": 809, 
+                    "end EST donor factor": 749
+                }
+            }, 
+            "type": "1"
+        }, 
+        "11": {
+            "BPS score": 0.0, 
+            "acceptor alignment average error": 0.0, 
+            "acceptor prefix": "CTTTATCCAGGAATG", 
+            "acceptor score": 0.840796, 
+            "chromosome end": 71469132, 
+            "chromosome start": 71469037, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.835895, 
+            "donor suffix": "AATAAACAATCTCCA", 
+            "length": 96, 
+            "number supporting EST": 9, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTTTTTTTTAATACCA", 
+            "relative end": 11158, 
+            "relative start": 11063, 
+            "repeat sequence": ".", 
+            "suffix": "AATGATTGTATTTTATTTAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 792, 
+                    "begin EST donor factor": 732, 
+                    "end EST acceptor factor": 836, 
+                    "end EST donor factor": 791
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 774, 
+                    "begin EST donor factor": 714, 
+                    "end EST acceptor factor": 818, 
+                    "end EST donor factor": 773
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 784, 
+                    "begin EST donor factor": 724, 
+                    "end EST acceptor factor": 828, 
+                    "end EST donor factor": 783
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 784, 
+                    "begin EST donor factor": 724, 
+                    "end EST acceptor factor": 828, 
+                    "end EST donor factor": 783
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 745, 
+                    "begin EST donor factor": 685, 
+                    "end EST acceptor factor": 789, 
+                    "end EST donor factor": 744
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 745, 
+                    "begin EST donor factor": 685, 
+                    "end EST acceptor factor": 789, 
+                    "end EST donor factor": 744
+                }, 
+                "BC106932": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 742, 
+                    "begin EST donor factor": 682, 
+                    "end EST acceptor factor": 786, 
+                    "end EST donor factor": 741
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 579, 
+                    "begin EST donor factor": 519, 
+                    "end EST acceptor factor": 623, 
+                    "end EST donor factor": 578
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "CTTTATCCAGGAATG", 
+                    "EST donor factor suffix": "AATAAACAATCTCCA", 
+                    "begin EST acceptor factor": 810, 
+                    "begin EST donor factor": 750, 
+                    "end EST acceptor factor": 854, 
+                    "end EST donor factor": 809
+                }
+            }, 
+            "type": "1"
+        }, 
+        "12": {
+            "BPS position": 267, 
+            "BPS score": 0.760002, 
+            "acceptor alignment average error": 0.222222, 
+            "acceptor prefix": "AATGCCCCTGCCAGA", 
+            "acceptor score": 0.88916, 
+            "chromosome end": 71469593, 
+            "chromosome start": 71469178, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.935389, 
+            "donor suffix": "GGAGCAAATCAATTG", 
+            "length": 416, 
+            "number supporting EST": 9, 
+            "pattern": "GTAG", 
+            "prefix": "GTAAGTCCATATTCTATAAA", 
+            "relative end": 11619, 
+            "relative start": 11204, 
+            "repeat sequence": "G", 
+            "suffix": "CAATATTTCTTTTTGAACAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 837, 
+                    "begin EST donor factor": 792, 
+                    "end EST acceptor factor": 881, 
+                    "end EST donor factor": 836
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 819, 
+                    "begin EST donor factor": 774, 
+                    "end EST acceptor factor": 863, 
+                    "end EST donor factor": 818
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 829, 
+                    "begin EST donor factor": 784, 
+                    "end EST acceptor factor": 873, 
+                    "end EST donor factor": 828
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 829, 
+                    "begin EST donor factor": 784, 
+                    "end EST acceptor factor": 873, 
+                    "end EST donor factor": 828
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 790, 
+                    "begin EST donor factor": 745, 
+                    "end EST acceptor factor": 834, 
+                    "end EST donor factor": 789
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 790, 
+                    "begin EST donor factor": 745, 
+                    "end EST acceptor factor": 834, 
+                    "end EST donor factor": 789
+                }, 
+                "BC106932": {
+                    "EST acceptor factor prefix": "AATGCCCCTGTCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 787, 
+                    "begin EST donor factor": 742, 
+                    "end EST acceptor factor": 831, 
+                    "end EST donor factor": 786
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAAA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 624, 
+                    "begin EST donor factor": 579, 
+                    "end EST acceptor factor": 668, 
+                    "end EST donor factor": 623
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "AATGCCCCTGCCAGA", 
+                    "EST donor factor suffix": "GGAGCAAATCAATTG", 
+                    "begin EST acceptor factor": 855, 
+                    "begin EST donor factor": 810, 
+                    "end EST acceptor factor": 899, 
+                    "end EST donor factor": 854
+                }
+            }, 
+            "type": "1"
+        }, 
+        "13": {
+            "BPS position": 2234, 
+            "BPS score": 0.772307, 
+            "acceptor alignment average error": 0.0, 
+            "acceptor prefix": "GGCGGGAGAGAAGAC", 
+            "acceptor score": 0.969053, 
+            "chromosome end": 71471901, 
+            "chromosome start": 71469639, 
+            "donor alignment average error": 0.0, 
+            "donor score": 0.801151, 
+            "donor suffix": "TCAGAAGAAGTGGCA", 
+            "length": 2263, 
+            "number supporting EST": 9, 
+            "pattern": "GTAG", 
+            "prefix": "GTGAGTAATGTCTTCTAACT", 
+            "relative end": 13927, 
+            "relative start": 11665, 
+            "repeat sequence": "G", 
+            "suffix": "ACGAATGTTTTTTTTTCCAG", 
+            "supporting ESTs": {
+                "AF209780": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 882, 
+                    "begin EST donor factor": 837, 
+                    "end EST acceptor factor": 1986, 
+                    "end EST donor factor": 881
+                }, 
+                "AF219994": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 864, 
+                    "begin EST donor factor": 819, 
+                    "end EST acceptor factor": 1616, 
+                    "end EST donor factor": 863
+                }, 
+                "AF263464": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 874, 
+                    "begin EST donor factor": 829, 
+                    "end EST acceptor factor": 1633, 
+                    "end EST donor factor": 873
+                }, 
+                "AJ537437": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 874, 
+                    "begin EST donor factor": 829, 
+                    "end EST acceptor factor": 1633, 
+                    "end EST donor factor": 873
+                }, 
+                "AK314918": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 835, 
+                    "begin EST donor factor": 790, 
+                    "end EST acceptor factor": 1380, 
+                    "end EST donor factor": 834
+                }, 
+                "BC106931": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 835, 
+                    "begin EST donor factor": 790, 
+                    "end EST acceptor factor": 1828, 
+                    "end EST donor factor": 834
+                }, 
+                "BC106932": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 832, 
+                    "begin EST donor factor": 787, 
+                    "end EST acceptor factor": 1824, 
+                    "end EST donor factor": 831
+                }, 
+                "BG208788": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 669, 
+                    "begin EST donor factor": 624, 
+                    "end EST acceptor factor": 757, 
+                    "end EST donor factor": 668
+                }, 
+                "NM_016519": {
+                    "EST acceptor factor prefix": "GGCGGGAGAGAAGAC", 
+                    "EST donor factor suffix": "TCAGAAGAAGTGGCA", 
+                    "begin EST acceptor factor": 900, 
+                    "begin EST donor factor": 855, 
+                    "end EST acceptor factor": 2003, 
+                    "end EST donor factor": 899
+                }
+            }, 
+            "type": "1"
+        }
+    }, 
+    "isoforms": {
+        "1": {
+            "CDS end": 1419, 
+            "CDS length": 1344, 
+            "CDS start": 76, 
+            "NMD flag": -1, 
+            "PAS?": true, 
+            "RefSeq": "NM_016519", 
+            "Reference frame?": true, 
+            "Type": "NM_016519 (Reference TR)", 
+            "annotated CDS?": true, 
+            "canonical end codon?": false, 
+            "canonical start codon?": false, 
+            "exons": [
+                {
+                    "3utr length": 0, 
+                    "5utr length": 75, 
+                    "chromosome end": 71458090, 
+                    "chromosome start": 71457975, 
+                    "cumulative genome length": 116, 
+                    "cumulative transcript length": 116, 
+                    "frame CDS": 0, 
+                    "frame start codon": 0, 
+                    "genome 5UTR end": 71458049, 
+                    "genome 5UTR start": 71457975, 
+                    "genome CDS end": 71458090, 
+                    "genome CDS start": 71458050, 
+                    "genome length": 116, 
+                    "genome start codon end": 71458052, 
+                    "genome start codon start": 71458050, 
+                    "relative end": 116, 
+                    "relative start": 1, 
+                    "sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAG", 
+                    "transcript length": 116
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71459112, 
+                    "chromosome start": 71459044, 
+                    "cumulative genome length": 185, 
+                    "cumulative transcript length": 185, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71459112, 
+                    "genome CDS start": 71459044, 
+                    "genome length": 69, 
+                    "relative end": 1138, 
+                    "relative start": 1070, 
+                    "sequence": "ATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCG", 
+                    "transcript length": 69
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71462766, 
+                    "chromosome start": 71462716, 
+                    "cumulative genome length": 236, 
+                    "cumulative transcript length": 236, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71462766, 
+                    "genome CDS start": 71462716, 
+                    "genome length": 51, 
+                    "relative end": 4792, 
+                    "relative start": 4742, 
+                    "sequence": "TTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAG", 
+                    "transcript length": 51
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71464120, 
+                    "chromosome start": 71464073, 
+                    "cumulative genome length": 284, 
+                    "cumulative transcript length": 284, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71464120, 
+                    "genome CDS start": 71464073, 
+                    "genome length": 48, 
+                    "relative end": 6146, 
+                    "relative start": 6099, 
+                    "sequence": "ACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAG", 
+                    "transcript length": 48
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71465363, 
+                    "chromosome start": 71465253, 
+                    "cumulative genome length": 395, 
+                    "cumulative transcript length": 395, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71465363, 
+                    "genome CDS start": 71465253, 
+                    "genome length": 111, 
+                    "relative end": 7389, 
+                    "relative start": 7279, 
+                    "sequence": "TATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAG", 
+                    "transcript length": 111
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71467371, 
+                    "chromosome start": 71467135, 
+                    "cumulative genome length": 632, 
+                    "cumulative transcript length": 632, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71467371, 
+                    "genome CDS start": 71467135, 
+                    "genome length": 237, 
+                    "relative end": 9397, 
+                    "relative start": 9161, 
+                    "sequence": "TATGAATATTCTTTGCCTGTGCATCCCCCACCTCTCCCATCACAGCCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAG", 
+                    "transcript length": 237
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71468379, 
+                    "chromosome start": 71468341, 
+                    "cumulative genome length": 671, 
+                    "cumulative transcript length": 671, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71468379, 
+                    "genome CDS start": 71468341, 
+                    "genome length": 39, 
+                    "relative end": 10405, 
+                    "relative start": 10367, 
+                    "sequence": "CTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71468553, 
+                    "chromosome start": 71468515, 
+                    "cumulative genome length": 710, 
+                    "cumulative transcript length": 710, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71468553, 
+                    "genome CDS start": 71468515, 
+                    "genome length": 39, 
+                    "relative end": 10579, 
+                    "relative start": 10541, 
+                    "sequence": "CTCCCAGGAATGGATTTTCCTGATCCACAAGGTCCATCA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71468727, 
+                    "chromosome start": 71468689, 
+                    "cumulative genome length": 749, 
+                    "cumulative transcript length": 749, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71468727, 
+                    "genome CDS start": 71468689, 
+                    "genome length": 39, 
+                    "relative end": 10753, 
+                    "relative start": 10715, 
+                    "sequence": "CTCCCAGGATTGGATTTTGCTGATCCACAAGGTTCAACA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71469036, 
+                    "chromosome start": 71468977, 
+                    "cumulative genome length": 809, 
+                    "cumulative transcript length": 809, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71469036, 
+                    "genome CDS start": 71468977, 
+                    "genome length": 60, 
+                    "relative end": 11062, 
+                    "relative start": 11003, 
+                    "sequence": "ATTTTCCAAATAGCCCGTTTGATTTCTCACGGACCAATGCCACAAAATAAACAATCTCCA", 
+                    "transcript length": 60
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71469177, 
+                    "chromosome start": 71469133, 
+                    "cumulative genome length": 854, 
+                    "cumulative transcript length": 854, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71469177, 
+                    "genome CDS start": 71469133, 
+                    "genome length": 45, 
+                    "relative end": 11203, 
+                    "relative start": 11159, 
+                    "sequence": "CTTTATCCAGGAATGTTGTACGTGCCTTTTGGAGCAAATCAATTG", 
+                    "transcript length": 45
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 0, 
+                    "chromosome end": 71469638, 
+                    "chromosome start": 71469594, 
+                    "cumulative genome length": 899, 
+                    "cumulative transcript length": 899, 
+                    "frame CDS": 1, 
+                    "genome CDS end": 71469638, 
+                    "genome CDS start": 71469594, 
+                    "genome length": 45, 
+                    "relative end": 11664, 
+                    "relative start": 11620, 
+                    "sequence": "AATGCCCCTGCCAGACTTGGCATCATGAGTTCAGAAGAAGTGGCA", 
+                    "transcript length": 45
+                }, 
+                {
+                    "3utr length": 584, 
+                    "5utr length": 0, 
+                    "chromosome end": 71473005, 
+                    "chromosome start": 71471902, 
+                    "cumulative genome length": 2003, 
+                    "cumulative transcript length": 2003, 
+                    "frame CDS": 1, 
+                    "frame stop codon": 0, 
+                    "genome 3UTR end": 71473005, 
+                    "genome 3UTR start": 71472422, 
+                    "genome CDS end": 71472418, 
+                    "genome CDS start": 71471902, 
+                    "genome length": 1104, 
+                    "genome stop codon end": 71472421, 
+                    "genome stop codon start": 71472419, 
+                    "relative end": 15031, 
+                    "relative start": 13928, 
+                    "sequence": "GGCGGGAGAGAAGACCCAATGGCCTATGGAGCCATGTTTCCAGGATTTGGAGGCATGAGGCCCGGCTTTGAGGGAATGCCCCACAACCCAGCTATGGGCGGTGACTTCACTCTGGAATTTGACTCCCCAGTGGCTGCCACCAAAGGCCCTGAGAACGAAGAAGGAGGTGCACAAGGCTCCCCTATGCCGGAGGCCAACCCAGACAATCTAGAAAACCCAGCTTTCCTTACAGAGCTAGAACCTGCTCCCCACGCAGGGCTCCTTGCTCTCCCTAAGGATGACATTCCCGGCCTGCCAAGGAGCCCTTCAGGGAAGATGAAGGGACTCCCCAGCGTCACCCCAGCAGCTGCTGACCCACTGATGACCCCTGAATTAGCTGATGTTTATAGGACCTACGATGCTGACATGACCACATCCGTGGATTTCCAGGAAGAAGCAACCATGGATACCACGATGGCCCCAAACTCTCTGCAAACATCCATGCCAGGAAACAAAGCCCAGGAGCCCGAGATGATGCATGACGCATGGCATTTCCAAGAGCCCTGACAGCTCTAAGATATTAGCTACTTTCTGTATGCACAAGCTTCCCAGCTTTGTCCCCACAGTGTACCTTTTTGCTAAAACACTTATTACCCTTCTGCAGCAAAGGCATTAAAAGCGCTAAGCATATATTAATAAATGCAAGTGGCTAGAAATAGTGTAGGTCCCCTTCTTGCTTTCAATATCTTGTTGAAATAAAATGTGTCAATTGTCTCTGTGATTTAGAAACACTATTAATAACATCAGAGCAAGGTTCTAAGGGTCTCAGCATTTGATCATCACTTTTTCTTAGCTGTCTTAAGCATTATAGAATTTCTCTTACCAGCATGACACTATTATATTCAGGAAACATGGCACTGCTTTTTTCTCTAAGCAAAGGCAAATATCCTCATAATTCTAAGCTAATTCATTTAAACTTTATTAAATGGGGATTGGTGGAAAACTCCTGACTGGTATTACTGGGTTTGGTATAATTTAATTTAAAATTCTCATTTATAGAGTATTTTATTTAATCTAGTATAAAAAATCTAGCCTATTTTAAATAAAGAATTTTTCTCACTGAAA", 
+                    "transcript length": 1104
+                }
+            ], 
+            "from RefSeq?": true, 
+            "introns": [
+                1, 
+                2, 
+                3, 
+                4, 
+                5, 
+                7, 
+                8, 
+                9, 
+                10, 
+                11, 
+                12, 
+                13
+            ], 
+            "length": 2003, 
+            "number exons": 13, 
+            "polyA?": true, 
+            "protein length": 447, 
+            "protein missing codon?": true, 
+            "reference CDS end codon?": true, 
+            "reference CDS start codon?": true, 
+            "reference?": true, 
+            "transcript sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAGATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCGTTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAGACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAGTATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAGTATGAATATTCTTTGCCTGTGCATCCCCCACCTCTCCCATCACAGCCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAGCTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCACTCCCAGGAATGGATTTTCCTGATCCACAAGGTCCATCACTCCCAGGATTGGATTTTGCTGATCCACAAGGTTCAACAATTTTCCAAATAGCCCGTTTGATTTCTCACGGACCAATGCCACAAAATAAACAATCTCCACTTTATCCAGGAATGTTGTACGTGCCTTTTGGAGCAAATCAATTGAATGCCCCTGCCAGACTTGGCATCATGAGTTCAGAAGAAGTGGCAGGCGGGAGAGAAGACCCAATGGCCTATGGAGCCATGTTTCCAGGATTTGGAGGCATGAGGCCCGGCTTTGAGGGAATGCCCCACAACCCAGCTATGGGCGGTGACTTCACTCTGGAATTTGACTCCCCAGTGGCTGCCACCAAAGGCCCTGAGAACGAAGAAGGAGGTGCACAAGGCTCCCCTATGCCGGAGGCCAACCCAGACAATCTAGAAAACCCAGCTTTCCTTACAGAGCTAGAACCTGCTCCCCACGCAGGGCTCCTTGCTCTCCCTAAGGATGACATTCCCGGCCTGCCAAGGAGCCCTTCAGGGAAGATGAAGGGACTCCCCAGCGTCACCCCAGCAGCTGCTGACCCACTGATGACCCCTGAATTAGCTGATGTTTATAGGACCTACGATGCTGACATGACCACATCCGTGGATTTCCAGGAAGAAGCAACCATGGATACCACGATGGCCCCAAACTCTCTGCAAACATCCATGCCAGGAAACAAAGCCCAGGAGCCCGAGATGATGCATGACGCATGGCATTTCCAAGAGCCCTGACAGCTCTAAGATATTAGCTACTTTCTGTATGCACAAGCTTCCCAGCTTTGTCCCCACAGTGTACCTTTTTGCTAAAACACTTATTACCCTTCTGCAGCAAAGGCATTAAAAGCGCTAAGCATATATTAATAAATGCAAGTGGCTAGAAATAGTGTAGGTCCCCTTCTTGCTTTCAATATCTTGTTGAAATAAAATGTGTCAATTGTCTCTGTGATTTAGAAACACTATTAATAACATCAGAGCAAGGTTCTAAGGGTCTCAGCATTTGATCATCACTTTTTCTTAGCTGTCTTAAGCATTATAGAATTTCTCTTACCAGCATGACACTATTATATTCAGGAAACATGGCACTGCTTTTTTCTCTAAGCAAAGGCAAATATCCTCATAATTCTAAGCTAATTCATTTAAACTTTATTAAATGGGGATTGGTGGAAAACTCCTGACTGGTATTACTGGGTTTGGTATAATTTAATTTAAAATTCTCATTTATAGAGTATTTTATTTAATCTAGTATAAAAAATCTAGCCTATTTTAAATAAAGAATTTTTCTCACTGAAA"
+        }, 
+        "2": {
+            "CDS end": 1554, 
+            "CDS length": 138, 
+            "CDS start": 1417, 
+            "NMD flag": 0, 
+            "PAS?": true, 
+            "Reference frame?": false, 
+            "Type": "term(E13a),CDS_3UTR;", 
+            "annotated CDS?": true, 
+            "canonical end codon?": true, 
+            "canonical start codon?": true, 
+            "exons": [
+                {
+                    "3utr length": 0, 
+                    "5utr length": 116, 
+                    "chromosome end": 71458090, 
+                    "chromosome start": 71457975, 
+                    "cumulative genome length": 116, 
+                    "cumulative transcript length": 116, 
+                    "genome 5UTR end": 71458090, 
+                    "genome 5UTR start": 71457975, 
+                    "genome length": 116, 
+                    "relative end": 116, 
+                    "relative start": 1, 
+                    "sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAG", 
+                    "transcript length": 116
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 69, 
+                    "chromosome end": 71459112, 
+                    "chromosome start": 71459044, 
+                    "cumulative genome length": 185, 
+                    "cumulative transcript length": 185, 
+                    "genome 5UTR end": 71459112, 
+                    "genome 5UTR start": 71459044, 
+                    "genome length": 69, 
+                    "relative end": 1138, 
+                    "relative start": 1070, 
+                    "sequence": "ATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCG", 
+                    "transcript length": 69
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 51, 
+                    "chromosome end": 71462766, 
+                    "chromosome start": 71462716, 
+                    "cumulative genome length": 236, 
+                    "cumulative transcript length": 236, 
+                    "genome 5UTR end": 71462766, 
+                    "genome 5UTR start": 71462716, 
+                    "genome length": 51, 
+                    "relative end": 4792, 
+                    "relative start": 4742, 
+                    "sequence": "TTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAG", 
+                    "transcript length": 51
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 48, 
+                    "chromosome end": 71464120, 
+                    "chromosome start": 71464073, 
+                    "cumulative genome length": 284, 
+                    "cumulative transcript length": 284, 
+                    "genome 5UTR end": 71464120, 
+                    "genome 5UTR start": 71464073, 
+                    "genome length": 48, 
+                    "relative end": 6146, 
+                    "relative start": 6099, 
+                    "sequence": "ACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAG", 
+                    "transcript length": 48
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 111, 
+                    "chromosome end": 71465363, 
+                    "chromosome start": 71465253, 
+                    "cumulative genome length": 395, 
+                    "cumulative transcript length": 395, 
+                    "genome 5UTR end": 71465363, 
+                    "genome 5UTR start": 71465253, 
+                    "genome length": 111, 
+                    "relative end": 7389, 
+                    "relative start": 7279, 
+                    "sequence": "TATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAG", 
+                    "transcript length": 111
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 237, 
+                    "chromosome end": 71467371, 
+                    "chromosome start": 71467135, 
+                    "cumulative genome length": 632, 
+                    "cumulative transcript length": 632, 
+                    "genome 5UTR end": 71467371, 
+                    "genome 5UTR start": 71467135, 
+                    "genome length": 237, 
+                    "relative end": 9397, 
+                    "relative start": 9161, 
+                    "sequence": "TATGAATATTCTTTGCCTGTGCATCCCCCACCTCTCCCATCACAGCCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAG", 
+                    "transcript length": 237
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 39, 
+                    "chromosome end": 71468379, 
+                    "chromosome start": 71468341, 
+                    "cumulative genome length": 671, 
+                    "cumulative transcript length": 671, 
+                    "genome 5UTR end": 71468379, 
+                    "genome 5UTR start": 71468341, 
+                    "genome length": 39, 
+                    "relative end": 10405, 
+                    "relative start": 10367, 
+                    "sequence": "CTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 39, 
+                    "chromosome end": 71468553, 
+                    "chromosome start": 71468515, 
+                    "cumulative genome length": 710, 
+                    "cumulative transcript length": 710, 
+                    "genome 5UTR end": 71468553, 
+                    "genome 5UTR start": 71468515, 
+                    "genome length": 39, 
+                    "relative end": 10579, 
+                    "relative start": 10541, 
+                    "sequence": "CTCCCAGGAATGGATTTTCCTGATCCACAAGGTCCATCA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 39, 
+                    "chromosome end": 71468727, 
+                    "chromosome start": 71468689, 
+                    "cumulative genome length": 749, 
+                    "cumulative transcript length": 749, 
+                    "genome 5UTR end": 71468727, 
+                    "genome 5UTR start": 71468689, 
+                    "genome length": 39, 
+                    "relative end": 10753, 
+                    "relative start": 10715, 
+                    "sequence": "CTCCCAGGATTGGATTTTGCTGATCCACAAGGTTCAACA", 
+                    "transcript length": 39
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 60, 
+                    "chromosome end": 71469036, 
+                    "chromosome start": 71468977, 
+                    "cumulative genome length": 809, 
+                    "cumulative transcript length": 809, 
+                    "genome 5UTR end": 71469036, 
+                    "genome 5UTR start": 71468977, 
+                    "genome length": 60, 
+                    "relative end": 11062, 
+                    "relative start": 11003, 
+                    "sequence": "ATTTTCCAAATAGCCCGTTTGATTTCTCACGGACCAATGCCACAAAATAAACAATCTCCA", 
+                    "transcript length": 60
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 45, 
+                    "chromosome end": 71469177, 
+                    "chromosome start": 71469133, 
+                    "cumulative genome length": 854, 
+                    "cumulative transcript length": 854, 
+                    "genome 5UTR end": 71469177, 
+                    "genome 5UTR start": 71469133, 
+                    "genome length": 45, 
+                    "relative end": 11203, 
+                    "relative start": 11159, 
+                    "sequence": "CTTTATCCAGGAATGTTGTACGTGCCTTTTGGAGCAAATCAATTG", 
+                    "transcript length": 45
+                }, 
+                {
+                    "3utr length": 0, 
+                    "5utr length": 45, 
+                    "chromosome end": 71469638, 
+                    "chromosome start": 71469594, 
+                    "cumulative genome length": 899, 
+                    "cumulative transcript length": 899, 
+                    "genome 5UTR end": 71469638, 
+                    "genome 5UTR start": 71469594, 
+                    "genome length": 45, 
+                    "relative end": 11664, 
+                    "relative start": 11620, 
+                    "sequence": "AATGCCCCTGCCAGACTTGGCATCATGAGTTCAGAAGAAGTGGCA", 
+                    "transcript length": 45
+                }, 
+                {
+                    "3utr length": 105, 
+                    "5utr length": 517, 
+                    "chromosome end": 71472661, 
+                    "chromosome start": 71471902, 
+                    "cumulative genome length": 1659, 
+                    "cumulative transcript length": 1659, 
+                    "frame CDS": 0, 
+                    "frame start codon": 0, 
+                    "frame stop codon": 0, 
+                    "genome 3UTR end": 71472661, 
+                    "genome 3UTR start": 71472557, 
+                    "genome 5UTR end": 71472418, 
+                    "genome 5UTR start": 71471902, 
+                    "genome CDS end": 71472553, 
+                    "genome CDS start": 71472419, 
+                    "genome length": 760, 
+                    "genome start codon end": 71472421, 
+                    "genome start codon start": 71472419, 
+                    "genome stop codon end": 71472556, 
+                    "genome stop codon start": 71472554, 
+                    "relative end": 14687, 
+                    "relative start": 13928, 
+                    "sequence": "GGCGGGAGAGAAGACCCAATGGCCTATGGAGCCATGTTTCCAGGATTTGGAGGCATGAGGCCCGGCTTTGAGGGAATGCCCCACAACCCAGCTATGGGCGGTGACTTCACTCTGGAATTTGACTCCCCAGTGGCTGCCACCAAAGGCCCTGAGAACGAAGAAGGAGGTGCACAAGGCTCCCCTATGCCGGAGGCCAACCCAGACAATCTAGAAAACCCAGCTTTCCTTACAGAGCTAGAACCTGCTCCCCACGCAGGGCTCCTTGCTCTCCCTAAGGATGACATTCCCGGCCTGCCAAGGAGCCCTTCAGGGAAGATGAAGGGACTCCCCAGCGTCACCCCAGCAGCTGCTGACCCACTGATGACCCCTGAATTAGCTGATGTTTATAGGACCTACGATGCTGACATGACCACATCCGTGGATTTCCAGGAAGAAGCAACCATGGATACCACGATGGCCCCAAACTCTCTGCAAACATCCATGCCAGGAAACAAAGCCCAGGAGCCCGAGATGATGCATGACGCATGGCATTTCCAAGAGCCCTGACAGCTCTAAGATATTAGCTACTTTCTGTATGCACAAGCTTCCCAGCTTTGTCCCCACAGTGTACCTTTTTGCTAAAACACTTATTACCCTTCTGCAGCAAAGGCATTAAAAGCGCTAAGCATATATTAATAAATGCAAGTGGCTAGAAATAGTGTAGGTCCCCTTCTTGCTTTCAATATCTTGTTGAAATAAAATGTGTCAATTGTCTCTGTGA", 
+                    "transcript length": 760
+                }
+            ], 
+            "from RefSeq?": false, 
+            "introns": [
+                1, 
+                2, 
+                3, 
+                4, 
+                5, 
+                7, 
+                8, 
+                9, 
+                10, 
+                11, 
+                12, 
+                13
+            ], 
+            "length": 1659, 
+            "number exons": 13, 
+            "polyA?": true, 
+            "protein length": 45, 
+            "protein missing codon?": false, 
+            "reference CDS end codon?": false, 
+            "reference CDS start codon?": false, 
+            "reference?": false, 
+            "transcript sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAGATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCGTTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAGACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAGTATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAGTATGAATATTCTTTGCCTGTGCATCCCCCACCTCTCCCATCACAGCCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAGCTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCACTCCCAGGAATGGATTTTCCTGATCCACAAGGTCCATCACTCCCAGGATTGGATTTTGCTGATCCACAAGGTTCAACAATTTTCCAAATAGCCCGTTTGATTTCTCACGGACCAATGCCACAAAATAAACAATCTCCACTTTATCCAGGAATGTTGTACGTGCCTTTTGGAGCAAATCAATTGAATGCCCCTGCCAGACTTGGCATCATGAGTTCAGAAGAAGTGGCAGGCGGGAGAGAAGACCCAATGGCCTATGGAGCCATGTTTCCAGGATTTGGAGGCATGAGGCCCGGCTTTGAGGGAATGCCCCACAACCCAGCTATGGGCGGTGACTTCACTCTGGAATTTGACTCCCCAGTGGCTGCCACCAAAGGCCCTGAGAACGAAGAAGGAGGTGCACAAGGCTCCCCTATGCCGGAGGCCAACCCAGACAATCTAGAAAACCCAGCTTTCCTTACAGAGCTAGAACCTGCTCCCCACGCAGGGCTCCTTGCTCTCCCTAAGGATGACATTCCCGGCCTGCCAAGGAGCCCTTCAGGGAAGATGAAGGGACTCCCCAGCGTCACCCCAGCAGCTGCTGACCCACTGATGACCCCTGAATTAGCTGATGTTTATAGGACCTACGATGCTGACATGACCACATCCGTGGATTTCCAGGAAGAAGCAACCATGGATACCACGATGGCCCCAAACTCTCTGCAAACATCCATGCCAGGAAACAAAGCCCAGGAGCCCGAGATGATGCATGACGCATGGCATTTCCAAGAGCCCTGACAGCTCTAAGATATTAGCTACTTTCTGTATGCACAAGCTTCCCAGCTTTGTCCCCACAGTGTACCTTTTTGCTAAAACACTTATTACCCTTCTGCAGCAAAGGCATTAAAAGCGCTAAGCATATATTAATAAATGCAAGTGGCTAGAAATAGTGTAGGTCCCCTTCTTGCTTTCAATATCTTGTTGAAATAAAATGTGTCAATTGTCTCTGTGA"
+        }, 
+        "3": {
+            "NMD flag": -1, 
+            "PAS?": false, 
+            "Reference frame?": false, 
+            "Type": "A3E (I5, +45 nt), CDS;", 
+            "annotated CDS?": false, 
+            "exons": [
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71458090, 
+                    "chromosome start": 71457975, 
+                    "genome length": 116, 
+                    "relative end": 116, 
+                    "relative start": 1, 
+                    "sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAG", 
+                    "transcript length": 116
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71459112, 
+                    "chromosome start": 71459044, 
+                    "genome length": 69, 
+                    "relative end": 1138, 
+                    "relative start": 1070, 
+                    "sequence": "ATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCG", 
+                    "transcript length": 69
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71462766, 
+                    "chromosome start": 71462716, 
+                    "genome length": 51, 
+                    "relative end": 4792, 
+                    "relative start": 4742, 
+                    "sequence": "TTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAG", 
+                    "transcript length": 51
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71464120, 
+                    "chromosome start": 71464073, 
+                    "genome length": 48, 
+                    "relative end": 6146, 
+                    "relative start": 6099, 
+                    "sequence": "ACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAG", 
+                    "transcript length": 48
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71465363, 
+                    "chromosome start": 71465253, 
+                    "genome length": 111, 
+                    "relative end": 7389, 
+                    "relative start": 7279, 
+                    "sequence": "TATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAG", 
+                    "transcript length": 111
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71467371, 
+                    "chromosome start": 71467180, 
+                    "genome length": 192, 
+                    "relative end": 9397, 
+                    "relative start": 9206, 
+                    "sequence": "CCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAG", 
+                    "transcript length": 192
+                }, 
+                {
+                    "5utr length": 0, 
+                    "chromosome end": 71468379, 
+                    "chromosome start": 71468341, 
+                    "genome length": 39, 
+                    "relative end": 10405, 
+                    "relative start": 10367, 
+                    "sequence": "CTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCA", 
+                    "transcript length": 39
+                }
+            ], 
+            "from RefSeq?": false, 
+            "introns": [
+                1, 
+                2, 
+                3, 
+                4, 
+                6, 
+                7
+            ], 
+            "length": 626, 
+            "number exons": 7, 
+            "polyA?": false, 
+            "reference CDS end codon?": true, 
+            "reference CDS start codon?": true, 
+            "reference?": false, 
+            "transcript sequence": "GAAGTACAGAGCAAGTCCCACGCACAGTCCTGAAAAAAATTTTAATCTTCTTTTCTTAGAACTATCTTGGTTGGCATCATCAGGCCCTGAGAGCACAGTGCATGTCAGCATCTAAGATTCCACTTTTCAAAATGAAGGACCTGATACTGATCCTATGCCTCCTGGAAATGAGTTTTGCAGTGCCGTTCTTTCCTCAGCAATCTGGAACACCGGGTATGGCTAGTTTGAGCCTTGAGACAATGAGACAGTTGGGAAGTCTGCAGAGATTAAACACACTTTCTCAGTATTCTAGATACGGCTTTGGAAAATCATTTAATTCTTTGTGGATGCACGGTCTCCTCCCACCACATTCCTCTCTTCCATGGATGAGGCCAAGAGAACATGAAACTCAACAGCCATCCTTGAAGCCTCAACAGCCAGGACTGAAACCTTTTCTCCAGTCTGCTGCTGCAACCACCAACCAGGCCACAGCACTGAAAGAAGCACTTCAGCCTCCAATTCACCTGGGACATCTGCCCTTGCAGGAAGGAGAACTGCCTCTGGTTCAGCAGCAGGTGGCACCATCAGATAAGCCACCAAAGCCTGAGCTCCCAGGAGTAGATTTTGCTGATCCACAAGGTCCATCA"
+        }
+    }, 
+    "length_genomic_sequence": 15031, 
+    "number of processed ESTs": 25, 
+    "number_isoforms": 3, 
+    "program_version": " v1.2.57-2-g50d9447", 
+    "version": 4
+}

@@ -1,0 +1,12 @@
+chr3	PIntron	exon	154684974	154685167	.	+	.	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	5UTR	154684974	154685035	.	+	.	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	start_codon	154685036	154685038	.	+	0	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	CDS	154685036	154685167	.	+	0	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	exon	154686494	154686584	.	+	.	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	CDS	154686494	154686584	.	+	0	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	exon	154702882	154703176	.	+	.	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	CDS	154702882	154702958	.	+	2	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	stop_codon	154702959	154702961	.	+	0	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	3UTR	154702962	154703176	.	+	.	gene_id "AAMP"; transcript_id "AAMP.1";
+chr3	PIntron	exon	154686494	154686661	.	+	.	gene_id "AAMP"; transcript_id "AAMP.2";
+chr3	PIntron	exon	154702882	154703176	.	+	.	gene_id "AAMP"; transcript_id "AAMP.2";

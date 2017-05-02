@@ -1,5 +1,0 @@
-how to execute PIntron for generate the example
-
-pintron_bindir=~/PIntron/bin ; $pintron_bindir/pintron --bin-dir=$pintron_bindir --genomic='/home/lorenzo/PIntron/regressionTest/input/genomic.txt' --EST='/home/lorenzo/PIntron/regressionTest/input/ests.txt' --organism=human --gene=TP53 --output='/home/lorenzo/PIntron/pintron-full-output.json' --logfile='/home/lorenzo/PIntron/pintron-pipeline-log.txt' general-logfile='/home/lorenzo/PIntron/pintron-log.txt' --gtf='/home/lorenzo/PIntron/pintron-cds-annotated-isoforms.gtf' --strict-GTF-compliance 
-
-pintron_bindir=~/PIntron/bin ; $pintron_bindir/pintron --bin-dir=$pintron_bindir --genomic='/home/lorenzo/PIntron/regressionTest/input/genomic.txt' --EST='/home/lorenzo/PIntron/regressionTest/input/ests.txt' --organism=human --gene=TP53 --output='/home/lorenzo/PIntron/pintron-full-output.json' --logfile='/home/lorenzo/PIntron/pintron-pipeline-log.txt' general-logfile='/home/lorenzo/PIntron/pintron-log.txt' --gtf='/home/lorenzo/PIntron/pintron-all-isoforms.gtf' -k
