@@ -816,3 +816,70 @@ src-dist	: prepare-src-dist
 
 check-syntax:
 	    gcc -o /dev/null -D$(DEFINE) $(CFLAGS) -S ${CHK_SOURCES}
+
+
+
+#Makefile part about unit-tests
+#when you run 'make test' all unit-tests are compiled, executed and then all the executables created during the compilation will be deleted
+test_SOURCE= \
+	$(CURDIR)/test/aug_suffix_tree_test.c\
+	$(CURDIR)/test/bit_vector_test.c\
+	$(CURDIR)/test/bool_list_test.c\
+	$(CURDIR)/test/BuildTranscripts_test.c\
+	$(CURDIR)/test/conversions_test.c\
+	$(CURDIR)/test/double_list_test.c\
+	$(CURDIR)/test/exon-complexity_test.c\
+	$(CURDIR)/test/ext_array_test.c\
+	$(CURDIR)/test/int_list_test.c\
+	$(CURDIR)/test/io-multifasta_test.c\
+	$(CURDIR)/test/list_test.c\
+	$(CURDIR)/test/min_factorization_test.c\
+	$(CURDIR)/test/refine-intron_test.c\
+	$(CURDIR)/test/simpl_info_test.c\
+	$(CURDIR)/test/types_test.c\
+	$(CURDIR)/test/util_test.c\
+
+test_EXEC= \
+	$(CURDIR)/test/aug_suffix_tree_test\
+	$(CURDIR)/test/bit_vector_test\
+	$(CURDIR)/test/bool_list_test\
+	$(CURDIR)/test/BuildTranscripts_test\
+	$(CURDIR)/test/conversions_test\
+	$(CURDIR)/test/double_list_test\
+	$(CURDIR)/test/exon-complexity_test\
+	$(CURDIR)/test/ext_array_test\
+	$(CURDIR)/test/int_list_test\
+	$(CURDIR)/test/io-multifasta_test\
+	$(CURDIR)/test/list_test\
+	$(CURDIR)/test/min_factorization_test\
+	$(CURDIR)/test/refine-intron_test\
+	$(CURDIR)/test/simpl_info_test\
+	$(CURDIR)/test/types_test\
+	$(CURDIR)/test/util_test\
+
+CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR)
+
+comp-test: $(test_EXEC) $(all_header_files) $(stree_header_files)
+	$(CC) $(test_SOURCE) $(CFLAGS)
+	
+test: $(test_EXEC)
+	$(CURDIR)/test/aug_suffix_tree_test
+	$(CURDIR)/test/bit_vector_test
+	$(CURDIR)/test/bool_list_test
+	$(CURDIR)/test/BuildTranscripts_test
+	$(CURDIR)/test/conversions_test
+	$(CURDIR)/test/double_list_test
+	$(CURDIR)/test/exon-complexity_test
+	$(CURDIR)/test/ext_array_test
+	$(CURDIR)/test/int_list_test
+	$(CURDIR)/test/io-multifasta_test
+	$(CURDIR)/test/list_test
+	$(CURDIR)/test/min_factorization_test
+	$(CURDIR)/test/refine-intron_test
+	$(CURDIR)/test/simpl_info_test
+	$(CURDIR)/test/types_test
+	$(CURDIR)/test/util_test
+
+.PHONY: clean-test
+clean-test:
+	rm $(CURDIR)/test/*_test
