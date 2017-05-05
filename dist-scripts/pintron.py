@@ -317,7 +317,7 @@ def compute_json(ccds_file, variant_file, output_file, pas_tolerance, genomic_se
             l = line.rstrip()
             if l[0] == '>':
                 gene['number_of_processed_transcripts'] = gene['number_of_processed_transcripts'] + 1
-                new = re.search('\/gb=([A-Z_0-9]+)', l).groups()
+                new = re.search('\/gb=([a-zA-Z_0-9]+)', l).groups()
                 current = new[0]
                 gene['factorizations'][current] = {
                     'polyA?': False,
