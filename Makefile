@@ -860,11 +860,13 @@ test_EXEC= \
 
 CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR) -I regressionTest
 
-comp-test: $(test_EXEC) $(all_header_files) $(stree_header_files)
+comp-test:$(test_EXEC) $(all_header_files) $(stree_header_files)
 	$(CC) $(test_SOURCE) $(CFLAGS)
 	
 test: $(test_EXEC)
+	#compiling PIntron
 	make dist
+	#executing PIntron as needed by regressionTest
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-788/genomic.txt' --EST='regressionTest/test-788/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-788/executionOutput/full.json' --logfile='regressionTest/test-788/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-788/executionOutput/pintron-log.txt' --gtf='regressionTest/test-788/executionOutput/pintron-all-isoforms.gtf'
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-AMBN/genomic.txt' --EST='regressionTest/test-AMBN/ests.txt' --organism=human --gene=AMBN --output='regressionTest/test-AMBN/executionOutput/full.json' --logfile='regressionTest/test-AMBN/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-AMBN/executionOutput/pintron-log.txt' --gtf='regressionTest/test-AMBN/executionOutput/pintron-all-isoforms.gtf'
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-CPB2/genomic.txt' --EST='regressionTest/test-CPB2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-CPB2/executionOutput/full.json' --logfile='regressionTest/test-CPB2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-CPB2/executionOutput/pintron-log.txt' --gtf='regressionTest/test-CPB2/executionOutput/pintron-all-isoforms.gtf'
@@ -884,9 +886,7 @@ test: $(test_EXEC)
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia1/genomic.txt' --EST='regressionTest/test-mattia1/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia1/executionOutput/full.json' --logfile='regressionTest/test-mattia1/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia1/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia1/executionOutput/pintron-all-isoforms.gtf'
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia2/genomic.txt' --EST='regressionTest/test-mattia2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia2/executionOutput/full.json' --logfile='regressionTest/test-mattia2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia2/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia2/executionOutput/pintron-all-isoforms.gtf'
 	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia3/genomic.txt' --EST='regressionTest/test-mattia3/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia3/executionOutput/full.json' --logfile='regressionTest/test-mattia3/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia3/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia3/executionOutput/pintron-all-isoforms.gtf'
-	#regressionTest:	
-	$(CURDIR)/regressionTest/testPIntronOutput
-	#unitTest:
+	#executing unitTest:
 	$(CURDIR)/test/aug_suffix_tree_test
 	$(CURDIR)/test/bit_vector_test
 	$(CURDIR)/test/bool_list_test
@@ -903,10 +903,17 @@ test: $(test_EXEC)
 	$(CURDIR)/test/simpl_info_test
 	$(CURDIR)/test/types_test
 	$(CURDIR)/test/util_test
-
+	#executing regressionTest:
+	$(CURDIR)/regressionTest/testPIntronOutput
 .PHONY: clean-test
 clean-test:
+	#cleaning unitTest temp files:
 	rm $(CURDIR)/test/*_test
+	#cleaning PIntron temp files:
+	rm $(CURDIR)/ests.txt
+	rm $(CURDIR)/genomic.txt
+	rm $(CURDIR)/pintron-log.txt
+	#cleaning regressionTest temp files:
 	rm $(CURDIR)/regressionTest/testPIntronOutput
 	rm $(CURDIR)/regressionTest/test-788/executionOutput/*
 	rm $(CURDIR)/regressionTest/test-AMBN/executionOutput/*
@@ -927,6 +934,3 @@ clean-test:
 	rm $(CURDIR)/regressionTest/test-mattia1/executionOutput/*
 	rm $(CURDIR)/regressionTest/test-mattia2/executionOutput/*
 	rm $(CURDIR)/regressionTest/test-mattia3/executionOutput/*
-	rm $(CURDIR)/ests.txt
-	rm $(CURDIR)/genomic.txt
-	rm $(CURDIR)/pintron-log.txt
