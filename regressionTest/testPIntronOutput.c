@@ -208,14 +208,12 @@ int compareJson(char f1[],char f2[]){
 	int c101=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",8),returnInfoNextToPattern(f2,"acceptor_factor_prefix",8));
 	int c102=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",8),returnInfoNextToPattern(f2,"acceptor_factor_start",8));
 	int c103=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",8),returnInfoNextToPattern(f2,"donor_factor_start",8));
-	int c109=!strcmp(returnInfoNextToPattern(f1,"RefSeq",1),returnInfoNextToPattern(f2,"RefSeqID",1));
-	
-	
-	if(c1&&c2&&c6&&c14&&c15&&c16&&c17&&c18&&c19&&c20&&c21&&c22&&c23&&c24&&c25&&c26&&c27&&c28&&c52&&c53&&c55&&c61
-		&&c32&&c33&&c36&&c37&&c38&&c39&&c40&&c41&&c42&&c43&&c44&&c45&&c46&&c47&&c48&&c49&&c50&&c51
-		&&c62&&c63&&c66&&c67&&c68&&c69&&c70&&c71&&c72&&c73&&c74&&c75&&c76&&c77&&c78&&c80&&c81&&c82
+
+	if(c1&&c2&&c6&&c14&&c15&&c16&&c17&&c18&&c19&&c20&&c21&&c22&&c23&&c24&&c25&&c26&&c27&&c28&&c52&&c53
+		&&c32&&c33&&c36&&c37&&c38&&c39&&c40&&c41&&c42&&c43&&c44&&c45&&c46&&c47&&c48&&c49&&c50&&c51&&c55
+		&&c62&&c63&&c66&&c67&&c68&&c69&&c70&&c71&&c72&&c73&&c74&&c75&&c76&&c77&&c78&&c80&&c81&&c82&&c61
 		&&c83&&c84&&c87&&c88&&c89&&c90&&c91&&c92&&c93&&c94&&c95&&c96&&c97&&c98&&c99&&c101&&c102&&c103
-		&&c109&&c110&&c111&&c117&&c118&&c119&&c126&&c127&&c29&&c30&&c29&&c130&&c57&&c58&&c56&&c31&&c60&&c59
+		&&c110&&c111&&c117&&c118&&c119&&c126&&c127&&c29&&c30&&c29&&c130&&c57&&c58&&c56&&c31&&c60&&c59
 		)
 		return 1;
 	else
@@ -502,10 +500,6 @@ Test(output,compareOutput_TestGtf5) {
 }
 
 Test(output,compareOutput_TestGtf6) {
-	char f1[]="regressionTest/test_gtf6/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test_gtf6/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
 	char f3[]="regressionTest/test_gtf6/referenceOutput/full.json";
 	char f4[]="regressionTest/test_gtf6/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
