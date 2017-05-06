@@ -61,6 +61,8 @@ char* returnInfoNextToPattern(char *f1,char *str,int num){
 	char temp[10000];
 	char *pch;
 	if((fp1=fopen(f1,"r"))==NULL){
+		perror("fopen failed");
+		exit(EXIT_FAILURE);
 		return("E-1");
 	}
 
@@ -116,89 +118,85 @@ char* returnInfoNextToPattern(char *f1,char *str,int num){
 int compareJson(char f1[],char f2[]){
 	int c1=!strcmp(returnInfoNextToPattern(f1,"sequence_id",1),returnInfoNextToPattern(f2,"sequence_id",1));
 	int c2=!strcmp(returnInfoNextToPattern(f1,"strand",1),returnInfoNextToPattern(f2,"strand",1));
-	int c6=!strcmp(returnInfoNextToPattern(f1,"acceptor alignment average error",1),returnInfoNextToPattern(f2,"acceptor_alignment_error",1));
+	int c6=!strcmp(returnInfoNextToPattern(f1,"acceptor_alignment_error",1),returnInfoNextToPattern(f2,"acceptor_alignment_error",1));
 	int c14=!strcmp(returnInfoNextToPattern(f1,"pattern",1),returnInfoNextToPattern(f2,"pattern",1));
 	int c15=!strcmp(returnInfoNextToPattern(f1,"prefix",1),returnInfoNextToPattern(f2,"prefix",1));
-	int c16=!strcmp(returnInfoNextToPattern(f1,"relative end",1),returnInfoNextToPattern(f2,"relative_end",1));
-	int c17=!strcmp(returnInfoNextToPattern(f1,"relative start",1),returnInfoNextToPattern(f2,"relative_start",1));
-	int c18=!strcmp(returnInfoNextToPattern(f1,"repeat sequence",1),returnInfoNextToPattern(f2,"repeat_sequence",1));
+	int c16=!strcmp(returnInfoNextToPattern(f1,"relative_end",1),returnInfoNextToPattern(f2,"relative_end",1));
+	int c17=!strcmp(returnInfoNextToPattern(f1,"relative_start",1),returnInfoNextToPattern(f2,"relative_start",1));
+	int c18=!strcmp(returnInfoNextToPattern(f1,"repeat_sequence",1),returnInfoNextToPattern(f2,"repeat_sequence",1));
 	int c19=!strcmp(returnInfoNextToPattern(f1,"suffix",1),returnInfoNextToPattern(f2,"suffix",1));
-	int c20=!strcmp(returnInfoNextToPattern(f1,"end EST acceptor factor",1),returnInfoNextToPattern(f2,"acceptor_factor_end",1));
-	int c21=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",1),returnInfoNextToPattern(f2,"acceptor_factor_prefix",1));
-	int c22=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",1),returnInfoNextToPattern(f2,"acceptor_factor_start",1));
-	int c23=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",1),returnInfoNextToPattern(f2,"donor_factor_start",1));
-	int c24=!strcmp(returnInfoNextToPattern(f1,"end EST acceptor factor",2),returnInfoNextToPattern(f2,"acceptor_factor_end",2));
-	int c25=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",2),returnInfoNextToPattern(f2,"acceptor_factor_prefix",2));
-	int c26=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",2),returnInfoNextToPattern(f2,"acceptor_factor_start",2));
-	int c27=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",2),returnInfoNextToPattern(f2,"donor_factor_start",2));
-	int c28=!strcmp(returnInfoNextToPattern(f1,"end EST acceptor factor",3),returnInfoNextToPattern(f2,"acceptor_factor_end",3));
-	int c29=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",3),returnInfoNextToPattern(f2,"acceptor_factor_prefix",3));
-	int c30=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",3),returnInfoNextToPattern(f2,"acceptor_factor_start",3));
-	int c31=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",3),returnInfoNextToPattern(f2,"donor_factor_start",3));
-	int c32=!strcmp(returnInfoNextToPattern(f1,"BPS position",1),returnInfoNextToPattern(f2,"BPS_position",1));//-1 in index of f1 and f2
-	int c33=!strcmp(returnInfoNextToPattern(f1,"BPS score",2),returnInfoNextToPattern(f2,"BPS_score",2));
-	int c36=!strcmp(returnInfoNextToPattern(f1,"acceptor alignment average error",2),returnInfoNextToPattern(f2,"acceptor_alignment_error",2));
-	int c37=!strcmp(returnInfoNextToPattern(f1,"acceptor prefix",2),returnInfoNextToPattern(f2,"acceptor_exon_prefix",2));
-	int c38=!strcmp(returnInfoNextToPattern(f1,"acceptor score",2),returnInfoNextToPattern(f2,"acceptor_score",2));
-	int c39=!strcmp(returnInfoNextToPattern(f1,"donor alignment average error",2),returnInfoNextToPattern(f2,"donor_alignment_error",2));
-	int c40=!strcmp(returnInfoNextToPattern(f1,"donor suffix",2),returnInfoNextToPattern(f2,"donor_exon_suffix",2));
-	int c41=!strcmp(returnInfoNextToPattern(f1,"donor score",2),returnInfoNextToPattern(f2,"donor_score",2));
+	int c20=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_end",1),returnInfoNextToPattern(f2,"acceptor_factor_end",1));
+	int c21=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",1),returnInfoNextToPattern(f2,"acceptor_factor_prefix",1));
+	int c22=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",1),returnInfoNextToPattern(f2,"acceptor_factor_start",1));
+	int c23=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",1),returnInfoNextToPattern(f2,"donor_factor_start",1));
+	int c24=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_end",2),returnInfoNextToPattern(f2,"acceptor_factor_end",2));
+	int c25=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",2),returnInfoNextToPattern(f2,"acceptor_factor_prefix",2));
+	int c26=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",2),returnInfoNextToPattern(f2,"acceptor_factor_start",2));
+	int c27=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",2),returnInfoNextToPattern(f2,"donor_factor_start",2));
+	int c28=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_end",3),returnInfoNextToPattern(f2,"acceptor_factor_end",3));
+	int c41=!strcmp(returnInfoNextToPattern(f1,"donor_score",2),returnInfoNextToPattern(f2,"donor_score",2));
 	int c42=!strcmp(returnInfoNextToPattern(f1,"length",2),returnInfoNextToPattern(f2,"length",3));//+1 in index of f2
-	int c43=!strcmp(returnInfoNextToPattern(f1,"number supporting EST",2),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",2));
+	int c43=!strcmp(returnInfoNextToPattern(f1,"number_of_supporting_transcripts",2),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",2));
 	int c44=!strcmp(returnInfoNextToPattern(f1,"pattern",2),returnInfoNextToPattern(f2,"pattern",2));
 	int c45=!strcmp(returnInfoNextToPattern(f1,"prefix",2),returnInfoNextToPattern(f2,"prefix",2));
-	int c46=!strcmp(returnInfoNextToPattern(f1,"relative end",2),returnInfoNextToPattern(f2,"relative_end",2));
-	int c47=!strcmp(returnInfoNextToPattern(f1,"relative start",2),returnInfoNextToPattern(f2,"relative_start",2));
-	int c48=!strcmp(returnInfoNextToPattern(f1,"repeat sequence",2),returnInfoNextToPattern(f2,"repeat_sequence",2));
+	int c46=!strcmp(returnInfoNextToPattern(f1,"relative_end",2),returnInfoNextToPattern(f2,"relative_end",2));
+	int c29=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",3),returnInfoNextToPattern(f2,"acceptor_factor_prefix",3));
+	int c30=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",3),returnInfoNextToPattern(f2,"acceptor_factor_start",3));
+	int c31=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",3),returnInfoNextToPattern(f2,"donor_factor_start",3));
+	int c32=!strcmp(returnInfoNextToPattern(f1,"BPS_position",1),returnInfoNextToPattern(f2,"BPS_position",1));//-1 in index of f1 and f2
+	int c33=!strcmp(returnInfoNextToPattern(f1,"BPS_score",2),returnInfoNextToPattern(f2,"BPS_score",2));
+	int c36=!strcmp(returnInfoNextToPattern(f1,"acceptor_alignment_error",2),returnInfoNextToPattern(f2,"acceptor_alignment_error",2));
+	int c37=!strcmp(returnInfoNextToPattern(f1,"acceptor_exon_prefix",2),returnInfoNextToPattern(f2,"acceptor_exon_prefix",2));
+	int c38=!strcmp(returnInfoNextToPattern(f1,"acceptor_score",2),returnInfoNextToPattern(f2,"acceptor_score",2));
+	int c39=!strcmp(returnInfoNextToPattern(f1,"donor_alignment_error",2),returnInfoNextToPattern(f2,"donor_alignment_error",2));
+	int c40=!strcmp(returnInfoNextToPattern(f1,"donor_exon_suffix",2),returnInfoNextToPattern(f2,"donor_exon_suffix",2));	
+	int c47=!strcmp(returnInfoNextToPattern(f1,"relative_start",2),returnInfoNextToPattern(f2,"relative_start",2));
+	int c48=!strcmp(returnInfoNextToPattern(f1,"repeat_sequence",2),returnInfoNextToPattern(f2,"repeat_sequence",2));
 	int c49=!strcmp(returnInfoNextToPattern(f1,"suffix",2),returnInfoNextToPattern(f2,"suffix",2));
-	int c50=!strcmp(returnInfoNextToPattern(f1,"end EST acceptor factor",4),returnInfoNextToPattern(f2,"acceptor_factor_end",4));
-	int c51=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",4),returnInfoNextToPattern(f2,"acceptor_factor_prefix",4));
-	int c52=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",4),returnInfoNextToPattern(f2,"acceptor_factor_start",4));
-	int c53=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",4),returnInfoNextToPattern(f2,"donor_factor_start",4));
-	int c55=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",5),returnInfoNextToPattern(f2,"acceptor_factor_prefix",5));
-	int c56=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",5),returnInfoNextToPattern(f2,"acceptor_factor_start",5));
-	int c57=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",5),returnInfoNextToPattern(f2,"donor_factor_start",5));
-	int c58=!strcmp(returnInfoNextToPattern(f1,"end EST acceptor factor",6),returnInfoNextToPattern(f2,"acceptor_factor_end",6));
-	int c59=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",6),returnInfoNextToPattern(f2,"acceptor_factor_prefix",6));
-	int c60=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",6),returnInfoNextToPattern(f2,"acceptor_factor_start",6));
-	int c61=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",6),returnInfoNextToPattern(f2,"donor_factor_start",6));
-	int c62=!strcmp(returnInfoNextToPattern(f1,"BPS position",2),returnInfoNextToPattern(f2,"BPS_position",2));//-1 in index of f1 and f2
-	int c63=!strcmp(returnInfoNextToPattern(f1,"BPS score",3),returnInfoNextToPattern(f2,"BPS_score",3));
-	int c66=!strcmp(returnInfoNextToPattern(f1,"acceptor alignment average error",3),returnInfoNextToPattern(f2,"acceptor_alignment_error",3));
-	int c67=!strcmp(returnInfoNextToPattern(f1,"acceptor prefix",3),returnInfoNextToPattern(f2,"acceptor_exon_prefix",3));
-	int c68=!strcmp(returnInfoNextToPattern(f1,"acceptor score",3),returnInfoNextToPattern(f2,"acceptor_score",3));
-	int c69=!strcmp(returnInfoNextToPattern(f1,"donor alignment average error",3),returnInfoNextToPattern(f2,"donor_alignment_error",3));
-	int c70=!strcmp(returnInfoNextToPattern(f1,"donor suffix",3),returnInfoNextToPattern(f2,"donor_exon_suffix",3));
-	int c71=!strcmp(returnInfoNextToPattern(f1,"donor score",3),returnInfoNextToPattern(f2,"donor_score",3));
+	int c50=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_end",4),returnInfoNextToPattern(f2,"acceptor_factor_end",4));
+	int c51=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",4),returnInfoNextToPattern(f2,"acceptor_factor_prefix",4));
+	int c52=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",4),returnInfoNextToPattern(f2,"acceptor_factor_start",4));
+	int c53=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",4),returnInfoNextToPattern(f2,"donor_factor_start",4));
+	int c55=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",5),returnInfoNextToPattern(f2,"acceptor_factor_prefix",5));
+	int c56=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",5),returnInfoNextToPattern(f2,"acceptor_factor_start",5));
+	int c57=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",5),returnInfoNextToPattern(f2,"donor_factor_start",5));
+	int c58=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_end",6),returnInfoNextToPattern(f2,"acceptor_factor_end",6));
+	int c59=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",6),returnInfoNextToPattern(f2,"acceptor_factor_prefix",6));
+	int c60=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",6),returnInfoNextToPattern(f2,"acceptor_factor_start",6));
+	int c61=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",6),returnInfoNextToPattern(f2,"donor_factor_start",6));
+	int c62=!strcmp(returnInfoNextToPattern(f1,"BPS_position",2),returnInfoNextToPattern(f2,"BPS_position",2));//-1 in index of f1 and f2
+	int c63=!strcmp(returnInfoNextToPattern(f1,"BPS_score",3),returnInfoNextToPattern(f2,"BPS_score",3));
+	int c66=!strcmp(returnInfoNextToPattern(f1,"acceptor_alignment_error",3),returnInfoNextToPattern(f2,"acceptor_alignment_error",3));
+	int c67=!strcmp(returnInfoNextToPattern(f1,"acceptor_exon_prefix",3),returnInfoNextToPattern(f2,"acceptor_exon_prefix",3));
+	int c68=!strcmp(returnInfoNextToPattern(f1,"acceptor_score",3),returnInfoNextToPattern(f2,"acceptor_score",3));
+	int c69=!strcmp(returnInfoNextToPattern(f1,"donor_alignment_error",3),returnInfoNextToPattern(f2,"donor_alignment_error",3));
+	int c70=!strcmp(returnInfoNextToPattern(f1,"donor_exon_suffix",3),returnInfoNextToPattern(f2,"donor_exon_suffix",3));
+	int c71=!strcmp(returnInfoNextToPattern(f1,"donor_score",3),returnInfoNextToPattern(f2,"donor_score",3));
 	int c72=!strcmp(returnInfoNextToPattern(f1,"length",3),returnInfoNextToPattern(f2,"length",4));//+1 in index of f2
-	int c73=!strcmp(returnInfoNextToPattern(f1,"number supporting EST",3),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",3));
+	int c73=!strcmp(returnInfoNextToPattern(f1,"number_of_supporting_transcripts",3),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",3));
 	int c74=!strcmp(returnInfoNextToPattern(f1,"pattern",3),returnInfoNextToPattern(f2,"pattern",3));
 	int c75=!strcmp(returnInfoNextToPattern(f1,"prefix",3),returnInfoNextToPattern(f2,"prefix",3));
-	int c76=!strcmp(returnInfoNextToPattern(f1,"relative end",3),returnInfoNextToPattern(f2,"relative_end",3));
-	int c77=!strcmp(returnInfoNextToPattern(f1,"relative start",3),returnInfoNextToPattern(f2,"relative_start",3));
-	int c78=!strcmp(returnInfoNextToPattern(f1,"repeat sequence",3),returnInfoNextToPattern(f2,"repeat_sequence",3));
-	int c80=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",7),returnInfoNextToPattern(f2,"acceptor_factor_prefix",7));
-	int c81=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",7),returnInfoNextToPattern(f2,"acceptor_factor_start",7));
-	int c82=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",7),returnInfoNextToPattern(f2,"donor_factor_start",7));
-	int c83=!strcmp(returnInfoNextToPattern(f1,"BPS position",3),returnInfoNextToPattern(f2,"BPS_position",3));//-1 in index of f1 and f2
-	int c84=!strcmp(returnInfoNextToPattern(f1,"BPS score",4),returnInfoNextToPattern(f2,"BPS_score",4));
-	int c87=!strcmp(returnInfoNextToPattern(f1,"acceptor alignment average error",4),returnInfoNextToPattern(f2,"acceptor_alignment_error",4));
-	int c88=!strcmp(returnInfoNextToPattern(f1,"acceptor prefix",4),returnInfoNextToPattern(f2,"acceptor_exon_prefix",4));
-	int c89=!strcmp(returnInfoNextToPattern(f1,"acceptor score",4),returnInfoNextToPattern(f2,"acceptor_score",4));
-	int c90=!strcmp(returnInfoNextToPattern(f1,"donor alignment average error",4),returnInfoNextToPattern(f2,"donor_alignment_error",4));
-	int c91=!strcmp(returnInfoNextToPattern(f1,"donor suffix",4),returnInfoNextToPattern(f2,"donor_exon_suffix",4));
-	int c92=!strcmp(returnInfoNextToPattern(f1,"donor score",4),returnInfoNextToPattern(f2,"donor_score",4));
+	int c76=!strcmp(returnInfoNextToPattern(f1,"relative_end",3),returnInfoNextToPattern(f2,"relative_end",3));
+	int c77=!strcmp(returnInfoNextToPattern(f1,"relative_start",3),returnInfoNextToPattern(f2,"relative_start",3));
+	int c78=!strcmp(returnInfoNextToPattern(f1,"repeat_sequence",3),returnInfoNextToPattern(f2,"repeat_sequence",3));
+	int c80=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",7),returnInfoNextToPattern(f2,"acceptor_factor_prefix",7));
+	int c81=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",7),returnInfoNextToPattern(f2,"acceptor_factor_start",7));
+	int c82=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",7),returnInfoNextToPattern(f2,"donor_factor_start",7));
+	int c83=!strcmp(returnInfoNextToPattern(f1,"BPS_position",3),returnInfoNextToPattern(f2,"BPS_position",3));//-1 in index of f1 and f2
+	int c84=!strcmp(returnInfoNextToPattern(f1,"BPS_score",4),returnInfoNextToPattern(f2,"BPS_score",4));
+	int c87=!strcmp(returnInfoNextToPattern(f1,"acceptor_alignment_error",4),returnInfoNextToPattern(f2,"acceptor_alignment_error",4));
+	int c88=!strcmp(returnInfoNextToPattern(f1,"acceptor_exon_prefix",4),returnInfoNextToPattern(f2,"acceptor_exon_prefix",4));
+	int c89=!strcmp(returnInfoNextToPattern(f1,"acceptor_score",4),returnInfoNextToPattern(f2,"acceptor_score",4));
+	int c90=!strcmp(returnInfoNextToPattern(f1,"donor_alignment_error",4),returnInfoNextToPattern(f2,"donor_alignment_error",4));
+	int c91=!strcmp(returnInfoNextToPattern(f1,"donor_exon_suffix",4),returnInfoNextToPattern(f2,"donor_exon_suffix",4));
+	int c92=!strcmp(returnInfoNextToPattern(f1,"donor_score",4),returnInfoNextToPattern(f2,"donor_score",4));
 	int c93=!strcmp(returnInfoNextToPattern(f1,"length",4),returnInfoNextToPattern(f2,"length",5));//+1 in index of f2
-	int c94=!strcmp(returnInfoNextToPattern(f1,"number supporting EST",4),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",4));
+	int c94=!strcmp(returnInfoNextToPattern(f1,"number_of_supporting_transcripts",4),returnInfoNextToPattern(f2,"number_of_supporting_transcripts",4));
 	int c95=!strcmp(returnInfoNextToPattern(f1,"pattern",4),returnInfoNextToPattern(f2,"pattern",4));
 	int c96=!strcmp(returnInfoNextToPattern(f1,"prefix",4),returnInfoNextToPattern(f2,"prefix",4));
-	int c97=!strcmp(returnInfoNextToPattern(f1,"relative end",4),returnInfoNextToPattern(f2,"relative_end",4));
-	int c98=!strcmp(returnInfoNextToPattern(f1,"relative start",4),returnInfoNextToPattern(f2,"relative_start",4));
-	int c99=!strcmp(returnInfoNextToPattern(f1,"repeat sequence",4),returnInfoNextToPattern(f2,"repeat_sequence",4));
-	int c101=!strcmp(returnInfoNextToPattern(f1,"EST acceptor factor prefix",8),returnInfoNextToPattern(f2,"acceptor_factor_prefix",8));
-	int c102=!strcmp(returnInfoNextToPattern(f1,"begin EST acceptor factor",8),returnInfoNextToPattern(f2,"acceptor_factor_start",8));
-	int c103=!strcmp(returnInfoNextToPattern(f1,"begin EST donor factor",8),returnInfoNextToPattern(f2,"donor_factor_start",8));
-	int c109=!strcmp(returnInfoNextToPattern(f1,"RefSeq",1),returnInfoNextToPattern(f2,"RefSeqID",1));
+	int c97=!strcmp(returnInfoNextToPattern(f1,"relative_end",4),returnInfoNextToPattern(f2,"relative_end",4));
+	int c98=!strcmp(returnInfoNextToPattern(f1,"relative_start",4),returnInfoNextToPattern(f2,"relative_start",4));
+	int c99=!strcmp(returnInfoNextToPattern(f1,"repeat_sequence",4),returnInfoNextToPattern(f2,"repeat_sequence",4));
 	int c110=!strcmp(returnInfoNextToPattern(f1,"annotated CDS?",1),returnInfoNextToPattern(f2,"annotated_CDS?",1));
 	int c111=!strcmp(returnInfoNextToPattern(f1,"3utr length",1),returnInfoNextToPattern(f2,"3UTR_length",1));
 	int c117=!strcmp(returnInfoNextToPattern(f1,"cumulative genome length",1),returnInfoNextToPattern(f2,"cumulative_length",1));
@@ -206,13 +204,16 @@ int compareJson(char f1[],char f2[]){
 	int c119=!strcmp(returnInfoNextToPattern(f1,"transcript length",1),returnInfoNextToPattern(f2,"length_on_transcript",1));
 	int c126=!strcmp(returnInfoNextToPattern(f1,"annotated CDS?",2),returnInfoNextToPattern(f2,"annotated_CDS?",2));
 	int c127=!strcmp(returnInfoNextToPattern(f1,"3utr length",2),returnInfoNextToPattern(f2,"3UTR_length",2));
-	int c130=!strcmp(returnInfoNextToPattern(f1,"cumulative transcript length",2),returnInfoNextToPattern(f2,"cumulative_length_on_transcript",2));
-	
-	if(c1&&c2&&c6&&c14&&c15&&c16&&c17&&c18&&c19&&c20&&c21&&c22&&c23&&c24&&c25&&c26&&c27&&c28&&c52&&c53&&c55&&c61
-		&&c32&&c33&&c36&&c37&&c38&&c39&&c40&&c41&&c42&&c43&&c44&&c45&&c46&&c47&&c48&&c49&&c50&&c51
-		&&c62&&c63&&c66&&c67&&c68&&c69&&c70&&c71&&c72&&c73&&c74&&c75&&c76&&c77&&c78&&c80&&c81&&c82
+	int c130=!strcmp(returnInfoNextToPattern(f1,"cumulative transcript length",2),returnInfoNextToPattern(f2,"cumulative_length_on_transcript",2));	
+	int c101=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_prefix",8),returnInfoNextToPattern(f2,"acceptor_factor_prefix",8));
+	int c102=!strcmp(returnInfoNextToPattern(f1,"acceptor_factor_start",8),returnInfoNextToPattern(f2,"acceptor_factor_start",8));
+	int c103=!strcmp(returnInfoNextToPattern(f1,"donor_factor_start",8),returnInfoNextToPattern(f2,"donor_factor_start",8));
+
+	if(c1&&c2&&c6&&c14&&c15&&c16&&c17&&c18&&c19&&c20&&c21&&c22&&c23&&c24&&c25&&c26&&c27&&c28&&c52&&c53
+		&&c32&&c33&&c36&&c37&&c38&&c39&&c40&&c41&&c42&&c43&&c44&&c45&&c46&&c47&&c48&&c49&&c50&&c51&&c55
+		&&c62&&c63&&c66&&c67&&c68&&c69&&c70&&c71&&c72&&c73&&c74&&c75&&c76&&c77&&c78&&c80&&c81&&c82&&c61
 		&&c83&&c84&&c87&&c88&&c89&&c90&&c91&&c92&&c93&&c94&&c95&&c96&&c97&&c98&&c99&&c101&&c102&&c103
-		&&c109&&c110&&c111&&c117&&c118&&c119&&c126&&c127&&c29&&c30&&c29&&c130&&c57&&c58&&c56&&c31&&c60&&c59
+		&&c110&&c111&&c117&&c118&&c119&&c126&&c127&&c29&&c30&&c29&&c130&&c57&&c58&&c56&&c31&&c60&&c59
 		)
 		return 1;
 	else
@@ -271,12 +272,10 @@ int compareGtfCr(char f1[],char f2[]){
 	FILE *fp1 = NULL;
 	FILE *fp2 = NULL;
 
-	if((fp1=fopen(f1,"r"))==NULL)
-	{
+	if((fp1=fopen(f1,"r"))==NULL){
 		perror("fopen failed");
 		exit(EXIT_FAILURE);
 	}
-
 	//implied else, fopen successful
 	//read each line from file into entry in words array
 	int i1=0;
@@ -427,159 +426,147 @@ int main(int argc, char *argv[]){
 
 
 Test(output,findPatternTest_Test788) {
-	char f1[]="test-788/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-788/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compare(f1,f2)==1);
+	char f1[]="regressionTest/test-788/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-788/executionOutput/pintron-all-isoforms.gtf";
+	cr_expect(compareGtf(f1,f2)==1);
 
-	char f3[]="test-788/referenceOutput/full.json";
-	char f4[]="test-788/executionOutput/full.json";
+	char f3[]="regressionTest/test-788/referenceOutput/full.json";
+	char f4[]="regressionTest/test-788/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestAMBN) {
-	char f1[]="test-AMBN/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-AMBN/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test-AMBN/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-AMBN/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtfCr(f1,f2)==1);
 
-	char f3[]="test-AMBN/referenceOutput/full.json";
-	char f4[]="test-AMBN/executionOutput/full.json";
+	char f3[]="regressionTest/test-AMBN/referenceOutput/full.json";
+	char f4[]="regressionTest/test-AMBN/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestCPB2) {
-	char f1[]="test-CPB2/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-CPB2/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test-CPB2/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-CPB2/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtf(f1,f2)==1);
 
-	char f3[]="test-CPB2/referenceOutput/full.json";
-	char f4[]="test-CPB2/executionOutput/full.json";
+	char f3[]="regressionTest/test-CPB2/referenceOutput/full.json";
+	char f4[]="regressionTest/test-CPB2/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestFeatureJsonWithESTalignments) {
-	char f3[]="test-feature-json-with-EST-alignments/referenceOutput/full.json";
-	char f4[]="test-feature-json-with-EST-alignments/executionOutput/full.json";
+	char f3[]="regressionTest/test-feature-json-with-EST-alignments/referenceOutput/full.json";
+	char f4[]="regressionTest/test-feature-json-with-EST-alignments/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf1) {
-	char f3[]="test_gtf1/referenceOutput/full.json";
-	char f4[]="test_gtf1/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf1/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf1/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf2) {
-	char f1[]="test_gtf2/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test_gtf2/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="test_gtf2/referenceOutput/full.json";
-	char f4[]="test_gtf2/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf2/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf2/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf3) {
-	char f1[]="test_gtf3/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test_gtf3/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test_gtf3/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test_gtf3/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtfCr(f1,f2)==1);
 
-	char f3[]="test_gtf3/referenceOutput/full.json";
-	char f4[]="test_gtf3/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf3/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf3/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf4) {
-	char f1[]="test_gtf4/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test_gtf4/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test_gtf4/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test_gtf4/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtf(f1,f2)==1);
 
-	char f3[]="test_gtf4/referenceOutput/full.json";
-	char f4[]="test_gtf4/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf4/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf4/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf5) {
-	char f3[]="test_gtf5/referenceOutput/full.json";
-	char f4[]="test_gtf5/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf5/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf5/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf6) {
-	char f1[]="test_gtf6/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test_gtf6/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="test_gtf6/referenceOutput/full.json";
-	char f4[]="test_gtf6/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf6/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf6/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf7) {
-	char f3[]="test_gtf7/referenceOutput/full.json";
-	char f4[]="test_gtf7/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf7/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf7/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestGtf8) {
-	char f3[]="test_gtf8/referenceOutput/full.json";
-	char f4[]="test_gtf8/executionOutput/full.json";
+	char f3[]="regressionTest/test_gtf8/referenceOutput/full.json";
+	char f4[]="regressionTest/test_gtf8/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestIssue2) {
-	char f1[]="test-issue-2/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-issue-2/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test-issue-2/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-issue-2/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtfCr(f1,f2)==1);
 
-	char f3[]="test-issue-2/referenceOutput/full.json";
-	char f4[]="test-issue-2/executionOutput/full.json";
+	char f3[]="regressionTest/test-issue-2/referenceOutput/full.json";
+	char f4[]="regressionTest/test-issue-2/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestIssue13) {
-	char f3[]="test-issue-13/referenceOutput/full.json";
-	char f4[]="test-issue-13/executionOutput/full.json";
+	char f3[]="regressionTest/test-issue-13/referenceOutput/full.json";
+	char f4[]="regressionTest/test-issue-13/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestIssue31) {
-	char f1[]="test-issue-31/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-issue-31/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtfCr(f1,f2)==1);
-
-	char f3[]="test-issue-31/referenceOutput/full.json";
-	char f4[]="test-issue-31/executionOutput/full.json";
+	char f3[]="regressionTest/test-issue-31/referenceOutput/full.json";
+	char f4[]="regressionTest/test-issue-31/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestIssue39) {
-	char f3[]="test-issue-39/referenceOutput/full.json";
-	char f4[]="test-issue-39/executionOutput/full.json";
+	char f3[]="regressionTest/test-issue-39/referenceOutput/full.json";
+	char f4[]="regressionTest/test-issue-39/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestMattia1) {
-	char f1[]="test-mattia1/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-mattia1/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test-mattia1/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-mattia1/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtf(f1,f2)==1);
 
-	char f3[]="test-mattia1/referenceOutput/full.json";
-	char f4[]="test-mattia1/executionOutput/full.json";
+	char f3[]="regressionTest/test-mattia1/referenceOutput/full.json";
+	char f4[]="regressionTest/test-mattia1/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestMattia2) {
-	char f3[]="test-mattia2/referenceOutput/full.json";
-	char f4[]="test-mattia2/executionOutput/full.json";
+	char f3[]="regressionTest/test-mattia2/referenceOutput/full.json";
+	char f4[]="regressionTest/test-mattia2/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
 
 Test(output,compareOutput_TestMattia3) {
-	char f1[]="test-mattia3/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="test-mattia3/executionOutput/pintron-all-isoforms.gtf";
+	char f1[]="regressionTest/test-mattia3/referenceOutput/pintron-all-isoforms.gtf";
+	char f2[]="regressionTest/test-mattia3/executionOutput/pintron-all-isoforms.gtf";
 	cr_expect(compareGtf(f1,f2)==1);
 
-	char f3[]="test-mattia3/referenceOutput/full.json";
-	char f4[]="test-mattia3/executionOutput/full.json";
+	char f3[]="regressionTest/test-mattia3/referenceOutput/full.json";
+	char f4[]="regressionTest/test-mattia3/executionOutput/full.json";
 	cr_expect(compareJson(f3,f4)==1);
 }
