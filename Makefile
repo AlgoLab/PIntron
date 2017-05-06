@@ -819,8 +819,7 @@ check-syntax:
 
 
 
-#Makefile part about unit-tests
-#when you run 'make test' all unit-tests are compiled, executed and then all the executables created during the compilation will be deleted
+#Makefile part about tests
 test_SOURCE= \
 	$(CURDIR)/test/aug_suffix_tree_test.c\
 	$(CURDIR)/test/bit_vector_test.c\
@@ -838,6 +837,7 @@ test_SOURCE= \
 	$(CURDIR)/test/simpl_info_test.c\
 	$(CURDIR)/test/types_test.c\
 	$(CURDIR)/test/util_test.c\
+	$(CURDIR)/regressionTest/testPIntronOutput.c\
 
 test_EXEC= \
 	$(CURDIR)/test/aug_suffix_tree_test\
@@ -856,13 +856,37 @@ test_EXEC= \
 	$(CURDIR)/test/simpl_info_test\
 	$(CURDIR)/test/types_test\
 	$(CURDIR)/test/util_test\
+	$(CURDIR)/regressionTest/testPIntronOutput\
 
-CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR)
+CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR) -I regressionTest
 
 comp-test: $(test_EXEC) $(all_header_files) $(stree_header_files)
 	$(CC) $(test_SOURCE) $(CFLAGS)
 	
 test: $(test_EXEC)
+	make dist
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-788/genomic.txt' --EST='regressionTest/test-788/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-788/executionOutput/full.json' --logfile='regressionTest/test-788/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-788/executionOutput/pintron-log.txt' --gtf='regressionTest/test-788/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-AMBN/genomic.txt' --EST='regressionTest/test-AMBN/ests.txt' --organism=human --gene=AMBN --output='regressionTest/test-AMBN/executionOutput/full.json' --logfile='regressionTest/test-AMBN/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-AMBN/executionOutput/pintron-log.txt' --gtf='regressionTest/test-AMBN/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-CPB2/genomic.txt' --EST='regressionTest/test-CPB2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-CPB2/executionOutput/full.json' --logfile='regressionTest/test-CPB2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-CPB2/executionOutput/pintron-log.txt' --gtf='regressionTest/test-CPB2/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-feature-json-with-EST-alignments/genomic.txt' --EST='regressionTest/test-feature-json-with-EST-alignments/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-feature-json-with-EST-alignments/executionOutput/full.json' --logfile='regressionTest/test-feature-json-with-EST-alignments/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-feature-json-with-EST-alignments/executionOutput/pintron-log.txt' --gtf='regressionTest/test-feature-json-with-EST-alignments/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf1/genomic.txt' --EST='regressionTest/test_gtf1/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf1/executionOutput/full.json' --logfile='regressionTest/test_gtf1/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf1/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf1/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf2/genomic.txt' --EST='regressionTest/test_gtf2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf2/executionOutput/full.json' --logfile='regressionTest/test_gtf2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf2/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf2/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf3/genomic.txt' --EST='regressionTest/test_gtf3/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf3/executionOutput/full.json' --logfile='regressionTest/test_gtf3/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf3/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf3/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf4/genomic.txt' --EST='regressionTest/test_gtf4/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf4/executionOutput/full.json' --logfile='regressionTest/test_gtf4/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf4/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf4/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf5/genomic.txt' --EST='regressionTest/test_gtf5/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf5/executionOutput/full.json' --logfile='regressionTest/test_gtf5/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf5/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf5/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf6/genomic.txt' --EST='regressionTest/test_gtf6/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf6/executionOutput/full.json' --logfile='regressionTest/test_gtf6/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf6/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf6/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf7/genomic.txt' --EST='regressionTest/test_gtf7/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf7/executionOutput/full.json' --logfile='regressionTest/test_gtf7/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf7/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf7/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test_gtf8/genomic.txt' --EST='regressionTest/test_gtf8/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test_gtf8/executionOutput/full.json' --logfile='regressionTest/test_gtf8/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test_gtf8/executionOutput/pintron-log.txt' --gtf='regressionTest/test_gtf8/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-issue-2/genomic.txt' --EST='regressionTest/test-issue-2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-issue-2/executionOutput/full.json' --logfile='regressionTest/test-issue-2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-issue-2/executionOutput/pintron-log.txt' --gtf='regressionTest/test-issue-2/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-issue-13/genomic.txt' --EST='regressionTest/test-issue-13/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-issue-13/executionOutput/full.json' --logfile='regressionTest/test-issue-13/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-issue-13/executionOutput/pintron-log.txt' --gtf='regressionTest/test-issue-13/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-issue-31/genomic.txt' --EST='regressionTest/test-issue-31/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-issue-31/executionOutput/full.json' --logfile='regressionTest/test-issue-31/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-issue-31/executionOutput/pintron-log.txt' --gtf='regressionTest/test-issue-31/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-issue-39/genomic.txt' --EST='regressionTest/test-issue-39/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-issue-39/executionOutput/full.json' --logfile='regressionTest/test-issue-39/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-issue-39/executionOutput/pintron-log.txt' --gtf='regressionTest/test-issue-39/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia1/genomic.txt' --EST='regressionTest/test-mattia1/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia1/executionOutput/full.json' --logfile='regressionTest/test-mattia1/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia1/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia1/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia2/genomic.txt' --EST='regressionTest/test-mattia2/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia2/executionOutput/full.json' --logfile='regressionTest/test-mattia2/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia2/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia2/executionOutput/pintron-all-isoforms.gtf'
+	bin/pintron --bin-dir=bin/ --genomic='regressionTest/test-mattia3/genomic.txt' --EST='regressionTest/test-mattia3/ests.txt' --organism=human --gene=AAMP --output='regressionTest/test-mattia3/executionOutput/full.json' --logfile='regressionTest/test-mattia3/executionOutput/pintron-pipeline-log.txt' general-logfile='regressionTest/test-mattia3/executionOutput/pintron-log.txt' --gtf='regressionTest/test-mattia3/executionOutput/pintron-all-isoforms.gtf'
+	#regressionTest:	
+	$(CURDIR)/regressionTest/testPIntronOutput
+	#unitTest:
 	$(CURDIR)/test/aug_suffix_tree_test
 	$(CURDIR)/test/bit_vector_test
 	$(CURDIR)/test/bool_list_test
@@ -883,3 +907,26 @@ test: $(test_EXEC)
 .PHONY: clean-test
 clean-test:
 	rm $(CURDIR)/test/*_test
+	rm $(CURDIR)/regressionTest/testPIntronOutput
+	rm $(CURDIR)/regressionTest/test-788/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-AMBN/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-CPB2/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-feature-json-with-EST-alignments/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf1/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf2/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf3/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf4/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf5/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf6/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf7/executionOutput/*
+	rm $(CURDIR)/regressionTest/test_gtf8/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-issue-2/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-issue-13/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-issue-31/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-issue-39/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-mattia1/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-mattia2/executionOutput/*
+	rm $(CURDIR)/regressionTest/test-mattia3/executionOutput/*
+	rm $(CURDIR)/ests.txt
+	rm $(CURDIR)/genomic.txt
+	rm $(CURDIR)/pintron-log.txt
