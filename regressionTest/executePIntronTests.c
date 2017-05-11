@@ -116,6 +116,12 @@ int main(int argc, char *argv[]){
 	//complete string:
 	char *FG=NULL;
 
+	char *MKd1="cd regressionTest/";
+	//line
+	char *MKd2="/;mkdir -p executionOutput";
+	//complete string for make missing dirs
+	char *MKdF=NULL;
+
 	fp = fopen("regressionTest/output.txt", "r");
 	while ((read = getline(&line,&len,fp)) != -1) {
 		line[strlen(line) - 1] = 0;
@@ -127,6 +133,10 @@ int main(int argc, char *argv[]){
 		while ((readgg = getline(&linegg,&lengg,fpgg)) != -1) {
 			linegg[strlen(linegg) - 1] = 0;}
 		fclose(fpgg);
+
+		MKdF=my_strcat(MKd1,line);
+		MKdF=my_strcat(MKdF,MKd2);
+		system(MKdF);
 
 		PI=my_strcat(PI1,line);
 		PI=my_strcat(PI,PI2);
