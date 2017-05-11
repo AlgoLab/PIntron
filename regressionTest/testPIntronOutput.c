@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <criterion/criterion.h>
+#include <criterion/parameterized.h>
+#include <dirent.h>
+#include <malloc.h>
 
 int compare(char f1[],char f2[]){
 	int flag=1;
@@ -72,46 +75,58 @@ char* returnInfoNextToPattern(char *f1,char *str,int num){
 			pch=strtok(temp,":");
 			pch=strtok(NULL,", ");
 
-			if((num==1)&&(find==1))
-				return(strdup(pch));
-			if((num==2)&&(find==2))
-				return(strdup(pch));
-			if((num==3)&&(find==3))
-				return(strdup(pch));
-			if((num==4)&&(find==4))
-				return(strdup(pch));
-			if((num==5)&&(find==5))
-				return(strdup(pch));
-			if((num==6)&&(find==6))
-				return(strdup(pch));
-			if((num==7)&&(find==7))
-				return(strdup(pch));
-			if((num==8)&&(find==8))
-				return(strdup(pch));
-			if((num==9)&&(find==9))
-				return(strdup(pch));
-			if((num==10)&&(find==10))
-				return(strdup(pch));
-			if((num==11)&&(find==11))
-				return(strdup(pch));
-			if((num==12)&&(find==12))
-				return(strdup(pch));
-			if((num==13)&&(find==13))
-				return(strdup(pch));
-			if((num==14)&&(find==14))
-				return(strdup(pch));
-			if((num==15)&&(find==15))
-				return(strdup(pch));
+			if((num==1)&&(find==1)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==2)&&(find==2)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==3)&&(find==3)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==4)&&(find==4)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==5)&&(find==5)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==6)&&(find==6)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==7)&&(find==7)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==8)&&(find==8)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==9)&&(find==9)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==10)&&(find==10)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==11)&&(find==11)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==12)&&(find==12)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==13)&&(find==13)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==14)&&(find==14)){
+				fclose(fp1);
+				return(strdup(pch));}
+			if((num==15)&&(find==15)){
+				fclose(fp1);
+				return(strdup(pch));}
 		}
 		++l;
 	}
 	if(find==0){
 		//couldn't find pattern
 	}
-	if(fclose(fp1)==EOF){
-		return("E-2");
-		//error closing files
-	}
+	fclose(fp1);
    	return("E1");
 }
 
@@ -221,8 +236,8 @@ int compareJson(char f1[],char f2[]){
 }
 
 
-#define MAX_ROWS (256)
-#define MAX_COLUMNS (256)
+#define MAX_ROWS (32768)
+#define MAX_COLUMNS (32768)
 static char words1[MAX_ROWS][MAX_COLUMNS]={{'\0','\0'}};
 static char words2[MAX_ROWS][MAX_COLUMNS]={{'\0','\0'}};
 
@@ -414,6 +429,14 @@ int compareGtf(char f1[],char f2[]){
 	return 1;
 }
 
+char * my_strcat(char *dest, char *src)
+{
+	char *new_string = malloc(strlen(dest) + strlen(src) + 1);
+	strcpy(new_string, dest);
+	strcat(new_string, src);
+	return(new_string);
+}
+
 int main(int argc, char *argv[]){
 	//for test execution
 	struct criterion_test_set *tests = criterion_initialize();
@@ -424,149 +447,57 @@ int main(int argc, char *argv[]){
 	return result;
 }
 
+Test(output,outputTest) {
+	system("cd regressionTest;for i in $(ls -d */); do echo ${i%%/}; done > output.txt");
 
-Test(output,findPatternTest_Test788) {
-	char f1[]="regressionTest/test-788/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-788/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
+	FILE * fp;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	char *p0="regressionTest/";
+	char *p1="/referenceOutput/pintron-all-isoforms.gtf";
+	char *p2="/executionOutput/pintron-all-isoforms.gtf";
+	char *p3="/referenceOutput/full.json";
+	char *p4="/executionOutput/full.json";
+	char *ft1=NULL;
+	char *ft2=NULL;
+	char *ft3=NULL;
+	char *ft4=NULL;
+	char f1[1024];
+	char f2[1024];
+	char f3[1024];
+	char f4[1024];
+	int gtfTest=0;
+	int jsonTest=0;
 
-	char f3[]="regressionTest/test-788/referenceOutput/full.json";
-	char f4[]="regressionTest/test-788/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
+	fp = fopen("regressionTest/output.txt", "r");
+	while ((read = getline(&line,&len,fp)) != -1) {
+		line[strlen(line) - 1] = 0;
 
-Test(output,compareOutput_TestAMBN) {
-	char f1[]="regressionTest/test-AMBN/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-AMBN/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtfCr(f1,f2)==1);
-
-	char f3[]="regressionTest/test-AMBN/referenceOutput/full.json";
-	char f4[]="regressionTest/test-AMBN/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestCPB2) {
-	char f1[]="regressionTest/test-CPB2/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-CPB2/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="regressionTest/test-CPB2/referenceOutput/full.json";
-	char f4[]="regressionTest/test-CPB2/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestFeatureJsonWithESTalignments) {
-	char f3[]="regressionTest/test-feature-json-with-EST-alignments/referenceOutput/full.json";
-	char f4[]="regressionTest/test-feature-json-with-EST-alignments/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf1) {
-	char f3[]="regressionTest/test_gtf1/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf1/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf2) {
-	char f3[]="regressionTest/test_gtf2/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf2/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf3) {
-	char f1[]="regressionTest/test_gtf3/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test_gtf3/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtfCr(f1,f2)==1);
-
-	char f3[]="regressionTest/test_gtf3/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf3/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf4) {
-	char f1[]="regressionTest/test_gtf4/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test_gtf4/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="regressionTest/test_gtf4/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf4/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf5) {
-	char f3[]="regressionTest/test_gtf5/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf5/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf6) {
-	char f3[]="regressionTest/test_gtf6/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf6/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf7) {
-	char f3[]="regressionTest/test_gtf7/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf7/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestGtf8) {
-	char f3[]="regressionTest/test_gtf8/referenceOutput/full.json";
-	char f4[]="regressionTest/test_gtf8/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestIssue2) {
-	char f1[]="regressionTest/test-issue-2/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-issue-2/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtfCr(f1,f2)==1);
-
-	char f3[]="regressionTest/test-issue-2/referenceOutput/full.json";
-	char f4[]="regressionTest/test-issue-2/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestIssue13) {
-	char f3[]="regressionTest/test-issue-13/referenceOutput/full.json";
-	char f4[]="regressionTest/test-issue-13/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestIssue31) {
-	char f3[]="regressionTest/test-issue-31/referenceOutput/full.json";
-	char f4[]="regressionTest/test-issue-31/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestIssue39) {
-	char f3[]="regressionTest/test-issue-39/referenceOutput/full.json";
-	char f4[]="regressionTest/test-issue-39/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestMattia1) {
-	char f1[]="regressionTest/test-mattia1/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-mattia1/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="regressionTest/test-mattia1/referenceOutput/full.json";
-	char f4[]="regressionTest/test-mattia1/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestMattia2) {
-	char f3[]="regressionTest/test-mattia2/referenceOutput/full.json";
-	char f4[]="regressionTest/test-mattia2/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
-}
-
-Test(output,compareOutput_TestMattia3) {
-	char f1[]="regressionTest/test-mattia3/referenceOutput/pintron-all-isoforms.gtf";
-	char f2[]="regressionTest/test-mattia3/executionOutput/pintron-all-isoforms.gtf";
-	cr_expect(compareGtf(f1,f2)==1);
-
-	char f3[]="regressionTest/test-mattia3/referenceOutput/full.json";
-	char f4[]="regressionTest/test-mattia3/executionOutput/full.json";
-	cr_expect(compareJson(f3,f4)==1);
+		ft1=my_strcat(p0,line);
+		ft1=my_strcat(ft1,p1);
+		ft2=my_strcat(p0,line);
+		ft2=my_strcat(ft2,p2);
+		strcpy(f1,ft1);
+		strcpy(f2,ft2);
+		gtfTest=compareGtfCr(f1,f2);
+		cr_expect(gtfTest==1);
+		
+		ft3=my_strcat(p0,line);
+		ft3=my_strcat(ft3,p3);
+		ft4=my_strcat(p0,line);
+		ft4=my_strcat(ft4,p4);
+		strcpy(f3,ft3);
+		strcpy(f4,ft4);
+		jsonTest=compareJson(f3,f4);
+		cr_expect(jsonTest==1);
+				
+		if(gtfTest&&jsonTest)
+			printf("tests for: %s passed\n",line);
+		else
+			printf("tests for: %s failed\n",line);
+		gtfTest=0;
+		jsonTest=0;
+	}
+	fclose(fp);
 }
