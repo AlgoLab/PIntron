@@ -837,6 +837,7 @@ test_SOURCE= \
 	$(CURDIR)/test/simpl_info_test.c\
 	$(CURDIR)/test/types_test.c\
 	$(CURDIR)/test/util_test.c\
+	$(CURDIR)/regressionTest/executePIntronTests.c\
 	$(CURDIR)/regressionTest/testPIntronOutput.c\
 
 test_EXEC= \
