@@ -819,8 +819,7 @@ check-syntax:
 
 
 
-#Makefile part about unit-tests
-#when you run 'make test' all unit-tests are compiled, executed and then all the executables created during the compilation will be deleted
+#Makefile part about tests
 test_SOURCE= \
 	$(CURDIR)/test/aug_suffix_tree_test.c\
 	$(CURDIR)/test/bit_vector_test.c\
@@ -838,6 +837,8 @@ test_SOURCE= \
 	$(CURDIR)/test/simpl_info_test.c\
 	$(CURDIR)/test/types_test.c\
 	$(CURDIR)/test/util_test.c\
+	$(CURDIR)/regressionTest/executePIntronTests.c\
+	$(CURDIR)/regressionTest/testPIntronOutput.c\
 
 test_EXEC= \
 	$(CURDIR)/test/aug_suffix_tree_test\
@@ -856,13 +857,18 @@ test_EXEC= \
 	$(CURDIR)/test/simpl_info_test\
 	$(CURDIR)/test/types_test\
 	$(CURDIR)/test/util_test\
+	$(CURDIR)/regressionTest/executePIntronTests\
+	$(CURDIR)/regressionTest/testPIntronOutput\
 
-CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR)
+CFLAGS = -l criterion -I $(INCLUDE_DIR) -I $(STREE_DIR) -I regressionTest
 
-comp-test: $(test_EXEC) $(all_header_files) $(stree_header_files)
+comp-test:$(test_EXEC) $(all_header_files) $(stree_header_files)
 	$(CC) $(test_SOURCE) $(CFLAGS)
 	
 test: $(test_EXEC)
+	#preparing files for regressionTest:
+	$(CURDIR)/regressionTest/executePIntronTests
+	#executing unitTest:
 	$(CURDIR)/test/aug_suffix_tree_test
 	$(CURDIR)/test/bit_vector_test
 	$(CURDIR)/test/bool_list_test
@@ -879,7 +885,18 @@ test: $(test_EXEC)
 	$(CURDIR)/test/simpl_info_test
 	$(CURDIR)/test/types_test
 	$(CURDIR)/test/util_test
-
+	#executing regressionTest:
+	$(CURDIR)/regressionTest/testPIntronOutput
 .PHONY: clean-test
 clean-test:
+	#cleaning unitTest temp files:
 	rm $(CURDIR)/test/*_test
+	#cleaning PIntron temp files:
+	rm $(CURDIR)/ests.txt
+	rm $(CURDIR)/genomic.txt
+	rm $(CURDIR)/pintron-log.txt
+	#cleaning regressionTest temp files:
+	rm $(CURDIR)/regressionTest/executePIntronTests
+	rm $(CURDIR)/regressionTest/testPIntronOutput
+	rm $(CURDIR)/regressionTest/output.txt
+	rm -rf $(CURDIR)/regressionTest/test*/executionOutput/
